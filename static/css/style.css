@@ -270,7 +270,7 @@ img { max-width: 100%; display: block; }
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   padding: 0.78rem 1.65rem;
-  font: 600 0.88rem/1 var(--font-body);
+  font: 600 0.92rem/1 var(--font-body);
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
@@ -340,10 +340,10 @@ img { max-width: 100%; display: block; }
 }
 
 .beazt-intro {
-  width: min(1040px, 100%);
-  aspect-ratio: 2.35/1;
+  width: min(1400px, 100%);
+  aspect-ratio: 16/7;
   position: relative;
-  border-radius: 20px;
+  border-radius: 28px;
   overflow: hidden;
   border: 1px solid rgba(118, 170, 255, 0.42);
   box-shadow: 0 0 50px rgba(58, 110, 255, 0.45), inset 0 0 50px rgba(124, 171, 255, 0.16);
@@ -357,7 +357,7 @@ img { max-width: 100%; display: block; }
   height: 100%;
   object-fit: cover;
   filter: saturate(1.08) contrast(1.08) brightness(0.88);
-  transform: scale(1.03);
+  transform: scale(1.08);
 }
 
 .eyes-aura,
@@ -409,6 +409,29 @@ img { max-width: 100%; display: block; }
   background-image: radial-gradient(rgba(182, 215, 255, 0.65) 1px, transparent 1px);
   background-size: 3px 3px;
   opacity: 0.16;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.hero-overlay-label {
+  font: 700 clamp(2rem, 5vw, 3.4rem)/1 var(--display);
+  letter-spacing: 0.5em;
+  color: #fff;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.45rem 1.5rem;
+  text-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(255, 255, 255, 0.45);
+  background: rgba(2, 3, 8, 0.35);
+  border-radius: 999px;
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.55);
 }
 
 .beazt-intro.is-live .beazt-hero-image { animation: heroBreath 5.2s ease-in-out infinite; }
@@ -597,6 +620,20 @@ img { max-width: 100%; display: block; }
   flex-direction: column;
   gap: var(--space-xs);
 }
+
+.page-chip-row {
+  margin-top: 0.6rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.page-chip-row .chip {
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
 .section-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -653,11 +690,12 @@ img { max-width: 100%; display: block; }
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--space-sm);
-  padding: var(--space-sm);
+  gap: 0.6rem;
+  padding: 0.9rem;
   border-radius: var(--radius);
   background: rgba(108, 156, 255, 0.08);
   border: 1px solid rgba(108, 156, 255, 0.22);
+  backdrop-filter: blur(8px);
 }
 
 .pricing-region {
@@ -669,14 +707,17 @@ img { max-width: 100%; display: block; }
 
 .trust-badge {
   color: var(--text-soft);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   display: inline-flex;
   gap: 0.45rem;
   align-items: center;
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.95rem;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(145, 194, 255, 0.14);
+  border: 1px solid rgba(145, 194, 255, 0.18);
+  background: rgba(5, 9, 26, 0.65);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+.trust-badge:hover { border-color: rgba(124, 58, 237, 0.4); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35); }
 .trust-badge .icon { color: var(--accent-l); }
 
 .steps-grid,
@@ -718,8 +759,8 @@ img { max-width: 100%; display: block; }
 .feature-card {
   padding: var(--space-lg);
   display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
+  align-items: flex-start;
 }
 
 .step-num {
@@ -737,22 +778,34 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow-glow);
 }
 
-.feature-icon {
-  color: var(--accent-l);
-  width: 2.4rem;
-  height: 2.4rem;
-  margin-bottom: 0.55rem;
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
-  background: rgba(109, 123, 255, 0.12);
-}
-
 .step-card h3,
 .feature-card h3 {
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
 }
+
+.feature-icon-ring {
+  width: 54px;
+  height: 54px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, rgba(54, 240, 255, 0.75), rgba(124, 58, 237, 0.4));
+  box-shadow: 0 0 24px rgba(54, 240, 255, 0.3);
+}
+.feature-icon-ring .icon { color: #050714; width: 1.3rem; height: 1.3rem; }
+
+.feature-card-body { display: flex; flex-direction: column; gap: 0.5rem; }
+.feature-card-body p { margin: 0; color: var(--text-soft); }
+
+.feature-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.feature-card .chip { font-size: 0.7rem; letter-spacing: 0.08em; }
 
 .pricing-section { width: min(1120px, 100%); margin-inline: auto; }
 
@@ -1226,6 +1279,11 @@ img { max-width: 100%; display: block; }
   font: 600 1rem/1.2 var(--font-body);
   letter-spacing: 0.04em;
 }
+.faq-question-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
 .faq-answer { display: none; padding: 0 1.6rem 1.2rem; color: var(--text-soft); }
 .faq-item.open .faq-answer { display: block; }
 .faq-question .icon { transition: transform var(--transition); }
@@ -1245,6 +1303,18 @@ img { max-width: 100%; display: block; }
   color: var(--accent-l);
 }
 
+.auth-benefits {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.auth-benefits .chip {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
 .auth-form { display: grid; gap: 1.15rem; }
 .form-group { display: grid; gap: 0.5rem; }
 .form-group label {
@@ -1258,19 +1328,26 @@ img { max-width: 100%; display: block; }
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"] {
-  min-height: 46px;
+  min-height: 48px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(116, 168, 255, 0.35);
   padding: 0.7rem 0.9rem;
   color: var(--text);
   background: rgba(9, 14, 35, 0.94);
-  font: 500 0.95rem var(--mono);
+  font: 500 1rem var(--mono);
 }
 
 .form-group input:focus-visible {
   outline: none;
   border-color: var(--border-strong);
   box-shadow: 0 0 0 3px rgba(125, 176, 255, 0.18);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
 }
 
 .form-row { display: flex; align-items: center; }
@@ -1483,7 +1560,7 @@ img { max-width: 100%; display: block; }
   .container { width: min(100%, 100% - 1.5rem); }
   .pricing-grid { grid-template-columns: 1fr; }
   .pricing-shell { padding: var(--space-lg); }
-  .rust-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rust-stack { justify-content: flex-start; }
   .feature-panel-grid { grid-template-columns: 1fr; }
   .pricing-card { min-height: 0; }
   .hero-cta { flex-direction: column; }
@@ -1492,6 +1569,36 @@ img { max-width: 100%; display: block; }
   .footer-inner { flex-direction: column; align-items: flex-start; }
   .terminal-grid { grid-template-columns: 1fr; }
   .hud-card { min-width: 0; width: 100%; }
+  .beazt-intro { width: 100%; border-radius: 20px; aspect-ratio: 16/10; }
+  .hero { padding-top: var(--space-2xl); }
+  .hero-copy .t-display { font-size: clamp(2.1rem, 10vw, 2.8rem); }
+  .btn { width: 100%; font-size: 1rem; }
+  .trust-badge, .stack-chip, .chip, .cta-badge { width: 100%; justify-content: center; }
+  .feature-card { flex-direction: column; gap: 0.7rem; }
+  .feature-card-chips { width: 100%; }
+  .plan-summary { width: 100%; justify-content: center; }
+  .pricing-cta-inner { width: 100%; padding-inline: 0.5rem; }
+  .auth-card { padding: 2rem 1.3rem; }
+  .auth-benefits .chip { width: 100%; justify-content: center; }
+}
+
+.hero-overlay-label {
+  font: 700 clamp(1.6rem, 6vw, 3.4rem)/1 var(--display);
+  letter-spacing: 0.3em;
+}
+
+@media (max-width: 480px) {
+  .hero { padding-bottom: var(--space-xl); }
+  .beazt-intro { aspect-ratio: 16/11; }
+  .hero-overlay-label { letter-spacing: 0.2em; padding: 0.35rem 1rem; }
+  .hero-terminal { padding: var(--space-sm); }
+  .trust-badges { padding: 0.7rem; }
+  .feature-panel { padding: var(--space-md); }
+  .feature-story-card { padding: var(--space-sm); }
+  .pricing-shell { padding: var(--space-md); }
+  .pricing-card { padding: 1.8rem 1.1rem; }
+  .cta-badge { font-size: 0.75rem; }
+  .stack-chip { font-size: 0.78rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
