@@ -4,110 +4,109 @@
 {% block content %}
 <section class="hero">
   <div class="container">
-    <div class="hero-grid reveal">
-      <div class="hero-copy">
-        <div class="hero-pill">
-          <span class="dot"></span> LIVE NODE ONLINE :: MEMBER ACCESS
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual-glow"></div>
+      <div class="beazt-intro">
+        <div class="beazt-lightning beazt-lightning-left"></div>
+        <div class="beazt-lightning beazt-lightning-right"></div>
+        <img src="/static/images/hero.png" alt="" class="beazt-hero-image">
+        <div class="eyes-aura"></div>
+        <div class="eyes-flare eyes-flare-left"></div>
+        <div class="eyes-flare eyes-flare-right"></div>
+        <div class="storm-particles"></div>
+      </div>
+      <div class="hero-hud">
+        <div class="hud-card">
+          <span class="hud-label">ESP Layer</span>
+          <span class="hud-value">Legit-Locked</span>
         </div>
-        <h1 class="t-display" data-typewriter="BEAZT - PRIVATE PREMIUM PC CHEATS">
-          External. Legit-Focused.<br>Instant Delivery.
-        </h1>
-        <p class="subhead">Encrypted storefront, instant key provisioning, and stable external architecture. Built for high-focus players who want speed and clarity.</p>
-
-        <div class="hero-cta">
-          <a href="#pricing" class="btn btn-primary btn-lg">
-            <span class="material-symbols-outlined">bolt</span>
-            Open Access Plans
-          </a>
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.my_keys') }}" class="btn btn-ghost btn-lg">
-              <span class="material-symbols-outlined">vpn_key</span>
-              My Keys
-            </a>
-          {% else %}
-            <a href="{{ url_for('auth.signup') }}" class="btn btn-ghost btn-lg">
-              <span class="material-symbols-outlined">person_add</span>
-              Create Operator Account
-            </a>
-          {% endif %}
+        <div class="hud-card">
+          <span class="hud-label">Aimbot</span>
+          <span class="hud-value">Humanized Curve</span>
         </div>
-
-        <div class="hero-terminal">
-          <div class="terminal-header">
-            <span class="terminal-led"></span>
-            <span>STACK MONITOR</span>
-            <span class="terminal-badge">Encrypted</span>
-          </div>
-          <div class="terminal-grid">
-            <div class="terminal-item">
-              <span class="terminal-label">Build</span>
-              <span class="terminal-value">Helios v5.14</span>
-            </div>
-            <div class="terminal-item">
-              <span class="terminal-label">Status</span>
-              <span class="terminal-value status-online">Online 99.9%</span>
-            </div>
-            <div class="terminal-item">
-              <span class="terminal-label">Delivery</span>
-              <span class="terminal-value">Instant Keys</span>
-            </div>
-            <div class="terminal-item">
-              <span class="terminal-label">Mode</span>
-              <span class="terminal-value">Legit Focus</span>
-            </div>
-          </div>
+        <div class="hud-card">
+          <span class="hud-label">Delivery</span>
+          <span class="hud-value">&lt;15s Stripe</span>
         </div>
+      </div>
+    </div>
 
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="stat-value">24/7</div>
-            <div class="stat-label">Live Support</div>
-          </div>
-          <div class="hero-stat">
-            <div class="stat-value">&lt;15s</div>
-            <div class="stat-label">Average Delivery</div>
-          </div>
-          <div class="hero-stat">
-            <div class="stat-value">99.9%</div>
-            <div class="stat-label">Service Uptime</div>
-          </div>
-          <div class="hero-stat">
-            <div class="stat-value">Community</div>
-            <div class="stat-label">Private Discord</div>
-          </div>
-        </div>
+    <div class="hero-copy">
+      <div class="hero-pill">
+        <span class="dot"></span> LIVE NODE ONLINE :: MEMBER ACCESS
+      </div>
+      <h1 class="t-display" data-typewriter="BEAZT - PRIVATE PREMIUM PC CHEATS">
+        External. Legit-Focused.<br>Instant Delivery.
+      </h1>
+      <p class="subhead">Encrypted storefront, instant key provisioning, and stable external architecture. Built for high-focus players who want speed and clarity.</p>
 
-        <a href="#pricing" class="scroll-cue" aria-label="Scroll to pricing">
-          <span class="material-symbols-outlined">south</span>
-          Scroll
+      <div class="hero-cta">
+        <a href="#pricing" class="btn btn-primary btn-lg">
+          <span class="material-symbols-outlined">bolt</span>
+          Open Access Plans
         </a>
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.my_keys') }}" class="btn btn-ghost btn-lg">
+            <span class="material-symbols-outlined">vpn_key</span>
+            My Keys
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.signup') }}" class="btn btn-ghost btn-lg">
+            <span class="material-symbols-outlined">person_add</span>
+            Create Operator Account
+          </a>
+        {% endif %}
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="hero-visual-glow"></div>
-        <div class="beazt-intro">
-          <div class="beazt-lightning beazt-lightning-left"></div>
-          <div class="beazt-lightning beazt-lightning-right"></div>
-          <img src="/static/images/hero.png" alt="" class="beazt-hero-image">
-          <div class="eyes-aura"></div>
-          <div class="eyes-flare eyes-flare-left"></div>
-          <div class="eyes-flare eyes-flare-right"></div>
-          <div class="storm-particles"></div>
+
+      <div class="hero-terminal">
+        <div class="terminal-header">
+          <span class="terminal-led"></span>
+          <span>STACK MONITOR</span>
+          <span class="terminal-badge">Encrypted</span>
         </div>
-        <div class="hero-hud">
-          <div class="hud-card">
-            <span class="hud-label">ESP Layer</span>
-            <span class="hud-value">Legit-Locked</span>
+        <div class="terminal-grid">
+          <div class="terminal-item">
+            <span class="terminal-label">Build</span>
+            <span class="terminal-value">Helios v5.14</span>
           </div>
-          <div class="hud-card">
-            <span class="hud-label">Aimbot</span>
-            <span class="hud-value">Humanized Curve</span>
+          <div class="terminal-item">
+            <span class="terminal-label">Status</span>
+            <span class="terminal-value status-online">Online 99.9%</span>
           </div>
-          <div class="hud-card">
-            <span class="hud-label">Delivery</span>
-            <span class="hud-value">&lt;15s Stripe</span>
+          <div class="terminal-item">
+            <span class="terminal-label">Delivery</span>
+            <span class="terminal-value">Instant Keys</span>
+          </div>
+          <div class="terminal-item">
+            <span class="terminal-label">Mode</span>
+            <span class="terminal-value">Legit Focus</span>
           </div>
         </div>
       </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Live Support</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-value">&lt;15s</div>
+          <div class="stat-label">Average Delivery</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-value">99.9%</div>
+          <div class="stat-label">Service Uptime</div>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-value">Community</div>
+          <div class="stat-label">Private Discord</div>
+        </div>
+      </div>
+
+      <a href="#pricing" class="scroll-cue" aria-label="Scroll to pricing">
+        <span class="material-symbols-outlined">south</span>
+        Scroll
+      </a>
     </div>
   </div>
 </section>
