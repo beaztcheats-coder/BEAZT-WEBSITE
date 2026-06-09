@@ -116,3 +116,20 @@
   .admin-sidebar a{padding:0.45rem 0.75rem;min-height:40px}
   .admin-main{padding:1.25rem}
 }
+
+.cf-alert{
+  display:flex;align-items:center;gap:0.55rem;
+  padding:0.8rem 1rem;border-radius:10px;
+  font-size:0.78rem;margin-top:1rem
+}
+.cf-alert .material-symbols-outlined{font-size:1.1rem}
+.cf-alert-warn{
+  background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.28);color:#fed7aa
+}
+.cf-alert-error{
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.28);color:#fecaca
+}
+
+.section-title{
+  font-size:0.88rem;font-weight:600;margin-bottom:0.6rem;color:var(--text-soft)
+}

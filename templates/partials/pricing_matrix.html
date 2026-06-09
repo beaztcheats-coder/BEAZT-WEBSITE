@@ -23,6 +23,12 @@
     <form method="POST" action="{{ url_for('checkout.create_session') }}" x-data="{ selected: '{{ ns.default_selected_id }}', selectedLabel: '', selectedPrice: '', showFeatures: false }" x-init="(() => { const el = $el.querySelector('input[name=tier_id]:checked'); if (el) { selected = el.value; selectedLabel = el.dataset.label; selectedPrice = el.dataset.price; } })()">
       <div class="plan-topline reveal">
         <span class="plan-tag">{{ product_features['label'] if product_features and product_features['label'] else product.name }}</span>
+        {% if cheat_status %}
+        <span class="plan-status {{ 'status-online' if cheat_status == 'online' else ('status-maintenance' if cheat_status == 'maintenance' else 'status-offline') }}">
+          <span class="status-dot"></span>
+          {{ cheat_status }}
+        </span>
+        {% endif %}
         <p class="plan-subtitle">Built for legit-focused playstyle. No rage-style defaults. All plans include the same full feature set and only duration changes.</p>
         <button type="button" class="btn btn-ghost feature-toggle" @click="showFeatures = !showFeatures" :aria-expanded="showFeatures.toString()">
           <span class="material-symbols-outlined" x-show="!showFeatures">visibility</span>

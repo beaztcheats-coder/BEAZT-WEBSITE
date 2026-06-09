@@ -32,11 +32,33 @@ def get_product_features(slug):
     return feature_sets.get(slug, default_set)
 
 
+def _get_chairfbi_cheat_status(product):
+    if not product or not product.chairfbi_cheat_id:
+        return None
+    try:
+        from config import get_chairfbi_config
+        cfg = get_chairfbi_config()
+        if not cfg.get("api_token"):
+            return None
+        from utils.chairfbi import ChairFBI
+        cf = ChairFBI(api_token=cfg["api_token"], base_url=cfg.get("api_base"))
+        cheats = cf.get_cheats()
+        for c in cheats:
+            cid = str(c.get("id", ""))
+            cname = c.get("name", "")
+            if cid == product.chairfbi_cheat_id or cname == product.chairfbi_cheat_id:
+                return c.get("status", "unknown")
+    except Exception:
+        pass
+    return None
+
+
 @main_bp.route("/")
 def index():
     product = Product.query.filter_by(slug="rust-external-private").first()
     tiers = []
     product_features = {"label": "Game Access", "items": []}
+    cheat_status = None
     if product:
         tiers = (
             PricingTier.query
@@ -45,7 +67,8 @@ def index():
             .all()
         )
         product_features = get_product_features(product.slug)
-    return render_template("index.html", product=product, tiers=tiers, product_features=product_features)
+        cheat_status = _get_chairfbi_cheat_status(product)
+    return render_template("index.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status)
 
 
 @main_bp.route("/product/<slug>")
@@ -54,13 +77,14 @@ def product_detail(slug):
     if not product:
         abort(404)
     product_features = get_product_features(product.slug)
+    cheat_status = _get_chairfbi_cheat_status(product)
     tiers = (
         PricingTier.query
         .filter_by(product_id=product.id)
         .order_by(PricingTier.duration_days)
         .all()
     )
-    return render_template("product.html", product=product, tiers=tiers, product_features=product_features)
+    return render_template("product.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status)
 
 
 @main_bp.route("/feedback")

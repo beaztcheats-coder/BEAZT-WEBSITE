@@ -37,6 +37,21 @@ def dashboard():
         if o.tier:
             revenue_pence += o.tier.price_pence
 
+    cf_balance = None
+    cf_balance_error = None
+    cf_config = get_chairfbi_config()
+    if cf_config.get("api_token"):
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=cf_config["api_token"], base_url=cf_config.get("api_base"))
+            balance_data = cf.get_balance()
+            if isinstance(balance_data, dict):
+                cf_balance = balance_data.get("balance")
+            else:
+                cf_balance = balance_data
+        except Exception as e:
+            cf_balance_error = str(e)
+
     return render_template(
         "admin/dashboard.html",
         total_users=total_users,
@@ -48,6 +63,8 @@ def dashboard():
         revenue_pounds=revenue_pence / 100,
         recent_users=recent_users,
         recent_keys=recent_keys,
+        cf_balance=cf_balance,
+        cf_balance_error=cf_balance_error,
     )
 
 
@@ -145,12 +162,20 @@ def products():
     return render_template("admin/products.html", products=products_list)
 
 
-@admin_bp.route("/products/<int:product_id>/tiers")
+@admin_bp.route("/products/<int:product_id>/tiers", methods=["GET", "POST"])
 @admin_required
 def product_tiers(product_id):
     product = db.session.get(Product, product_id)
     if not product:
         abort(404)
+
+    if request.method == "POST":
+        cheat_id = request.form.get("chairfbi_cheat_id", "").strip()
+        product.chairfbi_cheat_id = cheat_id if cheat_id else None
+        db.session.commit()
+        flash("Product ChairFBI cheat ID updated.", "success")
+        return redirect(url_for("admin.product_tiers", product_id=product.id))
+
     tiers = PricingTier.query.filter_by(product_id=product.id).order_by(PricingTier.duration_days).all()
     return render_template("admin/product_tiers.html", product=product, tiers=tiers)
 
@@ -273,3 +298,135 @@ def settings():
         chairfbi_api_token=cf_cfg["api_token"],
         chairfbi_api_base=cf_cfg["api_base"],
         chairfbi_rust_cheat_id=cf_cfg["rust_cheat_id"])
+
+
+@admin_bp.route("/chairfbi")
+@admin_required
+def chairfbi_dashboard():
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    api_base = cfg.get("api_base", "https://access.chairfbi.se")
+
+    balance = None
+    cheats = []
+    recent_cf_keys = []
+    chairfbi_error = None
+    balance_error = None
+
+    if not api_token:
+        chairfbi_error = "ChairFBI API token not configured. Add it in Settings."
+    else:
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=api_token, base_url=api_base)
+
+            try:
+                balance_data = cf.get_balance()
+                balance = balance_data.get("balance") if isinstance(balance_data, dict) else balance_data
+            except Exception as e:
+                balance_error = str(e)
+
+            try:
+                cheats_data = cf.get_cheats()
+                cheats = cheats_data if isinstance(cheats_data, list) else []
+            except Exception:
+                pass
+
+            try:
+                keys_data = cf.list_keys(per_page=20)
+                recent_cf_keys = keys_data.get("data", []) if isinstance(keys_data, dict) else []
+            except Exception:
+                pass
+        except Exception as e:
+            chairfbi_error = str(e)
+
+    products = Product.query.order_by(Product.name).all()
+    local_cf_keys = Key.query.filter(Key.chairfbi_key_id.isnot(None)).order_by(Key.created_at.desc()).limit(30).all()
+
+    return render_template(
+        "admin/chairfbi.html",
+        balance=balance,
+        balance_error=balance_error,
+        cheats=cheats,
+        recent_cf_keys=recent_cf_keys,
+        chairfbi_error=chairfbi_error,
+        products=products,
+        local_cf_keys=local_cf_keys,
+    )
+
+
+@admin_bp.route("/chairfbi/revoke/<int:key_id>", methods=["POST"])
+@admin_required
+def chairfbi_revoke(key_id):
+    key = db.session.get(Key, key_id)
+    if not key or not key.chairfbi_key_id:
+        flash("No ChairFBI key ID found for this key.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    api_base = cfg.get("api_base", "https://access.chairfbi.se")
+
+    try:
+        from utils.chairfbi import ChairFBI
+        cf = ChairFBI(api_token=api_token, base_url=api_base)
+        cf.revoke_key(key.chairfbi_key_id)
+        key.is_active = False
+        db.session.commit()
+        flash("ChairFBI key revoked successfully.", "success")
+    except Exception as e:
+        flash(f"ChairFBI revoke failed: {e}", "error")
+
+    return redirect(url_for("admin.chairfbi_dashboard"))
+
+
+@admin_bp.route("/chairfbi/hwid-reset/<int:key_id>", methods=["POST"])
+@admin_required
+def chairfbi_hwid_reset(key_id):
+    key = db.session.get(Key, key_id)
+    if not key or not key.chairfbi_key_id:
+        flash("No ChairFBI key ID found for this key.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    api_base = cfg.get("api_base", "https://access.chairfbi.se")
+
+    try:
+        from utils.chairfbi import ChairFBI
+        cf = ChairFBI(api_token=api_token, base_url=api_base)
+        resp = cf._request("POST", f"/keys/{key.chairfbi_key_id}/hwid-reset")
+        if resp.status_code in (200, 204):
+            flash("HWID reset successful.", "success")
+        else:
+            flash(f"HWID reset failed: {resp.text}", "error")
+    except Exception as e:
+        flash(f"HWID reset failed: {e}", "error")
+
+    return redirect(url_for("admin.chairfbi_dashboard"))
+
+
+@admin_bp.route("/chairfbi/vouche/<int:key_id>", methods=["POST"])
+@admin_required
+def chairfbi_vouche(key_id):
+    key = db.session.get(Key, key_id)
+    if not key or not key.chairfbi_key_id:
+        flash("No ChairFBI key ID found for this key.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    api_base = cfg.get("api_base", "https://access.chairfbi.se")
+
+    try:
+        from utils.chairfbi import ChairFBI
+        cf = ChairFBI(api_token=api_token, base_url=api_base)
+        resp = cf._request("POST", f"/keys/{key.chairfbi_key_id}/vouche")
+        if resp.status_code in (200, 204):
+            flash("Vouche (6 hours) added successfully.", "success")
+        else:
+            flash(f"Vouche failed: {resp.text}", "error")
+    except Exception as e:
+        flash(f"Vouche failed: {e}", "error")
+
+    return redirect(url_for("admin.chairfbi_dashboard"))

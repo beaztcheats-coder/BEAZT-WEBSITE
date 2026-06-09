@@ -30,7 +30,30 @@
     <div class="stat-num">{{ total_products }}</div>
     <div class="stat-lbl">Products</div>
   </div>
+  <div class="stat-card">
+    <div class="stat-num">
+      {% if cf_balance is not none %}
+        &euro;{{ "%.2f"|format(cf_balance|float) }}
+      {% else %}
+        --
+      {% endif %}
+    </div>
+    <div class="stat-lbl">ChairFBI Balance</div>
+  </div>
 </div>
+
+{% if cf_balance is not none and cf_balance|float < 20 %}
+<div class="cf-alert cf-alert-warn">
+  <span class="material-symbols-outlined">warning</span>
+  ChairFBI balance is low (&euro;{{ "%.2f"|format(cf_balance|float) }}). Top up soon to avoid checkout disruptions.
+</div>
+{% endif %}
+{% if cf_balance_error %}
+<div class="cf-alert cf-alert-error">
+  <span class="material-symbols-outlined">error</span>
+  Could not fetch ChairFBI balance: {{ cf_balance_error }}
+</div>
+{% endif %}
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
   <div>

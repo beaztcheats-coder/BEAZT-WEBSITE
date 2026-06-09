@@ -35,6 +35,7 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=True)
     image_url = db.Column(db.String(256), nullable=True)
     is_private = db.Column(db.Boolean, default=True)
+    chairfbi_cheat_id = db.Column(db.String(64), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     tiers = db.relationship("PricingTier", backref="product", lazy="dynamic")
@@ -128,7 +129,7 @@ def seed_products():
 
     if Product.query.count() == 0:
         product = Product(
-            name="BeaZt Performance Suite",
+            name="Rust External - BeaZt Legit",
             slug="rust-external-private",
             description=(
                 "Premium external performance suite with privacy-mode overlay "
@@ -137,6 +138,7 @@ def seed_products():
             ),
             image_url="/static/icons/rust_placeholder.jpg",
             is_private=True,
+            chairfbi_cheat_id="rust-external",
         )
         db.session.add(product)
         db.session.flush()

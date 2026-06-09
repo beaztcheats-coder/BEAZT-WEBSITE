@@ -109,8 +109,13 @@ def handle_checkout_completed(session_data):
     chairfbi_cheat_id = None
 
     cfg = get_chairfbi_config()
-    cheat_id = cfg.get("rust_cheat_id", "")
     api_token = cfg.get("api_token", "")
+    cheat_id = ""
+
+    if order.tier and order.tier.product and order.tier.product.chairfbi_cheat_id:
+        cheat_id = order.tier.product.chairfbi_cheat_id
+    else:
+        cheat_id = cfg.get("rust_cheat_id", "")
 
     if cheat_id and api_token:
         try:

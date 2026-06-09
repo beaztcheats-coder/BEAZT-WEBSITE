@@ -6,7 +6,7 @@
 </div>
 
 <table class="admin-table">
-  <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Private</th><th>Tiers</th><th>Actions</th></tr></thead>
+  <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Private</th><th>CF Cheat ID</th><th>Tiers</th><th>Actions</th></tr></thead>
   <tbody>
     {% for p in products %}
     <tr>
@@ -14,6 +14,7 @@
       <td>{{ p.name }}</td>
       <td><code>{{ p.slug }}</code></td>
       <td>{{ 'Yes' if p.is_private else 'No' }}</td>
+      <td><code>{{ p.chairfbi_cheat_id or '-' }}</code></td>
       <td>{{ p.tiers.count() }}</td>
       <td>
         <a href="{{ url_for('admin.product_tiers', product_id=p.id) }}" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-h);border:1px solid rgba(59,130,246,0.25);text-decoration:none;">

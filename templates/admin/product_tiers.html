@@ -3,7 +3,18 @@
 <div class="page-header-admin">
   <a href="{{ url_for('admin.products') }}" style="font-size:0.8rem;color:var(--accent-h);">&larr; Products</a>
   <h1>{{ product.name }}</h1>
-  <p>Manage pricing tiers for this product.</p>
+  <p>Manage pricing tiers and ChairFBI integration for this product.</p>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+  <form method="POST" class="form-inline">
+    <div style="flex:1;">
+      <label style="display:block;font-size:0.72rem;color:var(--text-muted);margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:0.06em;">ChairFBI Cheat ID</label>
+      <input type="text" name="chairfbi_cheat_id" value="{{ product.chairfbi_cheat_id or '' }}" placeholder="e.g. rust-external" style="width:100%;">
+    </div>
+    <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Update Cheat ID</button>
+  </form>
+  <p style="font-size:0.68rem;color:var(--text-muted);margin-top:0.4rem;">Maps this product to a ChairFBI cheat. Leave empty if not using ChairFBI for this product.</p>
 </div>
 
 <table class="admin-table" style="margin-bottom:2rem;">

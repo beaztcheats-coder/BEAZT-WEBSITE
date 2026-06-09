@@ -56,6 +56,9 @@
         <a href="{{ url_for('admin.orders') }}" class="{{ 'active' if request.endpoint == 'admin.orders' }}">
           <span class="material-symbols-outlined">receipt_long</span> Orders
         </a>
+        <a href="{{ url_for('admin.chairfbi_dashboard') }}" class="{{ 'active' if request.endpoint in ('admin.chairfbi_dashboard','admin.chairfbi_revoke','admin.chairfbi_hwid_reset','admin.chairfbi_vouche') }}">
+          <span class="material-symbols-outlined">cloud</span> ChairFBI
+        </a>
         <a href="{{ url_for('admin.settings') }}" class="{{ 'active' if request.endpoint == 'admin.settings' }}">
           <span class="material-symbols-outlined">settings</span> Settings
         </a>

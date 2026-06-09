@@ -43,6 +43,22 @@ def page_not_found(e):
 
 with app.app_context():
     db.create_all()
+
+    import sqlite3
+    try:
+        _engine = db.engine
+        _conn = _engine.raw_connection()
+        _cursor = _conn.cursor()
+        _cursor.execute("PRAGMA table_info(products)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "chairfbi_cheat_id" not in _cols:
+            _cursor.execute("ALTER TABLE products ADD COLUMN chairfbi_cheat_id VARCHAR(64)")
+            _conn.commit()
+        _cursor.close()
+        _conn.close()
+    except Exception:
+        pass
+
     seed_products()
 
 
