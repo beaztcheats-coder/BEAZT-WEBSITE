@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 from models import db, User, seed_products
 from flask_login import LoginManager
@@ -34,6 +34,12 @@ app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(checkout_bp, url_prefix="/checkout")
 app.register_blueprint(admin_bp, url_prefix="/admin")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
 
 with app.app_context():
     db.create_all()

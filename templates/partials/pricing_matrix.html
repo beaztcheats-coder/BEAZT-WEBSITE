@@ -1,0 +1,118 @@
+{% set ns = namespace(default_selected_id='', base_daily=0) %}
+{% for tier in tiers %}
+  {% if tier.duration_days == 30 and not ns.default_selected_id %}
+    {% set ns.default_selected_id = tier.id|string %}
+  {% endif %}
+  {% if tier.duration_days == 1 and ns.base_daily == 0 %}
+    {% set ns.base_daily = tier.price_pounds %}
+  {% endif %}
+{% endfor %}
+{% if not ns.default_selected_id and tiers %}
+  {% set ns.default_selected_id = tiers[0].id|string %}
+{% endif %}
+
+<div class="trust-badges reveal" style="margin-bottom:1.2rem">
+  <div class="trust-badge"><span class="material-symbols-outlined">verified_user</span> Stripe Verified</div>
+  <div class="trust-badge"><span class="material-symbols-outlined">lock</span> SSL Encrypted</div>
+  <div class="trust-badge"><span class="material-symbols-outlined">bolt</span> Instant Delivery</div>
+  <div class="trust-badge"><span class="material-symbols-outlined">forum</span> Discord Support</div>
+</div>
+
+<div class="pricing-section pricing-shell">
+  {% if tiers %}
+    <form method="POST" action="{{ url_for('checkout.create_session') }}" x-data="{ selected: '{{ ns.default_selected_id }}', selectedLabel: '', selectedPrice: '', showFeatures: false }" x-init="(() => { const el = $el.querySelector('input[name=tier_id]:checked'); if (el) { selected = el.value; selectedLabel = el.dataset.label; selectedPrice = el.dataset.price; } })()">
+      <div class="plan-topline reveal">
+        <span class="plan-tag">{{ product_features['label'] if product_features and product_features['label'] else product.name }}</span>
+        <p class="plan-subtitle">Built for legit-focused playstyle. No rage-style defaults. All plans include the same full feature set and only duration changes.</p>
+        <button type="button" class="btn btn-ghost feature-toggle" @click="showFeatures = !showFeatures" :aria-expanded="showFeatures.toString()">
+          <span class="material-symbols-outlined" x-show="!showFeatures">visibility</span>
+          <span class="material-symbols-outlined" x-show="showFeatures" x-cloak>visibility_off</span>
+          <span x-text="showFeatures ? 'Hide Features' : 'View Features'"></span>
+        </button>
+      </div>
+
+      <div class="feature-panel reveal" x-show="showFeatures" x-transition.opacity.duration.200ms x-cloak>
+        <h3>{{ product_features['label'] if product_features and product_features['label'] else product.name }} Included Features</h3>
+        <div class="feature-panel-grid">
+          {% for feature in product_features['items'] %}
+            <div class="feature-panel-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>{{ feature }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="pricing-grid reveal">
+        {% for tier in tiers %}
+          {% set regular_total = (ns.base_daily * tier.duration_days) if ns.base_daily else tier.price_pounds %}
+          {% set savings_pct = ((regular_total - tier.price_pounds) / regular_total * 100) if regular_total > tier.price_pounds else 0 %}
+          {% set per_day = tier.price_pounds / tier.duration_days %}
+          <label class="pricing-card {{ 'is-recommended' if tier.duration_days == 30 else '' }}" :class="{ 'is-selected': selected === '{{ tier.id }}' }" @click="selected = '{{ tier.id }}'; selectedLabel = '{{ tier.label }}'; selectedPrice = '{{ '%.0f'|format(tier.price_pounds) }}'">
+            <input type="radio" name="tier_id" value="{{ tier.id }}" class="sr-only" x-model="selected" data-label="{{ tier.label }}" data-price="{{ '%.0f'|format(tier.price_pounds) }}" {% if tier.id|string == ns.default_selected_id %}checked{% endif %}>
+            {% if tier.duration_days == 30 %}
+              <span class="badge">Most Chosen</span>
+            {% elif savings_pct >= 40 %}
+              <span class="badge badge-save">Max Savings</span>
+            {% elif savings_pct > 0 %}
+              <span class="badge badge-save">Save {{ savings_pct|round(0)|int }}%</span>
+            {% endif %}
+            <span class="material-symbols-outlined pricing-icon">{% if tier.duration_days == 1 %}electric_bolt{% elif tier.duration_days == 7 %}deployed_code{% elif tier.duration_days == 30 %}workspace_premium{% else %}diamond{% endif %}</span>
+            <span class="duration">{{ tier.label }}</span>
+            <span class="price"><span class="currency">&pound;</span>{{ "%.0f"|format(tier.price_pounds) }}</span>
+            <div class="plan-metrics">
+              <span class="per">{{ "%.2f"|format(per_day) }} / day</span>
+              {% if tier.duration_days >= 30 %}
+                <span class="per">{{ "%.2f"|format((tier.price_pounds / 30)) }} / month equivalent</span>
+              {% endif %}
+            </div>
+            {% if savings_pct > 0 %}
+              <span class="plan-saving">You save {{ savings_pct|round(0)|int }}% vs daily access</span>
+            {% else %}
+              <span class="plan-saving">Best for fast trial sessions</span>
+            {% endif %}
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="rust-stack reveal">
+        <div class="include-item"><span class="material-symbols-outlined">memory</span> Same full feature set on every plan</div>
+        <div class="include-item"><span class="material-symbols-outlined">schedule</span> Duration is the only difference</div>
+        <div class="include-item"><span class="material-symbols-outlined">shield_lock</span> Legit-focused presets, no rage-style defaults</div>
+        <div class="include-item"><span class="material-symbols-outlined">update</span> Frequent maintenance updates</div>
+        <div class="include-item"><span class="material-symbols-outlined">vpn_key</span> Instant key activation</div>
+        <div class="include-item"><span class="material-symbols-outlined">groups</span> Private Discord support</div>
+      </div>
+
+      <div class="pricing-cta reveal">
+        <div class="pricing-cta-inner">
+          <p class="plan-summary" x-show="selectedLabel" x-text="'Selected: ' + selectedLabel + ' - GBP ' + selectedPrice"></p>
+          {% if current_user.is_authenticated %}
+            <button type="submit" class="btn btn-primary btn-lg btn-full" :disabled="!selected">
+              <span class="material-symbols-outlined">shopping_cart</span>
+              Activate {{ product_features['label'] if product_features and product_features['label'] else product.name }} Plan
+            </button>
+          {% else %}
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg btn-full">
+              <span class="material-symbols-outlined">person_add</span>
+              Create Account and Continue
+            </a>
+          {% endif %}
+          <p class="checkout-note"><span class="material-symbols-outlined">lock</span> Secured by Stripe and key delivered instantly after payment</p>
+          <p class="risk-note">No tool can guarantee zero enforcement risk. Legit setup discipline and responsible use matter.</p>
+          <div class="trust-strip">
+            <span class="trust-strip-item"><span class="material-symbols-outlined">credit_card</span> Cards accepted</span>
+            <span class="trust-strip-item"><span class="material-symbols-outlined">timer</span> Activation in seconds</span>
+            <span class="trust-strip-item"><span class="material-symbols-outlined">support_agent</span> Guided legit setup in Discord</span>
+          </div>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <div class="empty-state reveal">
+      <span class="material-symbols-outlined empty-icon">inventory_2</span>
+      <h2>Plans Coming Soon</h2>
+      <p>Pricing is being configured. Check back shortly.</p>
+    </div>
+  {% endif %}
+</div>

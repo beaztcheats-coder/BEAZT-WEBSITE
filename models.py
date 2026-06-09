@@ -81,6 +81,8 @@ class Key(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    chairfbi_key_id = db.Column(db.String(64), nullable=True, index=True)
+    chairfbi_cheat_id = db.Column(db.String(32), nullable=True)
 
     product = db.relationship("Product")
 
@@ -126,12 +128,12 @@ def seed_products():
 
     if Product.query.count() == 0:
         product = Product(
-            name="Rust External \u2014 Private",
+            name="BeaZt Performance Suite",
             slug="rust-external-private",
             description=(
-                "Hardened external cheat for Rust with signature rotation, "
-                "custom stream-proof overlay, and private slot pool. "
-                "Vetted onboarding. Minimal footprint."
+                "Premium external performance suite with privacy-mode overlay "
+                "and read-only architecture. Exclusive access with continuous "
+                "updates and community support."
             ),
             image_url="/static/icons/rust_placeholder.jpg",
             is_private=True,
@@ -169,4 +171,4 @@ def seed_products():
             db.session.add(tier)
 
         db.session.commit()
-        print("Database seeded with Rust External Private product.")
+        print("Database seeded with Performance Suite product.")

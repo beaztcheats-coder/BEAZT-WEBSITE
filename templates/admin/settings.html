@@ -2,105 +2,102 @@
 {% block admin_content %}
 <div class="page-header-admin">
   <h1>Settings</h1>
-  <p>Configure Stripe integration. Values saved here override any <code>.env</code> settings. Leave blank to use environment defaults.</p>
+  <p>Configure Stripe + ChairFBI integration. Values save to the database and override <code>.env</code> settings.</p>
 </div>
 
 <div x-data="{ reveal: {} }">
   <form method="POST">
-    <div style="display:flex;flex-direction:column;gap:1.5rem;max-width:600px;">
+    <div style="display:flex;flex-direction:column;gap:2.5rem;max-width:640px;">
 
-      <div style="display:flex;flex-direction:column;gap:0.35rem;">
-        <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">key</span>
-          Stripe Secret Key
-        </label>
-        <div style="display:flex;gap:0.5rem;">
-          <input :type="reveal.secret ? 'text' : 'password'" name="stripe_secret_key"
-            value="{{ stripe_secret }}"
-            placeholder="sk_live_... or sk_test_..."
-            style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-          <button type="button" @click="reveal.secret = !reveal.secret"
-            style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;"
-            x-text="reveal.secret ? 'HIDE' : 'SHOW'">SHOW</button>
+      <!-- ===== STRIPE SECTION ===== -->
+      <div>
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;color:var(--accent);">payments</span> Stripe
+        </h3>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Stripe Secret Key</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input :type="reveal.secret ? 'text' : 'password'" name="stripe_secret_key" value="{{ stripe_secret }}" placeholder="sk_live_..." style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <button type="button" @click="reveal.secret = !reveal.secret" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.secret ? 'HIDE' : 'SHOW'"></button>
+            </div>
+            {% if stripe_secret %}<span style="font-size:0.68rem;color:var(--success);">Set ({{ stripe_secret[:12] }}...)</span>{% else %}<span style="font-size:0.68rem;color:var(--error);">Not set.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Stripe Publishable Key</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input :type="reveal.pub ? 'text' : 'password'" name="stripe_publishable_key" value="{{ stripe_publishable }}" placeholder="pk_live_..." style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <button type="button" @click="reveal.pub = !reveal.pub" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.pub ? 'HIDE' : 'SHOW'"></button>
+            </div>
+            {% if stripe_publishable %}<span style="font-size:0.68rem;color:var(--success);">Set ({{ stripe_publishable[:12] }}...)</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Optional.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Stripe Webhook Secret</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input :type="reveal.webhook ? 'text' : 'password'" name="stripe_webhook_secret" value="{{ stripe_webhook }}" placeholder="whsec_..." style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <button type="button" @click="reveal.webhook = !reveal.webhook" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.webhook ? 'HIDE' : 'SHOW'"></button>
+            </div>
+            {% if stripe_webhook %}<span style="font-size:0.68rem;color:var(--success);">Set ({{ stripe_webhook[:12] }}...)</span>{% else %}<span style="font-size:0.68rem;color:var(--warn);">Required for key delivery.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Site URL</label>
+            <input type="text" name="site_url" value="{{ site_url }}" placeholder="https://beaztcheats.com" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            <span style="font-size:0.68rem;color:var(--text-mut);">Used for Stripe redirect URLs.</span>
+          </div>
+
         </div>
-        {% if stripe_secret %}
-          <span style="font-size:0.68rem;color:var(--success);">
-            <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;">check_circle</span>
-            Set ({{ stripe_secret[:12] }}...)
-          </span>
-        {% else %}
-          <span style="font-size:0.68rem;color:var(--error);">
-            <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;">error</span>
-            Not set. Stripe checkout disabled.
-          </span>
-        {% endif %}
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:0.35rem;">
-        <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">public</span>
-          Stripe Publishable Key
-        </label>
-        <div style="display:flex;gap:0.5rem;">
-          <input :type="reveal.pub ? 'text' : 'password'" name="stripe_publishable_key"
-            value="{{ stripe_publishable }}"
-            placeholder="pk_live_... or pk_test_..."
-            style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-          <button type="button" @click="reveal.pub = !reveal.pub"
-            style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;"
-            x-text="reveal.pub ? 'HIDE' : 'SHOW'">SHOW</button>
-        </div>
-        {% if stripe_publishable %}
-          <span style="font-size:0.68rem;color:var(--success);">
-            <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;">check_circle</span>
-            Set ({{ stripe_publishable[:12] }}...)
-          </span>
-        {% else %}
-          <span style="font-size:0.68rem;color:var(--text-mut);">Optional for frontend. Backend only needs the Secret Key.</span>
-        {% endif %}
-      </div>
+      <!-- ===== CHAIRFBI SECTION ===== -->
+      <div>
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.15rem;color:var(--accent);">hub</span> ChairFBI Integration
+        </h3>
 
-      <div style="display:flex;flex-direction:column;gap:0.35rem;">
-        <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">webhook</span>
-          Stripe Webhook Secret
-        </label>
-        <div style="display:flex;gap:0.5rem;">
-          <input :type="reveal.webhook ? 'text' : 'password'" name="stripe_webhook_secret"
-            value="{{ stripe_webhook }}"
-            placeholder="whsec_..."
-            style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-          <button type="button" @click="reveal.webhook = !reveal.webhook"
-            style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;"
-            x-text="reveal.webhook ? 'HIDE' : 'SHOW'">SHOW</button>
-        </div>
-        {% if stripe_webhook %}
-          <span style="font-size:0.68rem;color:var(--success);">
-            <span class="material-symbols-outlined" style="font-size:0.85rem;vertical-align:middle;">check_circle</span>
-            Set ({{ stripe_webhook[:12] }}...)
-          </span>
-        {% else %}
-          <span style="font-size:0.68rem;color:var(--warn);">
-            Required for automatic key delivery after payment.
-          </span>
-        {% endif %}
-      </div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-      <div style="display:flex;flex-direction:column;gap:0.35rem;">
-        <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">
-          <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">link</span>
-          Site URL
-        </label>
-        <input type="text" name="site_url"
-          value="{{ site_url }}"
-          placeholder="https://beaztcheats.com"
-          style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-        <span style="font-size:0.68rem;color:var(--text-mut);">Used for Stripe redirect URLs after checkout. Include protocol (https://).</span>
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API Token</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input :type="reveal.cf_token ? 'text' : 'password'" name="chairfbi_api_token" value="{{ chairfbi_api_token }}" placeholder="Bearer token from ChairFBI panel" style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <button type="button" @click="reveal.cf_token = !reveal.cf_token" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.cf_token ? 'HIDE' : 'SHOW'"></button>
+            </div>
+            {% if chairfbi_api_token %}<span style="font-size:0.68rem;color:var(--success);">Set ({{ chairfbi_api_token[:12] }}...)</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Get this from ChairFBI Store Settings.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API Base URL</label>
+            <input type="text" name="chairfbi_api_base" value="{{ chairfbi_api_base }}" placeholder="https://access.chairfbi.se" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            <span style="font-size:0.68rem;color:var(--text-mut);">ChairFBI API endpoint.</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Rust External Cheat ID</label>
+            <input type="text" name="chairfbi_rust_cheat_id" value="{{ chairfbi_rust_cheat_id }}" placeholder="e.g. rust_external or UUID" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            <span style="font-size:0.68rem;color:var(--text-mut);">ChairFBI cheat identifier for creating keys.</span>
+          </div>
+
+          <div>
+            <form method="POST" action="{{ url_for('admin.test_chairfbi') }}" style="display:inline;">
+              <input type="hidden" name="chairfbi_api_token" :value="document.querySelector('input[name=chairfbi_api_token]').value">
+              <input type="hidden" name="chairfbi_api_base" :value="document.querySelector('input[name=chairfbi_api_base]').value">
+              <button type="submit" class="btn-xs" style="background:var(--surface);color:var(--accent-l);border:1px solid var(--accent);padding:0.35rem 0.85rem;font-size:0.75rem;font-weight:600;cursor:pointer;border-radius:3px;font-family:var(--font);">
+                Test Connection
+              </button>
+            </form>
+          </div>
+
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary" style="align-self:flex-start;">
         <span class="material-symbols-outlined">save</span>
-        Save Settings
+        Save All Settings
       </button>
     </div>
   </form>

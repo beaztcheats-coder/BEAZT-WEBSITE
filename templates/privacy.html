@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy | BeaZt{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="page-header reveal">
+      <span class="section-eyebrow">Legal</span>
+      <h1 class="t-h1">Privacy Policy</h1>
+      <p class="text-muted">Last updated: June 2026</p>
+    </div>
+
+    <div class="privacy-content reveal">
+      <h2>1. Information We Collect</h2>
+      <p>When you create an account or make a purchase, we collect:</p>
+      <ul>
+        <li>Email address and username (provided during registration)</li>
+        <li>Payment metadata processed securely through Stripe (we do not store credit card details)</li>
+        <li>License key usage data for service delivery</li>
+      </ul>
+
+      <h2>2. How We Use Your Information</h2>
+      <p>Your information is used to:</p>
+      <ul>
+        <li>Create and manage your account</li>
+        <li>Process payments and deliver license keys</li>
+        <li>Provide customer support via Discord</li>
+        <li>Send service-related notifications (updates, maintenance)</li>
+      </ul>
+      <p>We do not sell, rent, or share your personal information with third parties for marketing purposes.</p>
+
+      <h2>3. Payment Processing</h2>
+      <p>All payments are processed by Stripe, a PCI-DSS compliant payment processor. Your payment information is transmitted directly to Stripe via an encrypted connection. We do not store or have access to your full credit card details. Stripe's privacy policy applies to payment data.</p>
+
+      <h2>4. Data Security</h2>
+      <p>We implement industry-standard security measures including SSL/TLS encryption for all data transmission, secure credential storage using salted hashing, and regular security review of our infrastructure.</p>
+
+      <h2>5. Cookies</h2>
+      <p>We use essential session cookies to maintain your login state. These cookies are required for the website to function and do not track you across other sites. We also use Stripe's fraud prevention cookies during checkout. No advertising or analytics cookies are used.</p>
+
+      <h2>6. Third-Party Services</h2>
+      <p>We use the following third-party services:</p>
+      <ul>
+        <li><strong>Stripe</strong> — payment processing</li>
+        <li><strong>Google Fonts</strong> — website typography (loaded from Google CDN)</li>
+        <li><strong>Discord</strong> — customer support platform</li>
+      </ul>
+
+      <h2>7. Data Retention</h2>
+      <p>We retain your account information and purchase history for as long as your account is active. License keys and associated usage data are retained for the duration of the license period plus 30 days. You may request deletion of your account and associated data by contacting us via Discord.</p>
+
+      <h2>8. Your Rights</h2>
+      <p>Depending on your location, you may have rights under GDPR, CCPA, or similar regulations. These may include the right to access, correct, delete, or export your data. To exercise these rights, contact us via Discord.</p>
+
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this privacy policy from time to time. Significant changes will be communicated via our Discord server. Continued use of the service after changes constitutes acceptance of the updated policy.</p>
+
+      <h2>10. Contact</h2>
+      <p>For privacy-related inquiries, contact us via Discord. Our support team is available 24/7.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

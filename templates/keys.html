@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}My Keys | BeaZt Cheats{% endblock %}
+{% block title %}My Keys | BeaZt{% endblock %}
 
 {% block content %}
 <section class="page-section">
@@ -16,7 +16,7 @@
             <div class="key-header">
               <span class="material-symbols-outlined key-icon">vpn_key</span>
               <div>
-                <strong>{{ key.product.name if key.product else "Rust External" }}</strong>
+                <strong>Performance Suite</strong>
                 <span class="key-created">{{ key.created_at.strftime('%d %b %Y') }}</span>
               </div>
               <span class="key-status {{ 'status-active' if key.is_active else 'status-expired' }}">
@@ -37,6 +37,12 @@
                   <span class="key-label">Expires</span>
                   <span>{{ key.expires_at.strftime('%d %b %Y, %H:%M') if key.expires_at else 'Lifetime' }}</span>
                 </div>
+                {% if key.chairfbi_key_id %}
+                <div>
+                  <span class="key-label">Ref</span>
+                  <span>{{ key.chairfbi_key_id }}</span>
+                </div>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -46,10 +52,10 @@
       <div class="empty-state reveal">
         <span class="material-symbols-outlined empty-icon">vpn_key_off</span>
         <h2>No Keys Yet</h2>
-        <p>Purchase a license to receive your key instantly.</p>
+        <p>Purchase a license to receive your key instantly after payment.</p>
         <a href="{{ url_for('main.index') }}#pricing" class="btn btn-primary btn-lg">
           <span class="material-symbols-outlined">shopping_cart</span>
-          Browse Products
+          Browse Plans
         </a>
       </div>
     {% endif %}

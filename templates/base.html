@@ -3,41 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#080B16">
-  <meta name="description" content="BeaZt Cheats — Premium undetected Rust enhancements. Private-slot external cheat with signature rotation.">
-
-  <meta property="og:title" content="BeaZt Cheats — Undetected Rust Enhancements">
-  <meta property="og:description" content="Private-slot external cheat. Signature rotation. Stream-proof. Instant delivery.">
+  <meta name="theme-color" content="#060C24">
+  <meta name="description" content="BeaZt - cyber terminal storefront for performance tools, instant delivery, and private member support.">
+  <meta property="og:title" content="BeaZt - Cyber Terminal Access">
+  <meta property="og:description" content="Instant key delivery, encrypted checkout, and private member support.">
   <meta property="og:type" content="website">
-
   <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
-  <title>{% block title %}BeaZt Cheats — Undetected Rust Enhancements{% endblock %}</title>
-
+  <title>{% block title %}BeaZt - Cyber Terminal Access{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
-
   <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
   <script defer src="https://unpkg.com/scrollreveal@4/dist/scrollreveal.min.js"></script>
-
   <link rel="stylesheet" href="/static/css/style.css">
   {% block head %}{% endblock %}
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
   <canvas id="ambient-canvas" aria-hidden="true"></canvas>
 
-  <div class="main-content">
+  <div class="main-content" id="main-content">
     <header class="navbar" x-data="{ mobileOpen: false }">
       <div class="container nav-inner">
-        <a href="/" class="nav-logo">
+        <a href="/" class="nav-logo" aria-label="BeaZt home">
           <img src="/static/icons/logo.svg" alt="BeaZt" class="nav-logo-img">
-          BEAZT
         </a>
-
-        <nav class="nav-links">
+        <nav class="nav-links" aria-label="Main navigation">
           <a href="{{ url_for('main.index') }}#pricing" class="nav-link">Products</a>
           <a href="{{ url_for('main.feedback') }}" class="nav-link">Reviews</a>
+          <a href="{{ url_for('main.faq') }}" class="nav-link">FAQ</a>
+          <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="nav-link nav-discord">Discord</a>
           {% if current_user.is_authenticated %}
             <a href="{{ url_for('main.my_keys') }}" class="nav-link">My Keys</a>
             {% if current_user.is_admin %}
@@ -49,16 +47,16 @@
             <a href="{{ url_for('auth.signup') }}" class="nav-cta">Sign Up</a>
           {% endif %}
         </nav>
-
-        <button type="button" class="nav-burger" @click="mobileOpen = !mobileOpen" aria-label="Menu">
+        <button type="button" class="nav-burger" @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Menu">
           <span class="material-symbols-outlined" x-show="!mobileOpen">menu</span>
           <span class="material-symbols-outlined" x-show="mobileOpen" x-cloak>close</span>
         </button>
       </div>
-
       <div class="mobile-menu" :class="{ 'is-open': mobileOpen }" x-cloak>
         <a href="{{ url_for('main.index') }}#pricing" class="nav-link" @click="mobileOpen = false">Products</a>
         <a href="{{ url_for('main.feedback') }}" class="nav-link" @click="mobileOpen = false">Reviews</a>
+        <a href="{{ url_for('main.faq') }}" class="nav-link" @click="mobileOpen = false">FAQ</a>
+        <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="nav-link" @click="mobileOpen = false">Discord</a>
         {% if current_user.is_authenticated %}
           <a href="{{ url_for('main.my_keys') }}" class="nav-link" @click="mobileOpen = false">My Keys</a>
           {% if current_user.is_admin %}
@@ -74,7 +72,7 @@
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="flash-container">
+        <div class="flash-container" role="alert">
           {% for category, message in messages %}
             <div class="flash-message flash-{{ category }}">{{ message }}</div>
           {% endfor %}
@@ -86,12 +84,14 @@
 
     <footer class="footer">
       <div class="container footer-inner">
-        <span class="footer-left">&copy; BEAZT CHEATS 2026</span>
-        <div class="footer-links">
+        <span class="footer-left">&copy; BeaZt 2026</span>
+        <nav class="footer-links" aria-label="Footer navigation">
           <a href="{{ url_for('main.terms') }}">Terms</a>
+          <a href="{{ url_for('main.privacy') }}">Privacy</a>
+          <a href="{{ url_for('main.faq') }}">FAQ</a>
           <a href="{{ url_for('main.feedback') }}">Reviews</a>
           <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer">Discord</a>
-        </div>
+        </nav>
       </div>
     </footer>
   </div>

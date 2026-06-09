@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}BeaZt - Support FAQ{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="page-header reveal">
+      <span class="section-eyebrow">Support Center</span>
+      <h1 class="t-h1">Frequently Asked Questions</h1>
+      <p class="text-muted">Find answers to common questions about our performance suite.</p>
+    </div>
+
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>How does the Performance Suite work?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>Our Performance Suite is an external tool that provides visual overlays and precision assistance for competitive gaming. It operates outside the game process using read-only memory access — no files are modified, nothing is injected. You receive a license key after purchase, download the loader, and launch before your game session.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Which game is supported?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>We currently offer our Performance Suite for Rust. Additional titles may be added in the future — join our Discord for announcements.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>How do I install and set up?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>After purchase, you'll receive your license key instantly. Download the loader from your dashboard, enter your key, and launch. Detailed setup instructions are provided via Discord. The process takes under 2 minutes.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>What payment methods do you accept?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>We accept all major credit and debit cards through Stripe — including Visa, Mastercard, and American Express. Your payment information is encrypted and we never store your card details on our servers.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>How quickly do I receive my key?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>License keys are delivered instantly after payment confirmation — typically under 15 seconds. You can find your active keys on your <a href="{{ url_for('main.my_keys') if current_user.is_authenticated else url_for('auth.login') }}">My Keys dashboard</a>.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Can I switch between devices?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes. Each license allows a limited number of device transfers. Contact support via Discord for assistance with device changes.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>How are updates handled?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>Updates are released within hours of every game patch. You'll receive a notification via Discord when a new version is available. Simply download the updated loader from your dashboard and continue playing.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>What if the product is down for maintenance?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>During scheduled maintenance or updates, your access time is preserved — no time is lost. You are compensated for any downtime. Join our Discord for real-time status updates.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>What is your refund policy?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>Due to the digital nature of our products, all sales are final once a license key has been generated. We encourage you to review our features and contact us on Discord with any questions before purchasing.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>How do I contact support?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-answer">
+          <p>The fastest way to reach us is via our Discord server. Our support team is available 24/7 to assist with setup, troubleshooting, and any questions you may have.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

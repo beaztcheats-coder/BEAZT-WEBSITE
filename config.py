@@ -24,7 +24,10 @@ class Config:
     STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
     STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
     SITE_URL = os.getenv("SITE_URL", "http://localhost:5000")
-    DISCORD_INVITE = os.getenv("DISCORD_INVITE", "https://discord.gg/beazt")
+    DISCORD_INVITE = os.getenv("DISCORD_INVITE", "https://discord.gg/R75TJZSUbU")
+    CHAIRFBI_API_TOKEN = os.getenv("CHAIRFBI_API_TOKEN", "")
+    CHAIRFBI_API_BASE = os.getenv("CHAIRFBI_API_BASE", "https://access.chairfbi.se")
+    CHAIRFBI_RUST_CHEAT_ID = os.getenv("CHAIRFBI_RUST_CHEAT_ID", "")
 
 
 def get_stripe_config():
@@ -56,3 +59,22 @@ def _db_or_env(key, env_default):
     except Exception:
         pass
     return env_default
+
+
+def get_chairfbi_config():
+    from models import Setting
+
+    def _lookup(key, default):
+        try:
+            val = Setting.get(key)
+            if val:
+                return val
+        except Exception:
+            pass
+        return default
+
+    return {
+        "api_token": _lookup("chairfbi_api_token", Config.CHAIRFBI_API_TOKEN),
+        "api_base": _lookup("chairfbi_api_base", Config.CHAIRFBI_API_BASE),
+        "rust_cheat_id": _lookup("chairfbi_rust_cheat_id", Config.CHAIRFBI_RUST_CHEAT_ID),
+    }

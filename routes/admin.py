@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import get_stripe_config
+from config import get_stripe_config, get_chairfbi_config
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -220,6 +220,29 @@ def orders():
     return render_template("admin/orders.html", orders=orders_list, status_filter=status_filter)
 
 
+@admin_bp.route("/settings/chairfbi-test", methods=["POST"])
+@admin_required
+def test_chairfbi():
+    from utils.chairfbi import ChairFBI
+
+    token = request.form.get("chairfbi_api_token", "").strip()
+    base_url = request.form.get("chairfbi_api_base", "").strip()
+
+    if not token:
+        flash("Please enter an API token first.", "error")
+        return redirect(url_for("admin.settings"))
+
+    cf = ChairFBI(api_token=token, base_url=base_url or None)
+    success, result = cf.test_connection()
+
+    if success:
+        flash("ChairFBI connection successful.", "success")
+    else:
+        flash(f"ChairFBI connection failed: {result}", "error")
+
+    return redirect(url_for("admin.settings"))
+
+
 @admin_bp.route("/settings", methods=["GET", "POST"])
 @admin_required
 def settings():
@@ -229,6 +252,9 @@ def settings():
             "stripe_publishable_key": "Stripe Publishable Key",
             "stripe_webhook_secret": "Stripe Webhook Secret",
             "site_url": "Site URL",
+            "chairfbi_api_token": "ChairFBI API Token",
+            "chairfbi_api_base": "ChairFBI API Base URL",
+            "chairfbi_rust_cheat_id": "ChairFBI Rust Cheat ID",
         }
         for key, label in fields.items():
             val = request.form.get(key, "").strip()
@@ -238,8 +264,12 @@ def settings():
         return redirect(url_for("admin.settings"))
 
     cfg = get_stripe_config()
+    cf_cfg = get_chairfbi_config()
     return render_template("admin/settings.html",
         stripe_secret=cfg["secret_key"],
         stripe_publishable=cfg["publishable_key"],
         stripe_webhook=cfg["webhook_secret"],
-        site_url=cfg["site_url"])
+        site_url=cfg["site_url"],
+        chairfbi_api_token=cf_cfg["api_token"],
+        chairfbi_api_base=cf_cfg["api_base"],
+        chairfbi_rust_cheat_id=cf_cfg["rust_cheat_id"])
