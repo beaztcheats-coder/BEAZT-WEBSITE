@@ -1,113 +1,113 @@
 {% extends "base.html" %}
-{% block title %}BeaZt - Support FAQ{% endblock %}
+{% block title %}BEAZT - Support FAQ{% endblock %}
 
 {% block content %}
 <section class="page-section">
   <div class="container">
     <div class="page-header reveal">
       <span class="section-eyebrow">Support Center</span>
-      <h1 class="t-h1">Frequently Asked Questions</h1>
-      <p class="text-muted">Find answers to common questions about our performance suite.</p>
+      <h1 class="t-h1">Quick answers</h1>
+      <p class="text-muted">Everything you need to boot BEAZT fast.</p>
     </div>
 
     <div class="faq-list reveal">
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>How does the Performance Suite work?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>How does BEAZT run?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>Our Performance Suite is an external tool that provides visual overlays and precision assistance for competitive gaming. It operates outside the game process using read-only memory access — no files are modified, nothing is injected. You receive a license key after purchase, download the loader, and launch before your game session.</p>
+          <p>BEAZT is a read-only external stack. Launch the loader, drop your key, and start Rust — nothing injects or patches game files.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>Which game is supported?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>Which games are live?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>We currently offer our Performance Suite for Rust. Additional titles may be added in the future — join our Discord for announcements.</p>
+          <p>Right now the stack targets Rust. We announce new titles and betas inside Discord first.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>How do I install and set up?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>How do I install?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>After purchase, you'll receive your license key instantly. Download the loader from your dashboard, enter your key, and launch. Detailed setup instructions are provided via Discord. The process takes under 2 minutes.</p>
+          <p>Grab the loader from your dashboard, paste the key, and press launch. Setup averages under two minutes with Discord walkthroughs.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>What payment methods do you accept?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>What payments work?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>We accept all major credit and debit cards through Stripe — including Visa, Mastercard, and American Express. Your payment information is encrypted and we never store your card details on our servers.</p>
+          <p>Stripe handles every card — Visa, Mastercard, Amex — with full encryption. We never see or store your card data.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>How quickly do I receive my key?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>When do keys arrive?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>License keys are delivered instantly after payment confirmation — typically under 15 seconds. You can find your active keys on your <a href="{{ url_for('main.my_keys') if current_user.is_authenticated else url_for('auth.login') }}">My Keys dashboard</a>.</p>
+          <p>Keys hit your dashboard in under 15 seconds after payment. Track them anytime on the <a href="{{ url_for('main.my_keys') if current_user.is_authenticated else url_for('auth.login') }}">My Keys</a> page.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>Can I switch between devices?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>Can I move devices?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>Yes. Each license allows a limited number of device transfers. Contact support via Discord for assistance with device changes.</p>
+          <p>Yes. Message support on Discord to reset HWID or move your license — transfers are included.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>How are updates handled?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>How fast are updates?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>Updates are released within hours of every game patch. You'll receive a notification via Discord when a new version is available. Simply download the updated loader from your dashboard and continue playing.</p>
+          <p>Patches drop within hours. Discord sends the alert and you pull the fresh loader from your dashboard.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>What if the product is down for maintenance?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>What if there's downtime?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>During scheduled maintenance or updates, your access time is preserved — no time is lost. You are compensated for any downtime. Join our Discord for real-time status updates.</p>
+          <p>Maintenance time never burns your license. We pause timers and post live status threads in Discord.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>What is your refund policy?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>Do you refund?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>Due to the digital nature of our products, all sales are final once a license key has been generated. We encourage you to review our features and contact us on Discord with any questions before purchasing.</p>
+          <p>Keys are digital goods, so sales are final once generated. DM the team before purchasing if you need clarity.</p>
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-question" aria-expanded="false">
-          <span>How do I contact support?</span>
-          <span class="material-symbols-outlined faq-icon">expand_more</span>
+          <span>How do I reach support?</span>
+          <span class="icon icon-sm" data-lucide="chevron-down"></span>
         </button>
         <div class="faq-answer">
-          <p>The fastest way to reach us is via our Discord server. Our support team is available 24/7 to assist with setup, troubleshooting, and any questions you may have.</p>
+          <p>Hop in Discord and create a ticket. Operators staff the channel around the clock for setup, HWID, and legit tuning.</p>
         </div>
       </div>
     </div>

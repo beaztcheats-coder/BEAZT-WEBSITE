@@ -7,7 +7,7 @@
 
 {% if chairfbi_error %}
 <div class="cf-alert cf-alert-error">
-  <span class="material-symbols-outlined">error</span>
+  <span class="icon icon-sm" data-lucide="triangle-alert"></span>
   {{ chairfbi_error }}
 </div>
 {% else %}
@@ -39,13 +39,13 @@
 
 {% if balance is not none and balance|float < 20 %}
 <div class="cf-alert cf-alert-warn">
-  <span class="material-symbols-outlined">warning</span>
+  <span class="icon icon-sm" data-lucide="alert-triangle"></span>
   Balance is low (&euro;{{ "%.2f"|format(balance|float) }}). Top up via ChairFBI panel to keep key creation working.
 </div>
 {% endif %}
 {% if balance_error %}
 <div class="cf-alert cf-alert-error">
-  <span class="material-symbols-outlined">error</span>
+  <span class="icon icon-sm" data-lucide="triangle-alert"></span>
   Could not fetch balance: {{ balance_error }}
 </div>
 {% endif %}

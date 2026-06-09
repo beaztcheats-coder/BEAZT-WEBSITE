@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#060C24">
-  <meta name="description" content="BEAZT PRIVATE CHEATS - Private premium PC cheats. External legit configuration with instant key delivery.">
-  <meta property="og:title" content="BEAZT PRIVATE CHEATS - Premium PC Cheats">
-  <meta property="og:description" content="External legit PC cheats. Full feature set. Instant key delivery.">
+  <meta name="description" content="BEAZT Command Stack — legit Rust external with instant keys and neon ops experience.">
+  <meta property="og:title" content="BEAZT Command Stack">
+  <meta property="og:description" content="Legit Rust external overlays, human aim curves, and instant Stripe key delivery.">
   <meta property="og:type" content="website">
   <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
   <title>{% block title %}BEAZT PRIVATE CHEATS{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
   <script defer src="https://unpkg.com/scrollreveal@4/dist/scrollreveal.min.js"></script>
   <link rel="stylesheet" href="/static/css/style.css">
@@ -28,12 +27,23 @@
   <div class="main-content" id="main-content">
     <header class="navbar" x-data="{ mobileOpen: false }">
       <div class="container nav-inner">
-        <a href="/" class="nav-logo" aria-label="BeaZt home">
-          <img src="/static/images/BeaztLogo.png" alt="BeaZt" class="nav-logo-img">
+        <a href="/" class="nav-logo" aria-label="BEAZT home">
+          <img src="/static/images/BeaztLogo.png" alt="BEAZT" class="nav-logo-img">
+          <span class="nav-logo-text">
+            <span class="nav-mark">BEAZT</span>
+            <span class="nav-tag">Command Stack</span>
+          </span>
         </a>
+        <div class="nav-meta">
+          <span class="status-chip status-online" aria-live="polite">
+            <span class="icon icon-sm" data-lucide="activity" aria-hidden="true"></span>
+            Node Live
+          </span>
+        </div>
         <nav class="nav-links" aria-label="Main navigation">
-          <a href="{{ url_for('main.index') }}#pricing" class="nav-link">Products</a>
-          <a href="{{ url_for('main.feedback') }}" class="nav-link">Reviews</a>
+          <a href="{{ url_for('main.index') }}#pricing" class="nav-link">Plans</a>
+          <a href="{{ url_for('main.product_detail', slug='rust-external-private') }}" class="nav-link">Stack</a>
+          <a href="{{ url_for('main.feedback') }}" class="nav-link">Proof</a>
           <a href="{{ url_for('main.faq') }}" class="nav-link">FAQ</a>
           <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="nav-link nav-discord">Discord</a>
           {% if current_user.is_authenticated %}
@@ -47,14 +57,15 @@
             <a href="{{ url_for('auth.signup') }}" class="nav-cta">Sign Up</a>
           {% endif %}
         </nav>
-        <button type="button" class="nav-burger" @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Menu">
-          <span class="material-symbols-outlined" x-show="!mobileOpen">menu</span>
-          <span class="material-symbols-outlined" x-show="mobileOpen" x-cloak>close</span>
+        <button type="button" class="nav-burger" @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Toggle menu">
+          <span class="icon" data-lucide="menu" x-show="!mobileOpen"></span>
+          <span class="icon" data-lucide="x" x-show="mobileOpen" x-cloak></span>
         </button>
       </div>
       <div class="mobile-menu" :class="{ 'is-open': mobileOpen }" x-cloak>
-        <a href="{{ url_for('main.index') }}#pricing" class="nav-link" @click="mobileOpen = false">Products</a>
-        <a href="{{ url_for('main.feedback') }}" class="nav-link" @click="mobileOpen = false">Reviews</a>
+        <a href="{{ url_for('main.index') }}#pricing" class="nav-link" @click="mobileOpen = false">Plans</a>
+        <a href="{{ url_for('main.product_detail', slug='rust-external-private') }}" class="nav-link" @click="mobileOpen = false">Stack</a>
+        <a href="{{ url_for('main.feedback') }}" class="nav-link" @click="mobileOpen = false">Proof</a>
         <a href="{{ url_for('main.faq') }}" class="nav-link" @click="mobileOpen = false">FAQ</a>
         <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="nav-link" @click="mobileOpen = false">Discord</a>
         {% if current_user.is_authenticated %}
@@ -84,7 +95,7 @@
 
     <footer class="footer">
       <div class="container footer-inner">
-        <span class="footer-left">&copy; BeaZt 2026</span>
+        <span class="footer-left">&copy; BEAZT 2026</span>
         <nav class="footer-links" aria-label="Footer navigation">
           <a href="{{ url_for('main.terms') }}">Terms</a>
           <a href="{{ url_for('main.privacy') }}">Privacy</a>
@@ -96,6 +107,7 @@
     </footer>
   </div>
 
+  <script defer src="https://unpkg.com/lucide@latest"></script>
   <script src="/static/js/script.js"></script>
   {% block scripts %}{% endblock %}
 </body>

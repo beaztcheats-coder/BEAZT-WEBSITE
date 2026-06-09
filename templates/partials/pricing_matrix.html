@@ -12,10 +12,10 @@
 {% endif %}
 
 <div class="trust-badges reveal" style="margin-bottom:1.2rem">
-  <div class="trust-badge"><span class="material-symbols-outlined">verified_user</span> Stripe Verified</div>
-  <div class="trust-badge"><span class="material-symbols-outlined">lock</span> SSL Encrypted</div>
-  <div class="trust-badge"><span class="material-symbols-outlined">bolt</span> Instant Delivery</div>
-  <div class="trust-badge"><span class="material-symbols-outlined">forum</span> Discord Support</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="shield-check"></span> Stripe verified</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="lock"></span> SSL encrypted</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="zap"></span> Instant delivery</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="headset"></span> Discord desk</div>
 </div>
 
 <div class="pricing-section pricing-shell">
@@ -29,16 +29,16 @@
           {{ cheat_status }}
         </span>
         {% endif %}
-        <p class="plan-subtitle">Built for legit-focused playstyle. No rage-style defaults. All plans include the same full feature set and only duration changes.</p>
+        <p class="plan-subtitle">Legit presets, ESP layers, debug cam. Same toolkit across every tier.</p>
       </div>
 
       <div class="feature-panel reveal">
         <div class="feature-story-grid">
           <article class="feature-story-card">
-            <span class="material-symbols-outlined feature-story-icon">radar</span>
+            <span class="icon feature-story-icon" data-lucide="radar"></span>
             <div>
-              <h3>Legit ESP Stack</h3>
-              <p>Layered bones, distance bands, and occlusion cues built for stream-safe capture. Toggle only the intel you need while keeping screens clean.</p>
+              <h3>Legit ESP stack</h3>
+              <p>Layered bones, distance fades, and streamer-safe overlays with two-tap filters.</p>
               <ul class="feature-points">
                 <li>Player / sleeper / vehicle filters</li>
                 <li>Range culling + smart fade</li>
@@ -46,10 +46,10 @@
             </div>
           </article>
           <article class="feature-story-card">
-            <span class="material-symbols-outlined feature-story-icon">task_alt</span>
+            <span class="icon feature-story-icon" data-lucide="badge-check"></span>
             <div>
-              <h3>Aim Assistance</h3>
-              <p>Humanized curve profiles with velocity-aware smoothing. Built to feel controller-clean with legit recoil management presets.</p>
+              <h3>Aim assistance</h3>
+              <p>Velocity-aware smoothing + recoil presets tuned to stay human in POV reviews.</p>
               <ul class="feature-points">
                 <li>Per-weapon configs stored in cloud</li>
                 <li>Instant swap via radial hotkeys</li>
@@ -57,10 +57,10 @@
             </div>
           </article>
           <article class="feature-story-card">
-            <span class="material-symbols-outlined feature-story-icon">shield</span>
+            <span class="icon feature-story-icon" data-lucide="shield"></span>
             <div>
               <h3>Safety & Delivery</h3>
-              <p>In-house loader, HWID resets, and Discord verification on every ticket. Status pings keep you informed before you launch.</p>
+              <p>In-house loader, HWID resets, and Discord status pings before every launch.</p>
               <ul class="feature-points">
                 <li>Stripe + crypto key vending</li>
                 <li>Auto-refresh keys if node blips</li>
@@ -68,10 +68,10 @@
             </div>
           </article>
           <article class="feature-story-card">
-            <span class="material-symbols-outlined feature-story-icon">stadia_controller</span>
+            <span class="icon feature-story-icon" data-lucide="gamepad-2"></span>
             <div>
-              <h3>Utility Suite</h3>
-              <p>Radar, compass lines, loot priority, and cinematic debug camera for creators. All optimized for < 3% CPU overhead.</p>
+              <h3>Utility suite</h3>
+              <p>Radar, compass lines, loot tiers, and cinematic debug cam under 3% CPU.</p>
               <ul class="feature-points">
                 <li>Per-monitor calibration stored</li>
                 <li>Night mode + streamer cloak</li>
@@ -83,7 +83,7 @@
           <div class="feature-panel-grid">
             {% for feature in product_features['items'] %}
               <div class="feature-panel-item">
-                <span class="material-symbols-outlined">check_circle</span>
+                <span class="icon icon-sm" data-lucide="check-circle-2"></span>
                 <span>{{ feature }}</span>
               </div>
             {% endfor %}
@@ -107,6 +107,15 @@
           {% else %}
             {% set plan_style = 'plan-style-elite' %}
           {% endif %}
+          {% if tier.duration_days == 1 %}
+            {% set icon_name = 'zap' %}
+          {% elif tier.duration_days == 7 %}
+            {% set icon_name = 'code-2' %}
+          {% elif tier.duration_days == 30 %}
+            {% set icon_name = 'crown' %}
+          {% else %}
+            {% set icon_name = 'diamond' %}
+          {% endif %}
           <label class="pricing-card {{ 'is-recommended' if tier.duration_days == 30 else '' }} {{ plan_style }}" :class="{ 'is-selected': selected === '{{ tier.id }}' }" @click="selected = '{{ tier.id }}'; selectedLabel = '{{ tier.label }}'; selectedPrice = '{{ '%.0f'|format(tier.price_pounds) }}'">
             <input type="radio" name="tier_id" value="{{ tier.id }}" class="sr-only" x-model="selected" data-label="{{ tier.label }}" data-price="{{ '%.0f'|format(tier.price_pounds) }}" {% if tier.id|string == ns.default_selected_id %}checked{% endif %}>
             {% if tier.duration_days == 30 %}
@@ -116,7 +125,7 @@
             {% elif savings_pct > 0 %}
               <span class="badge badge-save">Save {{ savings_pct|round(0)|int }}%</span>
             {% endif %}
-            <span class="material-symbols-outlined pricing-icon">{% if tier.duration_days == 1 %}electric_bolt{% elif tier.duration_days == 7 %}deployed_code{% elif tier.duration_days == 30 %}workspace_premium{% else %}diamond{% endif %}</span>
+            <span class="icon pricing-icon" data-lucide="{{ icon_name }}"></span>
             <span class="duration">{{ tier.label }}</span>
             <span class="price"><span class="currency">&pound;</span>{{ "%.0f"|format(tier.price_pounds) }}</span>
             <div class="plan-metrics">
@@ -135,12 +144,12 @@
       </div>
 
       <div class="rust-stack reveal">
-        <div class="include-item"><span class="material-symbols-outlined">memory</span> Same full feature set on every plan</div>
-        <div class="include-item"><span class="material-symbols-outlined">schedule</span> Duration is the only difference</div>
-        <div class="include-item"><span class="material-symbols-outlined">shield_lock</span> Legit-focused presets, no rage-style defaults</div>
-        <div class="include-item"><span class="material-symbols-outlined">update</span> Frequent maintenance updates</div>
-        <div class="include-item"><span class="material-symbols-outlined">vpn_key</span> Instant key activation</div>
-        <div class="include-item"><span class="material-symbols-outlined">groups</span> Private Discord support</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="cpu"></span> Same feature set every tier</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="clock-8"></span> Duration is the only change</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="shield-lock"></span> Legit presets, no rage toggles</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="history"></span> Frequent maintenance updates</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="key-round"></span> Instant key activation</div>
+        <div class="include-item"><span class="icon icon-sm" data-lucide="users"></span> Private Discord support</div>
       </div>
 
       <div class="pricing-cta reveal">
@@ -148,28 +157,28 @@
           <p class="plan-summary" x-show="selectedLabel" x-text="'Selected: ' + selectedLabel + ' - GBP ' + selectedPrice"></p>
           {% if current_user.is_authenticated %}
             <button type="submit" class="btn btn-primary btn-lg btn-full" :disabled="!selected">
-              <span class="material-symbols-outlined">shopping_cart</span>
-              Activate {{ product_features['label'] if product_features and product_features['label'] else product.name }} Plan
+              <span class="icon" data-lucide="shopping-cart"></span>
+              Activate {{ product_features['label'] if product_features and product_features['label'] else product.name }}
             </button>
           {% else %}
             <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg btn-full">
-              <span class="material-symbols-outlined">person_add</span>
-              Create Account and Continue
+              <span class="icon" data-lucide="user-plus"></span>
+              Create account to continue
             </a>
           {% endif %}
-          <p class="checkout-note"><span class="material-symbols-outlined">lock</span> Secured by Stripe and key delivered instantly after payment</p>
+          <p class="checkout-note"><span class="icon icon-sm" data-lucide="lock"></span> Stripe secured · instant key drop</p>
           <p class="risk-note">No tool can guarantee zero enforcement risk. Legit setup discipline and responsible use matter.</p>
           <div class="trust-strip">
-            <span class="trust-strip-item"><span class="material-symbols-outlined">credit_card</span> Cards accepted</span>
-            <span class="trust-strip-item"><span class="material-symbols-outlined">timer</span> Activation in seconds</span>
-            <span class="trust-strip-item"><span class="material-symbols-outlined">support_agent</span> Guided legit setup in Discord</span>
+            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="credit-card"></span> Cards accepted</span>
+            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="timer"></span> Activation in seconds</span>
+            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="headset"></span> Discord legit setup</span>
           </div>
         </div>
       </div>
     </form>
   {% else %}
     <div class="empty-state reveal">
-      <span class="material-symbols-outlined empty-icon">inventory_2</span>
+      <span class="icon empty-icon" data-lucide="box"></span>
       <h2>Plans Coming Soon</h2>
       <p>Pricing is being configured. Check back shortly.</p>
     </div>

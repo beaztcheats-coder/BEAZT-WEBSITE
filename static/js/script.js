@@ -32,7 +32,7 @@
     var rafId = 0;
     var streams = [];
     var particles = [];
-    var glyphs = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/=+-*";
+    var glyphs = "BEAZT01<>#/";
 
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -67,7 +67,7 @@
       for (var i = 0; i < streams.length; i += 1) {
         var s = streams[i];
         var text = glyphs[Math.floor(Math.random() * glyphs.length)];
-        ctx.fillStyle = "rgba(118,171,255," + s.alpha + ")";
+        ctx.fillStyle = "rgba(124,58,237," + s.alpha + ")";
         ctx.fillText(text, s.x, s.y);
         s.y += s.speed;
         if (s.y > height + 20) {
@@ -89,13 +89,13 @@
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(137,190,255," + p.a + ")";
+        ctx.fillStyle = "rgba(54,240,255," + p.a + ")";
         ctx.fill();
       }
     }
 
     function frame() {
-      ctx.fillStyle = "rgba(3,7,24,0.24)";
+      ctx.fillStyle = "rgba(3,5,16,0.24)";
       ctx.fillRect(0, 0, width, height);
       drawRain();
       drawParticles();
@@ -120,12 +120,12 @@
       return;
     }
     ScrollReveal().reveal(".reveal", {
-      distance: "28px",
+      distance: "36px",
       origin: "bottom",
       opacity: 0,
-      duration: 680,
-      easing: "cubic-bezier(0.17, 0.84, 0.44, 1)",
-      interval: 55,
+      duration: 760,
+      easing: "cubic-bezier(0.22, 0.68, 0.27, 1)",
+      interval: 80,
       cleanup: true,
     });
   }
@@ -154,6 +154,35 @@
           node.innerHTML = target + "<br>" + remainder;
         }
       }, 44);
+    });
+  }
+
+  function setupHudTilt() {
+    if (reducedMotion) {
+      return;
+    }
+    var panel = document.querySelector(".beazt-intro");
+    if (!panel) {
+      return;
+    }
+    var bounds;
+    function updateBounds() {
+      bounds = panel.getBoundingClientRect();
+    }
+    updateBounds();
+    window.addEventListener("resize", updateBounds);
+    panel.addEventListener("mousemove", function (event) {
+      if (!bounds) {
+        return;
+      }
+      var percentX = (event.clientX - bounds.left) / bounds.width - 0.5;
+      var percentY = (event.clientY - bounds.top) / bounds.height - 0.5;
+      var rotateX = percentY * -6;
+      var rotateY = percentX * 6;
+      panel.style.transform = "perspective(900px) rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
+    });
+    panel.addEventListener("mouseleave", function () {
+      panel.style.transform = "";
     });
   }
 
@@ -188,54 +217,22 @@
     });
   }
 
-  function setupCounter() {
-    var nodes = document.querySelectorAll(".stat-value");
-    if (!nodes.length || typeof IntersectionObserver === "undefined" || reducedMotion) {
-      return;
+  function hydrateIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      try {
+        window.lucide.createIcons();
+      } catch (error) {
+        console.error("Lucide render failed", error);
+      }
     }
-
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) {
-          return;
-        }
-
-        var el = entry.target;
-        var text = el.textContent.trim();
-        var match = text.match(/\d+/);
-        if (!match) {
-          observer.unobserve(el);
-          return;
-        }
-
-        var target = parseInt(match[0], 10);
-        var prefix = text.slice(0, match.index);
-        var suffix = text.slice(match.index + match[0].length);
-        var value = 0;
-        var steps = 32;
-        var increment = target / steps;
-        var timer = window.setInterval(function () {
-          value += increment;
-          if (value >= target) {
-            el.textContent = prefix + target + suffix;
-            window.clearInterval(timer);
-          } else {
-            el.textContent = prefix + Math.floor(value) + suffix;
-          }
-        }, 28);
-
-        observer.unobserve(el);
-      });
-    }, { threshold: 0.4 });
-
-    nodes.forEach(function (el) { observer.observe(el); });
   }
 
   setupBeaztIntro();
   setupCanvas();
   setupReveal();
   setupTypewriter();
+  setupHudTilt();
   setupFaqAccordion();
   setupFlashDismiss();
-  setupCounter();
+  hydrateIcons();
 })();

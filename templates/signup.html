@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BeaZt - Create Operator{% endblock %}
+{% block title %}BEAZT - Create Operator{% endblock %}
 
 {% block content %}
 <section class="auth-section">
@@ -12,23 +12,23 @@
       </div>
       <form method="POST" class="auth-form">
         <div class="form-group">
-          <label for="username"><span class="material-symbols-outlined">person</span> Username</label>
+          <label for="username"><span class="icon icon-sm" data-lucide="user"></span> Username</label>
           <input type="text" id="username" name="username" required autocomplete="username" placeholder="choose_username" minlength="3">
         </div>
         <div class="form-group">
-          <label for="email"><span class="material-symbols-outlined">email</span> Email</label>
+          <label for="email"><span class="icon icon-sm" data-lucide="mail"></span> Email</label>
           <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com">
         </div>
         <div class="form-group">
-          <label for="password"><span class="material-symbols-outlined">lock</span> Password</label>
+          <label for="password"><span class="icon icon-sm" data-lucide="lock"></span> Password</label>
           <input type="password" id="password" name="password" required autocomplete="new-password" placeholder="min 8 characters" minlength="8">
         </div>
         <div class="form-group">
-          <label for="confirm_password"><span class="material-symbols-outlined">lock_reset</span> Confirm Password</label>
+          <label for="confirm_password"><span class="icon icon-sm" data-lucide="unlock"></span> Confirm Password</label>
           <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" placeholder="re-enter password">
         </div>
         <button type="submit" class="btn btn-primary btn-lg btn-full">
-          <span class="material-symbols-outlined">person_add</span> Create Account
+          <span class="icon" data-lucide="user-plus"></span> Create account
         </button>
       </form>
       <div class="auth-footer">

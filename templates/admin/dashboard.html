@@ -2,7 +2,7 @@
 {% block admin_content %}
 <div class="page-header-admin">
   <h1>Dashboard</h1>
-  <p>Overview of your BeaZt operation.</p>
+  <p>Overview of your BEAZT operation.</p>
 </div>
 
 <div class="stat-grid">
@@ -44,13 +44,13 @@
 
 {% if cf_balance is not none and cf_balance|float < 20 %}
 <div class="cf-alert cf-alert-warn">
-  <span class="material-symbols-outlined">warning</span>
+  <span class="icon icon-sm" data-lucide="alert-triangle"></span>
   ChairFBI balance is low (&euro;{{ "%.2f"|format(cf_balance|float) }}). Top up soon to avoid checkout disruptions.
 </div>
 {% endif %}
 {% if cf_balance_error %}
 <div class="cf-alert cf-alert-error">
-  <span class="material-symbols-outlined">error</span>
+  <span class="icon icon-sm" data-lucide="triangle-alert"></span>
   Could not fetch ChairFBI balance: {{ cf_balance_error }}
 </div>
 {% endif %}

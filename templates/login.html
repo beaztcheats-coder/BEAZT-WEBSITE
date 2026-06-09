@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BeaZt - Operator Login{% endblock %}
+{% block title %}BEAZT - Operator Login{% endblock %}
 
 {% block content %}
 <section class="auth-section">
@@ -12,18 +12,18 @@
       </div>
       <form method="POST" class="auth-form">
         <div class="form-group">
-          <label for="username"><span class="material-symbols-outlined">person</span> Username</label>
+          <label for="username"><span class="icon icon-sm" data-lucide="user"></span> Username</label>
           <input type="text" id="username" name="username" required autocomplete="username" placeholder="your_username">
         </div>
         <div class="form-group">
-          <label for="password"><span class="material-symbols-outlined">lock</span> Password</label>
+          <label for="password"><span class="icon icon-sm" data-lucide="lock"></span> Password</label>
           <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
         </div>
         <div class="form-group form-row">
           <label class="checkbox-label"><input type="checkbox" name="remember"> Remember me</label>
         </div>
         <button type="submit" class="btn btn-primary btn-lg btn-full">
-          <span class="material-symbols-outlined">login</span> Sign In
+          <span class="icon" data-lucide="log-in"></span> Sign in
         </button>
       </form>
       <div class="auth-footer">

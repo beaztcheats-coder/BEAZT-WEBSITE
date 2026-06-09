@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}My Keys | BeaZt{% endblock %}
+{% block title %}My Keys | BEAZT{% endblock %}
 
 {% block content %}
 <section class="page-section">
@@ -14,9 +14,9 @@
         {% for key in keys %}
           <div class="key-card reveal">
             <div class="key-header">
-              <span class="material-symbols-outlined key-icon">vpn_key</span>
+              <span class="icon key-icon" data-lucide="key-round"></span>
               <div>
-                <strong>Performance Suite</strong>
+                <strong>BEAZT Stack</strong>
                 <span class="key-created">{{ key.created_at.strftime('%d %b %Y') }}</span>
               </div>
               <span class="key-status {{ 'status-active' if key.is_active else 'status-expired' }}">
@@ -49,15 +49,15 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state reveal">
-        <span class="material-symbols-outlined empty-icon">vpn_key_off</span>
-        <h2>No Keys Yet</h2>
-        <p>Purchase a license to receive your key instantly after payment.</p>
-        <a href="{{ url_for('main.index') }}#pricing" class="btn btn-primary btn-lg">
-          <span class="material-symbols-outlined">shopping_cart</span>
-          Browse Plans
-        </a>
-      </div>
+        <div class="empty-state reveal">
+          <span class="icon empty-icon" data-lucide="key-round"></span>
+          <h2>No Keys Yet</h2>
+          <p>Purchase a license to receive your key instantly after payment.</p>
+          <a href="{{ url_for('main.index') }}#pricing" class="btn btn-primary btn-lg">
+            <span class="icon" data-lucide="shopping-cart"></span>
+            Browse plans
+          </a>
+        </div>
     {% endif %}
   </div>
 </section>

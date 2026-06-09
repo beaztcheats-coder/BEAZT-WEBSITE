@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BeaZt - Access Terminal{% endblock %}
+{% block title %}BEAZT Command Stack{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -33,27 +33,27 @@
 
     <div class="hero-copy">
       <div class="hero-pill">
-        <span class="dot"></span> LIVE NODE ONLINE :: MEMBER ACCESS
+        <span class="dot"></span> NODE LIVE // PRIVATE ACCESS
       </div>
-      <h1 class="t-display" data-typewriter="BEAZT - PRIVATE PREMIUM PC CHEATS">
-        External. Legit-Focused.<br>Instant Delivery.
+      <h1 class="t-display" data-typewriter="BEAZT COMMAND STACK">
+        External control.<br>Legit delivery.
       </h1>
-      <p class="subhead">Encrypted storefront, instant key provisioning, and stable external architecture. Built for high-focus players who want speed and clarity.</p>
+      <p class="subhead">Encrypted storefront, BEAZT stack telemetry, and instant keys engineered for zero-delay sessions.</p>
 
       <div class="hero-cta">
         <a href="#pricing" class="btn btn-primary btn-lg">
-          <span class="material-symbols-outlined">bolt</span>
-          Open Access Plans
+          <span class="icon" data-lucide="zap"></span>
+          Deploy Access
         </a>
         {% if current_user.is_authenticated %}
           <a href="{{ url_for('main.my_keys') }}" class="btn btn-ghost btn-lg">
-            <span class="material-symbols-outlined">vpn_key</span>
+            <span class="icon" data-lucide="key-round"></span>
             My Keys
           </a>
         {% else %}
           <a href="{{ url_for('auth.signup') }}" class="btn btn-ghost btn-lg">
-            <span class="material-symbols-outlined">person_add</span>
-            Create Operator Account
+            <span class="icon" data-lucide="user-plus"></span>
+            Join BEAZT
           </a>
         {% endif %}
       </div>
@@ -66,12 +66,12 @@
         </div>
         <div class="terminal-grid">
           <div class="terminal-item">
-            <span class="terminal-label">Build</span>
-            <span class="terminal-value">Helios v5.14</span>
+            <span class="terminal-label">Stack</span>
+            <span class="terminal-value">BEAZT v9.5</span>
           </div>
           <div class="terminal-item">
             <span class="terminal-label">Status</span>
-            <span class="terminal-value status-online">Online 99.9%</span>
+            <span class="terminal-value status-online">99.9% Online</span>
           </div>
           <div class="terminal-item">
             <span class="terminal-label">Delivery</span>
@@ -85,26 +85,26 @@
       </div>
 
       <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="stat-value">24/7</div>
-          <div class="stat-label">Live Support</div>
+        <div class="stat-chip">
+          <span class="icon icon-sm" data-lucide="headset"></span>
+          24/7 Discord desk
         </div>
-        <div class="hero-stat">
-          <div class="stat-value">&lt;15s</div>
-          <div class="stat-label">Average Delivery</div>
+        <div class="stat-chip">
+          <span class="icon icon-sm" data-lucide="timer"></span>
+          &lt;15s key drop
         </div>
-        <div class="hero-stat">
-          <div class="stat-value">99.9%</div>
-          <div class="stat-label">Service Uptime</div>
+        <div class="stat-chip">
+          <span class="icon icon-sm" data-lucide="activity"></span>
+          99.9% uptime
         </div>
-        <div class="hero-stat">
-          <div class="stat-value">Community</div>
-          <div class="stat-label">Private Discord</div>
+        <div class="stat-chip">
+          <span class="icon icon-sm" data-lucide="shield"></span>
+          Legit presets only
         </div>
       </div>
 
       <a href="#pricing" class="scroll-cue" aria-label="Scroll to pricing">
-        <span class="material-symbols-outlined">south</span>
+        <span class="icon" data-lucide="arrow-down"></span>
         Scroll
       </a>
     </div>
@@ -115,23 +115,23 @@
   <div class="container">
     <div class="page-header reveal">
       <span class="section-eyebrow">Protocol</span>
-      <h2 class="t-h1">Get Live in 3 Steps</h2>
+      <h2 class="t-h1">Boot in 3 steps</h2>
     </div>
     <div class="steps-grid reveal">
       <div class="step-card">
         <div class="step-num">1</div>
-        <h3>Select Duration</h3>
-        <p>Choose your license window from daily sessions to yearly access.</p>
+        <h3>Select duration</h3>
+        <p>Choose a day, week, or month. Same toolkit every tier.</p>
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
-        <h3>Complete Checkout</h3>
-        <p>Pay through Stripe with encrypted processing and verified billing flow.</p>
+        <h3>Stripe checkout</h3>
+        <p>Encrypted Stripe billing with 3DS and instant confirmation.</p>
       </div>
       <div class="step-card">
         <div class="step-num">3</div>
-        <h3>Receive Key</h3>
-        <p>Your key arrives instantly after payment so you can activate without delay.</p>
+        <h3>Instant key</h3>
+        <p>Key drops in seconds with launcher link + Discord ping.</p>
       </div>
     </div>
   </div>
@@ -140,9 +140,9 @@
 <section id="pricing" class="section section-alt" style="scroll-margin-top:5rem;">
   <div class="container">
     <div class="page-header reveal">
-      <span class="section-eyebrow">Rust External - BeaZt Legit</span>
-      <h2 class="t-h1">Choose Your Access Plan</h2>
-      <p class="text-muted">Legit-focused setup with ESP, debug camera, and controlled defaults. Same features on every plan, duration only changes.</p>
+      <span class="section-eyebrow">Rust External · BEAZT Stack</span>
+      <h2 class="t-h1">Choose your access plan</h2>
+      <p class="text-muted">Human aim curves, ESP overlays, debug cam, and status pings. Duration is the only switch.</p>
     </div>
 
     {% include "partials/pricing_matrix.html" %}
@@ -158,39 +158,39 @@
 <section class="section">
   <div class="container">
     <div class="page-header reveal">
-      <span class="section-eyebrow">System Features</span>
-      <h2 class="t-h1">Everything in the Stack</h2>
+      <span class="section-eyebrow">System specs</span>
+      <h2 class="t-h1">Everything in the stack</h2>
     </div>
     <div class="feature-grid reveal">
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">autorenew</span>
-        <h3>Continuous Updates</h3>
-        <p>Fast patch response with Discord notifications when fresh builds are published.</p>
+        <span class="icon feature-icon" data-lucide="refresh-cw"></span>
+        <h3>Rapid rebuilds</h3>
+        <p>Game patches trigger fast rebuilds and Discord alerts.</p>
       </div>
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">visibility_off</span>
-        <h3>Privacy Overlay</h3>
-        <p>Streamer-friendly render mode designed for clean capture workflows.</p>
+        <span class="icon feature-icon" data-lucide="eye-off"></span>
+        <h3>Privacy cloak</h3>
+        <p>Streamer mode masks overlays on all capture pipelines.</p>
       </div>
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">memory</span>
-        <h3>External Architecture</h3>
-        <p>Read-only architecture focused on predictable operation and low system overhead.</p>
+        <span class="icon feature-icon" data-lucide="cpu"></span>
+        <h3>External stack</h3>
+        <p>Read-only tooling keeps latency low and system safe.</p>
       </div>
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">shield_lock</span>
-        <h3>Dynamic Delivery</h3>
-        <p>License-linked distribution with regular refreshes to keep sessions consistent.</p>
+        <span class="icon feature-icon" data-lucide="shield-lock"></span>
+        <h3>Dynamic delivery</h3>
+        <p>License-bound loaders refresh often for consistency.</p>
       </div>
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">groups</span>
-        <h3>Private Community</h3>
-        <p>Capped access and active moderation inside a focused member Discord.</p>
+        <span class="icon feature-icon" data-lucide="users"></span>
+        <h3>Private cell</h3>
+        <p>Moderated Discord with live tuning and legit help.</p>
       </div>
       <div class="feature-card">
-        <span class="material-symbols-outlined feature-icon">ads_click</span>
-        <h3>Visual Toolkit</h3>
-        <p>Clear overlays and precision indicators tuned for responsive gameplay.</p>
+        <span class="icon feature-icon" data-lucide="target"></span>
+        <h3>Visual toolkit</h3>
+        <p>ESP layers and aim cues stay clear even mid-fight.</p>
       </div>
     </div>
   </div>
