@@ -12,10 +12,10 @@
 {% endif %}
 
 <div class="trust-badges reveal" style="margin-bottom:1.2rem">
-  <div class="trust-badge"><span class="icon icon-sm" data-lucide="shield-check"></span> Stripe-secured checkout</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="shield-check"></span> Stripe-secured payment</div>
   <div class="trust-badge"><span class="icon icon-sm" data-lucide="file-check-2"></span> Receipt-backed orders</div>
-  <div class="trust-badge"><span class="icon icon-sm" data-lucide="zap"></span> Automated key fulfillment</div>
-  <div class="trust-badge"><span class="icon icon-sm" data-lucide="headset"></span> Human support desk</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="zap"></span> Instant key fulfillment</div>
+  <div class="trust-badge"><span class="icon icon-sm" data-lucide="headset"></span> Live operator support</div>
 </div>
 
 <div class="pricing-region">
@@ -30,7 +30,7 @@
           {{ cheat_status }}
         </span>
         {% endif %}
-        <p class="plan-subtitle">Same features in every plan. Only time changes.</p>
+        <p class="plan-subtitle">One private stack. Choose your duration.</p>
       </div>
 
       <div class="pricing-grid reveal">
@@ -58,7 +58,7 @@
           {% else %}
             {% set icon_name = 'diamond' %}
           {% endif %}
-          <label class="pricing-card {{ 'is-recommended' if tier.duration_days == 30 else '' }} {{ plan_style }}" :class="{ 'is-selected': selected === '{{ tier.id }}' }" @click="window.location='{{ url_for('main.plan_detail', tier_id=tier.id) }}'">
+          <label class="pricing-card {{ 'is-recommended' if tier.duration_days == 30 else '' }} {{ plan_style }}" :class="{ 'is-selected': selected === '{{ tier.id }}' }">
             <input type="radio" name="tier_id" value="{{ tier.id }}" class="sr-only" x-model="selected" data-label="{{ tier.label }}" data-price="{{ '%.0f'|format(tier.price_pounds) }}" {% if tier.id|string == ns.default_selected_id %}checked{% endif %}>
             {% if tier.duration_days == 30 %}
               <span class="badge">Best Value</span>
@@ -79,7 +79,7 @@
             {% if savings_pct > 0 %}
               <span class="plan-saving">Save {{ savings_pct|round(0)|int }}%</span>
             {% else %}
-              <span class="plan-saving">Quick test tier</span>
+            <span class="plan-saving">Starter access tier</span>
             {% endif %}
           </label>
         {% endfor %}
@@ -105,17 +105,17 @@
           <div class="cta-badges">
             <span class="cta-badge"><span class="icon icon-sm" data-lucide="lock"></span>Encrypted checkout</span>
             <span class="cta-badge"><span class="icon icon-sm" data-lucide="zap"></span>Instant keys</span>
-            <span class="cta-badge"><span class="icon icon-sm" data-lucide="headset"></span>Live support</span>
+            <span class="cta-badge"><span class="icon icon-sm" data-lucide="headset"></span>Operator support</span>
           </div>
-          <p class="risk-note"><span class="icon icon-sm" data-lucide="alert-triangle"></span>Use responsibly. Risk always exists.</p>
+          <p class="risk-note"><span class="icon icon-sm" data-lucide="alert-triangle"></span>Use responsibly. No product can remove platform risk.</p>
         </div>
       </div>
     </form>
   {% else %}
     <div class="empty-state reveal">
       <span class="icon empty-icon" data-lucide="box"></span>
-      <h2>Plans Coming Soon</h2>
-      <p>Pricing is being configured. Check back shortly.</p>
+      <h2>Plans unavailable</h2>
+      <p>Pricing is being updated. Please check back shortly.</p>
     </div>
   {% endif %}
 </div>

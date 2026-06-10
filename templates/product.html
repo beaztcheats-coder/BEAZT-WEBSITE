@@ -29,7 +29,7 @@
           {% else %}
             <div class="product-gallery-empty">
               <span class="icon" data-lucide="image"></span>
-              Loader gallery coming soon
+              Preview gallery coming soon
             </div>
           {% endif %}
         </div>
@@ -47,7 +47,7 @@
         <h1 class="product-title">{{ product.name }}</h1>
 
         <p class="product-lead">
-          {{ product.description if product.description else 'Premium legit-focused external toolkit with rapid updates and private Discord support.' }}
+          {{ product.description if product.description else 'Private external toolkit with fast updates and operator-led Discord support.' }}
         </p>
 
         <div class="product-duration-pills" role="tablist" aria-label="Select package duration">
@@ -74,13 +74,13 @@
               <input type="hidden" name="tier_id" value="{{ selected_tier.id }}">
               <button type="submit" class="btn btn-primary btn-lg btn-full">
                 <span class="icon" data-lucide="shopping-cart"></span>
-                Buy {{ selected_tier.label }} Access
+                Buy {{ selected_tier.label }} Plan
               </button>
             </form>
           {% else %}
             <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg btn-full">
               <span class="icon" data-lucide="user-plus"></span>
-              Create account to continue
+              Create account to buy
             </a>
           {% endif %}
         {% endif %}
@@ -88,15 +88,15 @@
         <div class="product-trust-row">
           <span class="stack-chip"><span class="icon icon-sm" data-lucide="lock"></span> Stripe secured</span>
           <span class="stack-chip"><span class="icon icon-sm" data-lucide="timer"></span> Instant key delivery</span>
-          <span class="stack-chip"><span class="icon icon-sm" data-lucide="headset"></span> Discord setup support</span>
+          <span class="stack-chip"><span class="icon icon-sm" data-lucide="headset"></span> Live setup support</span>
         </div>
       </article>
     </div>
 
     <div class="terminal-panel reveal">
       <header class="terminal-header">
-        <span class="terminal-title">ACTIVE_PACKAGE :: OUTPUT</span>
-        <span class="terminal-badge">ACTIVE</span>
+        <span class="terminal-title">INCLUDED_FEATURES</span>
+        <span class="terminal-badge">LIVE</span>
       </header>
       <ul class="terminal-list">
         {% for feature in product_features['items'] %}
@@ -110,21 +110,21 @@
 
     <div class="terminal-panel terminal-panel--info reveal">
       <header class="terminal-header">
-        <span class="terminal-title">BUYER_CLARITY :: NOTES</span>
+        <span class="terminal-title">BUYER_NOTES</span>
         <span class="terminal-badge terminal-badge--cyan">INFO</span>
       </header>
       <ul class="terminal-list">
         <li class="terminal-line">
           <span class="terminal-prompt">#</span>
-          <span>Windows desktop with stable Rust install</span>
+          <span>Windows desktop with a stable Rust install</span>
         </li>
         <li class="terminal-line">
           <span class="terminal-prompt">#</span>
-          <span>Minutes-long onboarding with Discord setup</span>
+          <span>Fast onboarding with Discord walkthroughs</span>
         </li>
         <li class="terminal-line">
           <span class="terminal-prompt">#</span>
-          <span>Ticketed help for setup, HWID and maintenance</span>
+          <span>Ticketed help for setup, HWID, and maintenance</span>
         </li>
         <li class="terminal-line terminal-line--warn">
           <span class="terminal-prompt">!</span>
