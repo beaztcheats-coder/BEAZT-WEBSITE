@@ -30,66 +30,7 @@
           {{ cheat_status }}
         </span>
         {% endif %}
-        <p class="plan-subtitle">Premium legit stack with unified features across all tiers. Pick the duration that matches your usage rhythm.</p>
-      </div>
-
-      <div class="feature-panel reveal">
-        <div class="feature-story-grid">
-          <article class="feature-story-card">
-            <div class="feature-story-icon"><span class="icon" data-lucide="radar"></span></div>
-            <div class="feature-text">
-              <h3>Legit ESP stack</h3>
-              <p>Layered bones, streamer-safe fades, and quick filter toggles keep VODs clean.</p>
-              <div class="feature-chips">
-                <span class="chip">Player / sleeper filters</span>
-                <span class="chip">Range culling</span>
-              </div>
-            </div>
-          </article>
-          <article class="feature-story-card">
-            <div class="feature-story-icon"><span class="icon" data-lucide="target"></span></div>
-            <div class="feature-text">
-              <h3>Aim assistance</h3>
-              <p>Velocity-aware smoothing and recoil curves that stay human in POV reviews.</p>
-              <div class="feature-chips">
-                <span class="chip">Cloud configs</span>
-                <span class="chip">Instant hotkeys</span>
-              </div>
-            </div>
-          </article>
-          <article class="feature-story-card">
-            <div class="feature-story-icon"><span class="icon" data-lucide="shield-check"></span></div>
-            <div class="feature-text">
-              <h3>Safety & Delivery</h3>
-              <p>In-house loader, HWID resets, and Discord status pings before every launch.</p>
-              <div class="feature-chips">
-                <span class="chip">Stripe + crypto</span>
-                <span class="chip">Auto-refresh keys</span>
-              </div>
-            </div>
-          </article>
-          <article class="feature-story-card">
-            <div class="feature-story-icon"><span class="icon" data-lucide="layers"></span></div>
-            <div class="feature-text">
-              <h3>Utility suite</h3>
-              <p>Radar, compass lines, loot tiers, and cinematic debug cam under 3% CPU.</p>
-              <div class="feature-chips">
-                <span class="chip">Per-monitor saves</span>
-                <span class="chip">Night mode</span>
-              </div>
-            </div>
-          </article>
-        </div>
-        {% if product_features and product_features['items'] %}
-          <div class="feature-panel-grid">
-            {% for feature in product_features['items'] %}
-              <div class="feature-panel-item">
-                <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-                <span>{{ feature }}</span>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
+        <p class="plan-subtitle">Same features in every plan. Only time changes.</p>
       </div>
 
       <div class="pricing-grid reveal">
@@ -132,47 +73,16 @@
             <div class="plan-metrics">
               <span class="per">{{ "%.2f"|format(per_day) }} / day</span>
               {% if tier.duration_days >= 30 %}
-                <span class="per">{{ "%.2f"|format((tier.price_pounds / 30)) }} / month equivalent</span>
+                <span class="per">{{ "%.2f"|format((tier.price_pounds / 30)) }} / month</span>
               {% endif %}
             </div>
             {% if savings_pct > 0 %}
-              <span class="plan-saving">{{ savings_pct|round(0)|int }}% more efficient than daily access</span>
+              <span class="plan-saving">Save {{ savings_pct|round(0)|int }}%</span>
             {% else %}
-              <span class="plan-saving">Best for short evaluation sessions</span>
+              <span class="plan-saving">Quick test tier</span>
             {% endif %}
           </label>
         {% endfor %}
-      </div>
-
-      <div class="plan-highlights reveal">
-        <article class="plan-highlight">
-          <span class="icon icon-sm" data-lucide="layers"></span>
-          <div>
-            <h4>Unified toolkit</h4>
-            <p>No feature gating between plans.</p>
-          </div>
-        </article>
-        <article class="plan-highlight">
-          <span class="icon icon-sm" data-lucide="clock-8"></span>
-          <div>
-            <h4>Duration only</h4>
-            <p>Decision stays simple at checkout.</p>
-          </div>
-        </article>
-        <article class="plan-highlight">
-          <span class="icon icon-sm" data-lucide="shield"></span>
-          <div>
-            <h4>Legit presets</h4>
-            <p>Tuned for controlled usage patterns.</p>
-          </div>
-        </article>
-        <article class="plan-highlight">
-          <span class="icon icon-sm" data-lucide="headset"></span>
-          <div>
-            <h4>Live operators</h4>
-            <p>Real support for setup and account continuity.</p>
-          </div>
-        </article>
       </div>
 
       <div class="pricing-cta reveal">
@@ -184,25 +94,20 @@
           {% if current_user.is_authenticated %}
             <button type="submit" class="btn btn-primary btn-lg btn-full" :disabled="!selected">
               <span class="icon" data-lucide="shopping-cart"></span>
-              Continue to Secure Checkout
+              Checkout
             </button>
           {% else %}
             <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg btn-full">
               <span class="icon" data-lucide="user-plus"></span>
-              Create account to continue
+              Create account
             </a>
           {% endif %}
           <div class="cta-badges">
-            <span class="cta-badge"><span class="icon icon-sm" data-lucide="lock"></span>Encrypted checkout handoff</span>
-            <span class="cta-badge"><span class="icon icon-sm" data-lucide="zap"></span>Fast key issuance</span>
-            <span class="cta-badge"><span class="icon icon-sm" data-lucide="shield"></span>Ops monitored delivery</span>
+            <span class="cta-badge"><span class="icon icon-sm" data-lucide="lock"></span>Encrypted checkout</span>
+            <span class="cta-badge"><span class="icon icon-sm" data-lucide="zap"></span>Instant keys</span>
+            <span class="cta-badge"><span class="icon icon-sm" data-lucide="headset"></span>Live support</span>
           </div>
-          <p class="risk-note"><span class="icon icon-sm" data-lucide="alert-triangle"></span>All software use includes enforcement risk. Discipline, moderation, and responsible setup remain essential.</p>
-          <div class="trust-strip trust-strip-alt">
-            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="credit-card"></span> Cards accepted</span>
-            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="timer"></span> Activation in seconds</span>
-            <span class="trust-strip-item"><span class="icon icon-sm" data-lucide="headset"></span> Discord legit setup</span>
-          </div>
+          <p class="risk-note"><span class="icon icon-sm" data-lucide="alert-triangle"></span>Use responsibly. Risk always exists.</p>
         </div>
       </div>
     </form>
