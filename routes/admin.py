@@ -642,6 +642,46 @@ def chairfbi_dashboard():
     )
 
 
+@admin_bp.route("/chairfbi/import-one", methods=["POST"])
+@admin_required
+def chairfbi_import_one():
+    cheat_id = request.form.get("cheat_id", "").strip()
+    cheat_name = request.form.get("cheat_name", "").strip()
+    if not cheat_id or not cheat_name:
+        flash("Missing cheat ID or name.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    slug = re.sub(r"[^a-z0-9]+", "-", cheat_name.lower()).strip("-")
+    if not slug:
+        slug = f"cf-cheat-{cheat_id}"
+
+    existing = Product.query.filter_by(slug=slug).first()
+    if existing:
+        if not existing.chairfbi_cheat_id or existing.chairfbi_cheat_id != cheat_id:
+            existing.chairfbi_cheat_id = cheat_id
+            existing.key_source = "chairfbi"
+            db.session.commit()
+            flash(f"'{cheat_name}' was already imported — ChairFBI cheat ID updated.", "info")
+        else:
+            flash(f"'{cheat_name}' already exists as a product.", "info")
+        return redirect(url_for("admin.product_tiers", product_id=existing.id))
+
+    product = Product(
+        name=cheat_name,
+        slug=slug,
+        key_source="chairfbi",
+        chairfbi_cheat_id=cheat_id,
+        is_private=True,
+    )
+    db.session.add(product)
+    db.session.commit()
+    flash(f"'{cheat_name}' imported. Add pricing tiers to activate.", "success")
+    return redirect(url_for("admin.product_tiers", product_id=product.id))
+
+
+@admin_bp.route("/chairfbi/import-all", methods=["POST"])
+
+
 @admin_bp.route("/chairfbi/import-all", methods=["POST"])
 @admin_required
 def chairfbi_import_all():

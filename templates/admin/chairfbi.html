@@ -59,7 +59,7 @@
     </form>
   </div>
   <table class="admin-table">
-    <thead><tr><th>Cheat</th><th>Status</th><th>Local Product Match</th></tr></thead>
+    <thead><tr><th>Cheat</th><th>Status</th><th>Local Product Match</th><th></th></tr></thead>
     <tbody>
       {% for c in cheats %}
       <tr>
@@ -79,7 +79,16 @@
           {% if matched.found %}
             <a href="{{ url_for('admin.product_tiers', product_id=matched.found.id) }}">{{ matched.found.name }}</a>
           {% else %}
-            <span style="color:var(--text-muted);">Not linked — set cheat ID on product</span>
+            <span style="color:var(--text-muted);">Not linked</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if not matched.found %}
+          <form method="POST" action="{{ url_for('admin.chairfbi_import_one') }}">
+            <input type="hidden" name="cheat_id" value="{{ c.id }}">
+            <input type="hidden" name="cheat_name" value="{{ c.name if c.name else c.id }}">
+            <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add</button>
+          </form>
           {% endif %}
         </td>
       </tr>
