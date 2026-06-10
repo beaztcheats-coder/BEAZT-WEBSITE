@@ -1,364 +1,19 @@
 {% extends "base.html" %}
-{% block title %}BEAZT — Legit External Stack{% endblock %}
+{% block title %}BEAZT — Premium External{% endblock %}
 
 {% block content %}
-<!-- ═══════════ HERO ═══════════ -->
-<section class="hero">
-  <div class="container hero-inner">
-    <div class="hero-content reveal">
-      <div class="hero-badge">
-        <span class="hero-badge-dot"></span>
-        Rust External · Live
-      </div>
-      <h1 class="hero-title">
-        Undetected.<br><span>Instant.</span> Legit.
-      </h1>
-      <p class="hero-sub">
-        Humanized aim curves, cloaked ESP, and external architecture.
-        Stripe keys delivered in under 15 seconds with live Discord support.
-      </p>
-      <div class="hero-actions">
-        <a href="#pricing" class="btn btn-primary btn-lg">
-          <span class="icon" data-lucide="zap"></span>
-          Get Access
-        </a>
-        <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-lg">
-          <span class="icon" data-lucide="headset"></span>
-          Join Discord
-        </a>
-      </div>
-    </div>
-
-    <div class="hero-visual reveal">
-      <div class="hero-card" aria-hidden="true">
-        <div class="hero-card-grid"></div>
-        <img src="/static/images/hero.png" alt="BEAZT" class="hero-card-img">
-        <div class="hero-card-veil"></div>
-        <div class="hero-card-tag">
-          <span>External Loader</span>
-          <span>Kernel Safe</span>
-        </div>
-      </div>
-      <div class="hero-stats-row">
-        <div class="hero-stat">
-          <span class="hero-stat-val">2,400+</span>
-          <span class="hero-stat-label">Active Users</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-val">99.9%</span>
-          <span class="hero-stat-label">Uptime</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-val">&lt;15s</span>
-          <span class="hero-stat-label">Key Delivery</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-val">24/7</span>
-          <span class="hero-stat-label">Discord Desk</span>
-        </div>
-      </div>
-    </div>
+<section class="hero-main">
+  <div class="hero-bg" aria-hidden="true">
+    <img src="/static/images/header.png" alt="" class="hero-bg-image">
+    <div class="hero-vignette"></div>
+    <div class="eye-glow eye-glow-left"></div>
+    <div class="eye-glow eye-glow-right"></div>
   </div>
 
-  <a href="#trust" class="scroll-cue" aria-label="Scroll down">
-    <span class="icon" data-lucide="arrow-down"></span>
-    Scroll
-  </a>
-</section>
-
-<!-- ═══════════ TRUST BAR ═══════════ -->
-<section id="trust" class="trust-bar" aria-label="Key metrics">
-  <div class="container trust-bar-inner">
-    <div class="trust-bar-item">
-      <span class="trust-bar-num">2,400+</span>
-      <span class="trust-bar-label">Keys Delivered</span>
-    </div>
-    <div class="trust-bar-item">
-      <span class="trust-bar-num">99.98%</span>
-      <span class="trust-bar-label">Loader Uptime</span>
-    </div>
-    <div class="trust-bar-item">
-      <span class="trust-bar-num">42s</span>
-      <span class="trust-bar-label">Avg Ops Reply</span>
-    </div>
-    <div class="trust-bar-item">
-      <span class="trust-bar-num">Stripe</span>
-      <span class="trust-bar-label">+ Crypto</span>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ BENTO GRID ═══════════ -->
-<section class="bento-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-eyebrow">Stack Overview</span>
-      <h2 class="section-title">Everything in the toolkit</h2>
-      <p class="section-sub">Same payload regardless of tier. ESP, aim curves, debug cam, and armored delivery infrastructure.</p>
-    </div>
-
-    <div class="bento-grid reveal">
-      <!-- Large card: Loader -->
-      <article class="bento-card large bento-glow-purple">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="cpu"></span></div>
-          <h4>Stealth Loader</h4>
-          <p>Read-only external architecture with encrypted pipeline. No injection, no kernel tampering, no footprint on disk.</p>
-          <div class="bento-card-tags">
-            <span>External</span>
-            <span>Encrypted boot</span>
-            <span>Zero injection</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- ESP -->
-      <article class="bento-card bento-glow-cyan">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="radar"></span></div>
-          <h4>Legit ESP</h4>
-          <p>Layered filters with streamer-safe visibility fades and per-monitor config saves.</p>
-          <div class="bento-card-tags">
-            <span>Cloaked</span>
-            <span>Per monitor</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Aim -->
-      <article class="bento-card bento-glow-rose">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="target"></span></div>
-          <h4>Aim Curves</h4>
-          <p>Velocity-aware smoothing with cloud presets and hotkey swaps mid-session.</p>
-          <div class="bento-card-tags">
-            <span>Cloud configs</span>
-            <span>Instant swap</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Debug cam -->
-      <article class="bento-card bento-glow-purple">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="camera"></span></div>
-          <h4>Debug Camera</h4>
-          <p>Radar, compass, distance tools, and cinematic cam under 3% CPU overhead.</p>
-          <div class="bento-card-tags">
-            <span>Range culling</span>
-            <span>Night mode</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Delivery wide -->
-      <article class="bento-card wide bento-glow-cyan">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="credit-card"></span></div>
-          <h4>Armored Delivery</h4>
-          <p>Stripe 3DS and crypto checkout with encrypted key routing, receipt-backed orders, and account continuity tooling.</p>
-          <div class="bento-card-tags">
-            <span>Stripe</span>
-            <span>Crypto</span>
-            <span>Auto-refresh</span>
-            <span>HWID resets</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Support -->
-      <article class="bento-card bento-glow-rose">
-        <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon icon-lg" data-lucide="headset"></span></div>
-          <h4>Operator Desk</h4>
-          <p>Real humans on Discord for setup, HWID resets, and live status pings before every launch.</p>
-          <div class="bento-card-tags">
-            <span>24/7</span>
-            <span>Ticketed</span>
-          </div>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ HOW IT WORKS ═══════════ -->
-<section class="how-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-eyebrow">Onboarding</span>
-      <h2 class="section-title">From click to cockpit</h2>
-      <p class="section-sub">Three steps. No bloat. Every tier runs the same toolkit.</p>
-    </div>
-
-    <div class="how-track reveal">
-      <div class="how-node">
-        <span class="how-node-num">01</span>
-        <h3>Choose Duration</h3>
-        <p>Day, week, or month. The full toolkit ships with every plan — you only decide how long.</p>
-      </div>
-      <div class="how-node">
-        <span class="how-node-num">02</span>
-        <h3>Secure Checkout</h3>
-        <p>Stripe or crypto. Instant confirmation. Encrypted receipt backed to your email.</p>
-      </div>
-      <div class="how-node">
-        <span class="how-node-num">03</span>
-        <h3>Instant Access</h3>
-        <p>Key lands in your dashboard. Launcher, config, and Discord setup guide included.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ PRICING ═══════════ -->
-<section id="pricing" class="pricing-section-page" style="scroll-margin-top:5rem;">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-eyebrow">Pricing</span>
-      <h2 class="section-title">Pay for time, not features</h2>
-      <p class="section-sub">Every plan includes the full BEAZT stack. Duration is the only variable — no gate, no upsell.</p>
-    </div>
-
-    {% include "partials/pricing_matrix.html" %}
-  </div>
-</section>
-
-<!-- ═══════════ TESTIMONIALS ═══════════ -->
-<section class="testimonials-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-eyebrow">Proof</span>
-      <h2 class="section-title">What operators say</h2>
-      <p class="section-sub">Real feedback from the Discord desk. No paid reviews, no astroturfing.</p>
-    </div>
-
-    <div class="testimonials-grid reveal">
-      <article class="testimonial-card">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
-          "Switched from a kernel driver to BEAZT external. Cleaner, zero detection issues over 3 months. ESP filters are exactly what I needed for streaming."
-        </p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">R</span>
-          <div>
-            <span class="testimonial-name">RustMain_NA</span>
-            <span class="testimonial-role">30-day subscriber</span>
-          </div>
-          <span class="verified-badge">
-            <span class="icon icon-sm" data-lucide="check-circle"></span>
-            Verified
-          </span>
-        </div>
-      </article>
-
-      <article class="testimonial-card">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
-          "Key arrived in 8 seconds. Discord support walked me through my first config in under 5 minutes. This is how a cheat storefront should operate."
-        </p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">S</span>
-          <div>
-            <span class="testimonial-name">SoloSloth</span>
-            <span class="testimonial-role">Weekly subscriber</span>
-          </div>
-          <span class="verified-badge">
-            <span class="icon icon-sm" data-lucide="check-circle"></span>
-            Verified
-          </span>
-        </div>
-      </article>
-
-      <article class="testimonial-card">
-        <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
-          "Have used 4 providers. BEAZT is the only one where support doesn't ghost you after purchase. HWID reset was done in under 3 minutes."
-        </p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">M</span>
-          <div>
-            <span class="testimonial-name">Monitor_KE</span>
-            <span class="testimonial-role">Monthly subscriber</span>
-          </div>
-          <span class="verified-badge">
-            <span class="icon icon-sm" data-lucide="check-circle"></span>
-            Verified
-          </span>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ FAQ ═══════════ -->
-<section class="faq-section">
-  <div class="container">
-    <div class="section-header reveal">
-      <span class="section-eyebrow">FAQ</span>
-      <h2 class="section-title">Quick answers</h2>
-    </div>
-
-    <div class="faq-list reveal" x-data="{ openItem: null }">
-      <div class="faq-item" :class="{ 'open': openItem === 0 }">
-        <button class="faq-question" @click="openItem = openItem === 0 ? null : 0">
-          <span>Is this a kernel driver or external?</span>
-          <span class="icon" data-lucide="chevron-down"></span>
-        </button>
-        <div class="faq-answer">
-          <p>Fully external. The loader runs in read-only userspace mode with zero kernel interaction. This keeps detection surface minimal and makes the stack compatible with standard anti-cheat monitoring without triggering behavioral flags.</p>
-        </div>
-      </div>
-
-      <div class="faq-item" :class="{ 'open': openItem === 1 }">
-        <button class="faq-question" @click="openItem = openItem === 1 ? null : 1">
-          <span>How fast do keys arrive after payment?</span>
-          <span class="icon" data-lucide="chevron-down"></span>
-        </button>
-        <div class="faq-answer">
-          <p>Keys are automated via Stripe webhooks. Typical delivery is under 15 seconds from payment confirmation. Crypto orders are manually verified and delivered within 5 minutes during desk hours.</p>
-        </div>
-      </div>
-
-      <div class="faq-item" :class="{ 'open': openItem === 2 }">
-        <button class="faq-question" @click="openItem = openItem === 2 ? null : 2">
-          <span>Do all plans include the same features?</span>
-          <span class="icon" data-lucide="chevron-down"></span>
-        </button>
-        <div class="faq-answer">
-          <p>Yes. Every tier receives the identical toolkit: ESP, aim curves, debug camera, and delivery infrastructure. Duration is the only variable. No paywalls, no feature gating, no upsells.</p>
-        </div>
-      </div>
-
-      <div class="faq-item" :class="{ 'open': openItem === 3 }">
-        <button class="faq-question" @click="openItem = openItem === 3 ? null : 3">
-          <span>How do HWID resets work?</span>
-          <span class="icon" data-lucide="chevron-down"></span>
-        </button>
-        <div class="faq-answer">
-          <p>Request a reset through the Discord ticket desk. Our operators verify your license and process the reset. Most resets are completed within 5 minutes during active hours. There is no hard limit on resets for active subscribers.</p>
-        </div>
-      </div>
-
-      <div class="faq-item" :class="{ 'open': openItem === 4 }">
-        <button class="faq-question" @click="openItem = openItem === 4 ? null : 4">
-          <span>What payment methods are accepted?</span>
-          <span class="icon" data-lucide="chevron-down"></span>
-        </button>
-        <div class="faq-answer">
-          <p>Stripe (credit/debit cards with 3DS), and cryptocurrency (BTC, ETH, LTC). All Stripe transactions are encrypted and receipt-backed. Crypto payments receive manual confirmation within desk hours.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ FINAL CTA ═══════════ -->
-<section class="final-cta">
-  <div class="final-cta-inner reveal">
-    <h2>Ready to deploy?</h2>
-    <p>Choose a plan, complete checkout, and get your key in under 15 seconds. Discord operators standing by.</p>
-    <div class="final-cta-actions">
+  <div class="container hero-main-inner reveal">
+    <h1 class="hero-brand">BEAZT</h1>
+    <p class="hero-line">Undetected. Instant. Legit.</p>
+    <div class="hero-main-actions">
       <a href="#pricing" class="btn btn-primary btn-lg">
         <span class="icon" data-lucide="zap"></span>
         Get Access
@@ -368,11 +23,61 @@
         Join Discord
       </a>
     </div>
-    <div class="final-cta-meta">
-      <span><span class="icon icon-sm" data-lucide="shield-check"></span>Stripe secured</span>
-      <span><span class="icon icon-sm" data-lucide="zap"></span>&lt;15s delivery</span>
-      <span><span class="icon icon-sm" data-lucide="headset"></span>24/7 desk</span>
+  </div>
+</section>
+
+<section class="stack-strip section">
+  <div class="container">
+    <div class="stack-grid reveal">
+      <article class="stack-item">
+        <span class="icon" data-lucide="cpu"></span>
+        <h3>Stealth Loader</h3>
+        <p>External and read-only architecture.</p>
+      </article>
+      <article class="stack-item">
+        <span class="icon" data-lucide="radar"></span>
+        <h3>Cloaked ESP</h3>
+        <p>Streamer-safe layered visual intel.</p>
+      </article>
+      <article class="stack-item">
+        <span class="icon" data-lucide="target"></span>
+        <h3>Aim Curves</h3>
+        <p>Humanized profiles, fast swaps.</p>
+      </article>
+      <article class="stack-item">
+        <span class="icon" data-lucide="headset"></span>
+        <h3>Live Ops</h3>
+        <p>24/7 Discord setup support.</p>
+      </article>
     </div>
+  </div>
+</section>
+
+<section id="pricing" class="pricing-section-page section" style="scroll-margin-top:5rem;">
+  <div class="container">
+    {% include "partials/pricing_matrix.html" %}
+  </div>
+</section>
+
+<section class="trust-inline section-alt">
+  <div class="container trust-inline-inner reveal">
+    <span>2,400+ keys</span>
+    <span>99.9% uptime</span>
+    <span>&lt;15s delivery</span>
+    <span>24/7 desk</span>
+  </div>
+</section>
+
+<section class="section final-strip">
+  <div class="container final-strip-inner reveal">
+    <a href="#pricing" class="btn btn-primary btn-lg">
+      <span class="icon" data-lucide="zap"></span>
+      Get Access
+    </a>
+    <a href="{{ config.DISCORD_INVITE }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-lg">
+      <span class="icon" data-lucide="message-circle"></span>
+      Join Discord
+    </a>
   </div>
 </section>
 {% endblock %}
