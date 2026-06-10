@@ -150,6 +150,10 @@ def plan_detail(tier_id):
 def loader():
     loader = get_loader_config()
     return render_template("loader.html", loader_token=loader["loader_token"], loader_url=loader["loader_url"])
+
+
+@main_bp.route("/feedback")
+def feedback():
     return render_template("feedback.html")
 
 
