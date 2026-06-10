@@ -1,0 +1,135 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<div class="page-header-admin">
+  <h1>Key Pool: {{ product.name }}</h1>
+  <p>Pre-load license keys. When a sale completes, keys are assigned from the pool automatically.</p>
+</div>
+
+<div class="admin-card" style="margin-bottom:1.75rem;">
+  <h2 style="font-size:1rem;margin-bottom:0.8rem;">Pool Summary</h2>
+  <div class="admin-grid-4">
+    {% for tier in tiers %}
+      {% set stats = pool_stats.get(tier.id, {}) %}
+      <div class="admin-stat-card">
+        <span class="admin-stat-label">{{ tier.label }}</span>
+        <span class="admin-stat-value">{{ stats.available or 0 }}</span>
+        <span class="admin-stat-sub">available / {{ stats.total or 0 }} total</span>
+        <span class="admin-stat-sub">{{ stats.assigned or 0 }} assigned</span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="admin-card" style="margin-bottom:1.75rem;">
+  <h2 style="font-size:1rem;margin-bottom:0.8rem;">Import Keys</h2>
+  <form method="POST" action="{{ url_for('admin.product_keys', product_id=product.id) }}">
+    <input type="hidden" name="action" value="add">
+    <div class="form-row" style="gap:1rem;align-items:end;flex-wrap:wrap;">
+      <div class="form-group" style="flex:1;min-width:200px;">
+        <label for="tier_select">Assign to Tier</label>
+        <select id="tier_select" name="tier_id" class="admin-select" style="width:100%;">
+          <option value="">-- No tier (generic pool) --</option>
+          {% for tier in tiers %}
+            <option value="{{ tier.id }}" {% if selected_tier_id == tier.id %}selected{% endif %}>{{ tier.label }} ({{ tier.duration_days }} day)</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary">Add Keys</button>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:1rem;">
+      <label for="keys_text">Paste keys (one per line)</label>
+      <textarea id="keys_text" name="keys_text" rows="10" placeholder="1808d361-2579-44aa-9dd0-43e7c9340a1f&#10;4384510a-c751-4abf-ab83-783840ff7f4d&#10;..." style="width:100%;font-family:monospace;border-radius:10px;border:1px solid rgba(116,168,255,0.35);padding:0.7rem 0.9rem;background:rgba(9,14,35,0.94);color:var(--text);resize:vertical;"></textarea>
+    </div>
+  </form>
+</div>
+
+<div class="admin-card">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+    <h2 style="font-size:1rem;">Pool Keys</h2>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <a href="{{ url_for('admin.product_keys', product_id=product.id) }}" class="btn-xs" style="text-decoration:none;background:{% if not selected_tier_id %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">
+        All
+      </a>
+      {% for tier in tiers %}
+        <a href="{{ url_for('admin.product_keys', product_id=product.id, tier_id=tier.id) }}" class="btn-xs" style="text-decoration:none;background:{% if selected_tier_id == tier.id %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">
+          {{ tier.label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if pool_keys %}
+    <form method="POST" action="{{ url_for('admin.product_keys', product_id=product.id, tier_id=selected_tier_id or '') }}">
+      <input type="hidden" name="action" value="delete_pool">
+      <div style="max-height:480px;overflow-y:auto;margin-bottom:0.75rem;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:40px;"><input type="checkbox" id="select_all_pool" onclick="document.querySelectorAll('.pool-key-cb').forEach(cb=>cb.checked=this.checked)"></th>
+              <th>Key</th>
+              <th>Tier</th>
+              <th>Added</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for k in pool_keys %}
+            <tr>
+              <td><input type="checkbox" name="key_ids" value="{{ k.id }}" class="pool-key-cb"></td>
+              <td><code style="font-size:0.76rem;word-break:break-all;">{{ k.key_value }}</code></td>
+              <td>{{ k.tier.label if k.tier else '-' }}</td>
+              <td>{{ k.created_at.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-ghost" style="color:var(--danger);border-color:rgba(255,111,149,0.4);" onclick="var cbs=document.querySelectorAll('.pool-key-cb:checked');if(!cbs.length){alert('Select keys to delete.');return false;}return confirm('Delete '+cbs.length+' unassigned pool key(s)?')">
+        Delete Selected
+      </button>
+    </form>
+  {% else %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+      <span class="empty-icon" style="font-size:2rem;">inventory_2</span>
+      <h3 style="font-size:1rem;margin-top:0.5rem;">No pool keys{% if selected_tier_id %} for this tier{% endif %}</h3>
+      <p style="color:var(--text-muted);">Paste keys above to pre-load the inventory.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.admin-grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.8rem; }
+.admin-stat-card {
+  border:1px solid rgba(116,160,255,0.32);
+  border-radius:14px;
+  background:rgba(7,13,33,0.92);
+  padding:0.9rem 1rem;
+  text-align:center;
+}
+.admin-stat-label { display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-muted); margin-bottom:0.35rem; }
+.admin-stat-value { display:block; font:700 1.6rem/1 var(--display); color:var(--accent-l); }
+.admin-stat-sub { display:block; font-size:0.68rem; color:var(--text-dim); margin-top:0.2rem; }
+.admin-card {
+  border:1px solid rgba(146,194,255,0.24);
+  border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(9,14,34,0.9),rgba(6,9,24,0.92));
+  box-shadow:inset 0 0 0 1px rgba(152,196,255,0.05),var(--shadow-soft);
+  padding:1.4rem;
+}
+.admin-select {
+  min-height:44px;
+  border-radius:10px;
+  border:1px solid rgba(116,168,255,0.35);
+  padding:0.65rem 0.8rem;
+  background:rgba(9,14,35,0.94);
+  color:var(--text);
+  font:500 0.9rem var(--mono);
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2391bcff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:40px;
+}
+</style>
+{% endblock %}

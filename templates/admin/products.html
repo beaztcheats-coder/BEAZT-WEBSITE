@@ -16,9 +16,12 @@
       <td>{{ 'Yes' if p.is_private else 'No' }}</td>
       <td><code>{{ p.chairfbi_cheat_id or '-' }}</code></td>
       <td>{{ p.tiers.count() }}</td>
-      <td>
+      <td style="display:flex;gap:0.35rem;flex-wrap:wrap;">
         <a href="{{ url_for('admin.product_tiers', product_id=p.id) }}" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-h);border:1px solid rgba(59,130,246,0.25);text-decoration:none;">
-          Manage Tiers
+          Tiers
+        </a>
+        <a href="{{ url_for('admin.product_keys', product_id=p.id) }}" class="btn-xs" style="background:rgba(90,206,168,0.18);color:var(--accent-2);border:1px solid rgba(90,206,168,0.35);text-decoration:none;">
+          Keys
         </a>
       </td>
     </tr>

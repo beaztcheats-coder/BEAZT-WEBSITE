@@ -3,12 +3,18 @@
 <div class="page-header-admin">
   <h1>All Keys</h1>
   <p>Manage every license key in the system.</p>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;">
+    <a href="{{ url_for('admin.keys') }}" class="btn-xs" style="text-decoration:none;background:{% if not request.args.get('filter') %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">All</a>
+    <a href="{{ url_for('admin.keys', filter='pool') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'pool' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Pool</a>
+    <a href="{{ url_for('admin.keys', filter='active') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'active' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Active</a>
+    <a href="{{ url_for('admin.keys', filter='expired') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'expired' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Expired</a>
+  </div>
 </div>
 
 <table class="admin-table">
   <thead>
     <tr>
-      <th>ID</th><th>Key</th><th>User</th><th>Product</th>
+      <th>ID</th><th>Key</th><th>Product</th><th>Tier</th><th>User</th>
       <th>Status</th><th>Created</th><th>Expires</th><th>Actions</th>
     </tr>
   </thead>
@@ -16,10 +22,19 @@
     {% for k in keys.items %}
     <tr>
       <td>{{ k.id }}</td>
-      <td><code>{{ k.key_value }}</code></td>
-      <td>{{ k.user.username if k.user else '-' }}</td>
+      <td><code style="font-size:0.7rem;word-break:break-all;">{{ k.key_value }}</code></td>
       <td>{{ k.product.name if k.product else '-' }}</td>
-      <td><span class="badge-sm {{ 'badge-green' if k.is_active else 'badge-red' }}">{{ 'Active' if k.is_active else 'Expired' }}</span></td>
+      <td>{{ k.tier.label if k.tier else '-' }}</td>
+      <td>{{ k.user.username if k.user else '<span style="color:var(--text-dim);">Pool</span>'|safe }}</td>
+      <td>
+        {% if not k.user_id %}
+          <span class="badge-sm" style="background:rgba(255,185,112,0.15);color:var(--accent-warm);">Pool</span>
+        {% elif k.is_active %}
+          <span class="badge-sm badge-green">Active</span>
+        {% else %}
+          <span class="badge-sm badge-red">Expired</span>
+        {% endif %}
+      </td>
       <td>{{ k.created_at.strftime('%d %b') }}</td>
       <td>{{ k.expires_at.strftime('%d %b %Y') if k.expires_at else '-' }}</td>
       <td style="display:flex;gap:0.35rem;">
@@ -43,7 +58,7 @@
     {% if p == keys.page %}
       <span class="current">{{ p }}</span>
     {% else %}
-      <a href="?page={{ p }}">{{ p }}</a>
+      <a href="?page={{ p }}&filter={{ request.args.get('filter','') }}">{{ p }}</a>
     {% endif %}
   {% endfor %}
 </div>

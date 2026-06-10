@@ -63,7 +63,7 @@
     }
 
     function drawRain() {
-      ctx.font = "13px Inter, sans-serif";
+      ctx.font = "13px DM Sans, sans-serif";
       for (var i = 0; i < streams.length; i += 1) {
         var s = streams[i];
         var text = glyphs[Math.floor(Math.random() * glyphs.length)];

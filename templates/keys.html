@@ -30,8 +30,11 @@
             <div class="key-header">
               <span class="icon key-icon" data-lucide="key-round"></span>
               <div>
-                <strong>BEAZT Stack</strong>
-                <span class="key-created">{{ key.created_at.strftime('%d %b %Y') }}</span>
+                <strong>{{ key.product.name if key.product else 'License' }}</strong>
+                {% if key.tier %}
+                  <span class="key-tier-badge">{{ key.tier.label }}</span>
+                {% endif %}
+                <span class="key-created">Received {{ key.assigned_at.strftime('%d %b %Y') if key.assigned_at else key.created_at.strftime('%d %b %Y') }}</span>
               </div>
               <span class="key-status {{ 'status-active' if key.is_active else 'status-expired' }}">
                 {{ 'Active' if key.is_active else 'Expired' }}
@@ -39,7 +42,12 @@
             </div>
             <div>
               <div class="key-value-group">
-                <span class="key-label">License Key</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">
+                  <span class="key-label">License Key</span>
+                  <button type="button" class="key-copy-btn" onclick="navigator.clipboard.writeText('{{ key.key_value }}').then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy';},1400)})">
+                    <span class="material-symbols-outlined" style="font-size:0.85rem;">content_copy</span> Copy
+                  </button>
+                </div>
                 <code class="key-value">{{ key.key_value }}</code>
               </div>
               <div class="key-meta">

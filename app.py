@@ -49,11 +49,24 @@ with app.app_context():
         _engine = db.engine
         _conn = _engine.raw_connection()
         _cursor = _conn.cursor()
+
+        # Ensure products table has chairfbi_cheat_id
         _cursor.execute("PRAGMA table_info(products)")
         _cols = [r[1] for r in _cursor.fetchall()]
         if "chairfbi_cheat_id" not in _cols:
             _cursor.execute("ALTER TABLE products ADD COLUMN chairfbi_cheat_id VARCHAR(64)")
             _conn.commit()
+
+        # Ensure keys table has tier_id, assigned_at
+        _cursor.execute("PRAGMA table_info(keys)")
+        _key_cols = [r[1] for r in _cursor.fetchall()]
+        if "tier_id" not in _key_cols:
+            _cursor.execute("ALTER TABLE keys ADD COLUMN tier_id INTEGER REFERENCES pricing_tiers(id)")
+            _conn.commit()
+        if "assigned_at" not in _key_cols:
+            _cursor.execute("ALTER TABLE keys ADD COLUMN assigned_at DATETIME")
+            _conn.commit()
+
         _cursor.close()
         _conn.close()
     except Exception:

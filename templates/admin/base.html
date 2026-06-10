@@ -50,7 +50,7 @@
         <a href="{{ url_for('admin.keys') }}" class="{{ 'active' if request.endpoint == 'admin.keys' }}">
           <span class="icon icon-sm" data-lucide="key-round"></span> Keys
         </a>
-        <a href="{{ url_for('admin.products') }}" class="{{ 'active' if request.endpoint in ('admin.products','admin.product_tiers') }}">
+        <a href="{{ url_for('admin.products') }}" class="{{ 'active' if request.endpoint in ('admin.products','admin.product_tiers','admin.product_keys') }}">
           <span class="icon icon-sm" data-lucide="boxes"></span> Products
         </a>
         <a href="{{ url_for('admin.orders') }}" class="{{ 'active' if request.endpoint == 'admin.orders' }}">

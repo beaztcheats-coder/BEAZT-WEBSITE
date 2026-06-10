@@ -48,7 +48,7 @@ def create_session():
                 "product_slug": tier.product.slug,
             },
             success_url=url_for("main.my_keys", _external=True),
-            cancel_url=url_for("main.product_detail", slug=tier.product.slug, _external=True),
+            cancel_url=url_for("main.plan_detail", tier_id=tier.id, _external=True),
         )
 
         order = Order(
@@ -102,12 +102,31 @@ def handle_checkout_completed(session_data):
     metadata = session_data.get("metadata", {})
     duration_days = int(metadata.get("duration_days", 30))
     product_id = int(metadata.get("product_id", order.tier.product_id if order.tier else 1))
+    tier_id = int(metadata.get("tier_id", order.tier_id if order.tier_id else 0))
     expires_at = datetime.utcnow() + timedelta(days=duration_days)
 
     key_value = ""
     chairfbi_key_id = None
     chairfbi_cheat_id = None
 
+    # 1) Try pool key first
+    pool_key = (
+        Key.query
+        .filter_by(product_id=product_id, tier_id=tier_id, user_id=None, is_active=False)
+        .order_by(Key.created_at.asc())
+        .first()
+    )
+    if pool_key:
+        pool_key.user_id = order.user_id
+        pool_key.order_id = order.id
+        pool_key.tier_id = tier_id
+        pool_key.expires_at = expires_at
+        pool_key.assigned_at = datetime.utcnow()
+        pool_key.is_active = True
+        db.session.commit()
+        return
+
+    # 2) Fallback: ChairFBI generation
     cfg = get_chairfbi_config()
     api_token = cfg.get("api_token", "")
     cheat_id = ""
@@ -137,6 +156,7 @@ def handle_checkout_completed(session_data):
         user_id=order.user_id,
         order_id=order.id,
         product_id=product_id,
+        tier_id=tier_id,
         key_value=key_value,
         expires_at=expires_at,
         chairfbi_key_id=chairfbi_key_id,

@@ -125,9 +125,15 @@ def delete_user(user_id):
 @admin_required
 def keys():
     page = request.args.get("page", 1, type=int)
-    keys_list = Key.query.order_by(Key.created_at.desc()).paginate(
-        page=page, per_page=30, error_out=False
-    )
+    key_filter = request.args.get("filter", "")
+    query = Key.query.order_by(Key.created_at.desc())
+    if key_filter == "pool":
+        query = query.filter(Key.user_id.is_(None))
+    elif key_filter == "active":
+        query = query.filter(Key.user_id.isnot(None), Key.is_active == True)
+    elif key_filter == "expired":
+        query = query.filter(Key.user_id.isnot(None), Key.is_active == False)
+    keys_list = query.paginate(page=page, per_page=30, error_out=False)
     return render_template("admin/keys.html", keys=keys_list)
 
 
@@ -243,6 +249,78 @@ def orders():
         query = query.filter_by(status=status_filter)
     orders_list = query.paginate(page=page, per_page=30, error_out=False)
     return render_template("admin/orders.html", orders=orders_list, status_filter=status_filter)
+
+
+@admin_bp.route("/products/<int:product_id>/keys", methods=["GET", "POST"])
+@admin_required
+def product_keys(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        abort(404)
+    tier_id = request.args.get("tier_id", type=int)
+
+    if request.method == "POST":
+        action = request.form.get("action", "add")
+        if action == "add":
+            raw_keys = request.form.get("keys_text", "").strip()
+            sel_tier_id = request.form.get("tier_id", type=int)
+            if not raw_keys:
+                flash("Paste at least one key.", "error")
+                return redirect(url_for("admin.product_keys", product_id=product.id, tier_id=sel_tier_id))
+            tier = db.session.get(PricingTier, sel_tier_id) if sel_tier_id else None
+            if sel_tier_id and not tier:
+                flash("Invalid tier selected.", "error")
+                return redirect(url_for("admin.product_keys", product_id=product.id))
+            lines = [line.strip() for line in raw_keys.splitlines() if line.strip()]
+            added = 0
+            skipped = 0
+            for line in lines:
+                existing = Key.query.filter_by(key_value=line).first()
+                if existing:
+                    skipped += 1
+                    continue
+                key = Key(
+                    user_id=None,
+                    product_id=product.id,
+                    tier_id=tier.id if tier else None,
+                    key_value=line,
+                    is_active=False,
+                )
+                db.session.add(key)
+                added += 1
+            db.session.commit()
+            flash(f"{added} key(s) added to pool. {skipped} duplicate(s) skipped.", "success")
+            return redirect(url_for("admin.product_keys", product_id=product.id, tier_id=sel_tier_id))
+
+        elif action == "delete_pool":
+            key_ids = request.form.getlist("key_ids")
+            if key_ids:
+                Key.query.filter(Key.id.in_([int(k) for k in key_ids]), Key.user_id.is_(None)).delete(synchronize_session="fetch")
+                db.session.commit()
+                flash(f"{len(key_ids)} pool key(s) deleted.", "success")
+            return redirect(url_for("admin.product_keys", product_id=product.id, tier_id=tier_id))
+
+    tiers = PricingTier.query.filter_by(product_id=product.id).order_by(PricingTier.duration_days).all()
+    pool_query = Key.query.filter_by(product_id=product.id).filter(Key.user_id.is_(None)).order_by(Key.created_at.desc())
+    if tier_id:
+        pool_query = pool_query.filter_by(tier_id=tier_id)
+    pool_keys = pool_query.all()
+
+    pool_stats = {}
+    for t in tiers:
+        total = Key.query.filter_by(product_id=product.id, tier_id=t.id).count()
+        unassigned = Key.query.filter_by(product_id=product.id, tier_id=t.id).filter(Key.user_id.is_(None)).count()
+        assigned = Key.query.filter_by(product_id=product.id, tier_id=t.id).filter(Key.user_id.isnot(None)).count()
+        pool_stats[t.id] = {"total": total, "available": unassigned, "assigned": assigned}
+
+    return render_template(
+        "admin/product_keys.html",
+        product=product,
+        tiers=tiers,
+        pool_keys=pool_keys,
+        selected_tier_id=tier_id,
+        pool_stats=pool_stats,
+    )
 
 
 @admin_bp.route("/settings/chairfbi-test", methods=["POST"])

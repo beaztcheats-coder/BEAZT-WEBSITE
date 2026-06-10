@@ -52,6 +52,7 @@ class PricingTier(db.Model):
     stripe_price_id = db.Column(db.String(128), nullable=True)
 
     orders = db.relationship("Order", backref="tier", lazy="dynamic")
+    keys = db.relationship("Key", backref="pricing_tier", lazy="dynamic")
 
     @property
     def price_pounds(self):
@@ -75,17 +76,20 @@ class Key(db.Model):
     __tablename__ = "keys"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
-    key_value = db.Column(db.String(64), unique=True, nullable=False)
+    tier_id = db.Column(db.Integer, db.ForeignKey("pricing_tiers.id"), nullable=True)
+    key_value = db.Column(db.String(128), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    assigned_at = db.Column(db.DateTime, nullable=True)
     expires_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     chairfbi_key_id = db.Column(db.String(64), nullable=True, index=True)
     chairfbi_cheat_id = db.Column(db.String(32), nullable=True)
 
     product = db.relationship("Product")
+    tier = db.relationship("PricingTier", overlaps="keys,pricing_tier")
 
 
 class Setting(db.Model):
