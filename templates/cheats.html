@@ -10,15 +10,21 @@
       <p class="text-muted">Browse our full catalog. Click any cheat for details and purchase options.</p>
     </div>
 
-    <div class="cheats-grid reveal">
-      {% for p in products %}
+    {% if private_products %}
+    <div class="section-header reveal" style="margin-bottom:1.2rem;">
+      <span class="section-eyebrow" style="color:var(--accent-l)">BeaZt</span>
+      <h2 class="t-h2">Private Cheats</h2>
+    </div>
+    <div class="cheats-grid cheats-grid--private reveal" style="margin-bottom:2.5rem;">
+      {% for p in private_products %}
         {% set status = cheat_statuses.get(p.id) %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
+        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private">
+          <div class="cheat-card-banner">
+            <img src="{{ url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
+          </div>
           <div class="cheat-card-top">
             <span class="cheat-card-status {{ 'status-online' if status == 'online' else 'status-offline' if status == 'offline' else 'status-unknown' }}"></span>
-            {% if p.key_source == 'pool' %}
-            <span class="cheat-source-badge">Private</span>
-            {% endif %}
+            <span class="cheat-source-badge cheat-source-badge--gold">BeaZt Private</span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
           {% set tiers = product_tiers.get(p.id, []) %}
@@ -35,6 +41,39 @@
         </a>
       {% endfor %}
     </div>
+    {% endif %}
+
+    {% if resold_products %}
+    <div class="section-header reveal" style="margin-bottom:1.2rem;">
+      <span class="section-eyebrow">Catalog</span>
+      <h2 class="t-h2">All Cheats</h2>
+    </div>
+    <div class="cheats-grid reveal">
+      {% for p in resold_products %}
+        {% set status = cheat_statuses.get(p.id) %}
+        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
+          <div class="cheat-card-banner">
+            <img src="{{ url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
+          </div>
+          <div class="cheat-card-top">
+            <span class="cheat-card-status {{ 'status-online' if status == 'online' else 'status-offline' if status == 'offline' else 'status-unknown' }}"></span>
+          </div>
+          <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% set tiers = product_tiers.get(p.id, []) %}
+          {% if tiers %}
+          <div class="cheat-card-pricing">
+            {% for t in tiers[:3] %}
+              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d</span></span>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="cheat-card-noprice">No pricing yet</p>
+          {% endif %}
+          <span class="cheat-card-arrow">&rarr;</span>
+        </a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

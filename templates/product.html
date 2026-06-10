@@ -9,7 +9,7 @@
         <div class="product-main-media">
           <img
             id="product-main-image"
-            src="{{ gallery_images[0] if gallery_images else '/static/images/hero.png' }}"
+            src="{{ gallery_images[0] if gallery_images else url_for('main.cheat_image', slug=product.slug) }}"
             alt="{{ product.name }} preview"
           >
         </div>

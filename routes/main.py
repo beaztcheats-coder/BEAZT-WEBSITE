@@ -1,6 +1,7 @@
 from pathlib import Path
+import io
 
-from flask import Blueprint, render_template, abort, current_app
+from flask import Blueprint, render_template, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, Product, Key, PricingTier
 from config import get_loader_config
@@ -52,6 +53,105 @@ def _get_product_features_from_db(product):
     }
 
 
+@main_bp.route("/cheat-image/<slug>")
+def cheat_image(slug):
+    product = Product.query.filter_by(slug=slug).first()
+    if not product:
+        abort(404)
+
+    if product.image_url:
+        from flask import redirect as _redirect
+        return _redirect(product.image_url)
+
+    from PIL import Image, ImageDraw, ImageFont
+
+    is_private = product.key_source == "pool"
+    accent = (196, 162, 106) if is_private else (96, 147, 255)
+    accent_dark = (140, 110, 60) if is_private else (50, 90, 180)
+
+    width, height = 600, 340
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    for y in range(height):
+        ratio = y / height
+        r = int(9 + ratio * 10)
+        g = int(11 + ratio * 18)
+        b = int(27 + ratio * 22)
+        draw.line([(0, y), (width, y)], fill=(r, g, b))
+
+    for i in range(3):
+        cx = int(width * (0.25 + i * 0.25))
+        cy = int(height * (0.4 + i * 0.15))
+        r_max = int(width * 0.42)
+        for rad in range(r_max, 0, -1):
+            alpha = int(max(0, 18 - (rad / r_max) * 18))
+            draw.ellipse([cx - rad, cy - rad, cx + rad, cy + rad], fill=(accent[0], accent[1], accent[2], alpha))
+
+    for i in range(40):
+        x0 = i * (width // 40)
+        x1 = x0 + (width // 80)
+        draw.rectangle([x0, 0, x1, height], fill=(accent[0], accent[1], accent[2], 3))
+
+    label = "BEAZT PRIVATE" if is_private else "LICENSE"
+    try:
+        font_label = ImageFont.truetype("arial.ttf", 13)
+    except Exception:
+        font_label = ImageFont.load_default()
+    bbox = draw.textbbox((0, 0), label, font=font_label)
+    lw = bbox[2] - bbox[0]
+    label_x = (width - lw) // 2
+    draw.rectangle([label_x - 14, 132, label_x + lw + 14, 156], fill=(accent[0], accent[1], accent[2], 40))
+    draw.text((label_x, 134), label, fill=accent, font=font_label)
+
+    name = product.name
+    try:
+        font_name = ImageFont.truetype("impact.ttf", 36)
+    except Exception:
+        try:
+            font_name = ImageFont.truetype("arialbd.ttf", 34)
+        except Exception:
+            font_name = ImageFont.load_default()
+    bbox = draw.textbbox((0, 0), name, font=font_name)
+    tw = bbox[2] - bbox[0]
+    if tw > width - 40:
+        try:
+            font_name = ImageFont.truetype("impact.ttf", 28)
+        except Exception:
+            font_name = ImageFont.load_default()
+        bbox = draw.textbbox((0, 0), name, font=font_name)
+        tw = bbox[2] - bbox[0]
+    tx = (width - tw) // 2
+    draw.text((tx + 2, 162), name, fill=(0, 0, 0, 120), font=font_name)
+    draw.text((tx, 160), name, fill=(255, 255, 255), font=font_name)
+
+    try:
+        font_sub = ImageFont.truetype("arial.ttf", 14)
+    except Exception:
+        font_sub = ImageFont.load_default()
+    sub_text = "Private Build" if is_private else "Instant Key Delivery"
+    bbox = draw.textbbox((0, 0), sub_text, font=font_sub)
+    sw = bbox[2] - bbox[0]
+    draw.text(((width - sw) // 2, 215), sub_text, fill=(180, 180, 200), font=font_sub)
+
+    try:
+        font_tag = ImageFont.truetype("arial.ttf", 12)
+    except Exception:
+        font_tag = ImageFont.load_default()
+    tier_count = PricingTier.query.filter_by(product_id=product.id).count()
+    tag_text = f"{tier_count} PLAN(S) AVAILABLE" if tier_count > 0 else "COMING SOON"
+    bbox = draw.textbbox((0, 0), tag_text, font=font_tag)
+    tag_w = bbox[2] - bbox[0]
+    tag_x = (width - tag_w) // 2
+    draw.rectangle([tag_x - 12, 296, tag_x + tag_w + 12, 318], fill=(accent[0], accent[1], accent[2], 30))
+    draw.text((tag_x, 298), tag_text, fill=accent, font=font_tag)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return Response(buf.getvalue(), mimetype="image/png")
+
+
 def _get_chairfbi_cheat_status(product):
     if not product or not product.chairfbi_cheat_id:
         return None
@@ -92,6 +192,8 @@ def _get_product_gallery(slug, fallback_image=None):
 def index():
     product = Product.query.filter_by(slug="rust-external-private").first()
     all_products = Product.query.order_by(Product.created_at.asc()).all()
+    private_products = [p for p in all_products if p.key_source == "pool"]
+    resold_products = [p for p in all_products if p.key_source != "pool"]
     cheat_statuses_home = {}
     for p in all_products:
         cheat_statuses_home[p.id] = _get_chairfbi_cheat_status(p)
@@ -107,12 +209,14 @@ def index():
         )
         product_features = _get_product_features_from_db(product)
         cheat_status = _get_chairfbi_cheat_status(product)
-    return render_template("index.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status, all_products=all_products, cheat_statuses_home=cheat_statuses_home)
+    return render_template("index.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status, all_products=all_products, cheat_statuses_home=cheat_statuses_home, private_products=private_products, resold_products=resold_products)
 
 
 @main_bp.route("/cheats")
 def cheats():
     products = Product.query.order_by(Product.created_at.asc()).all()
+    private_products = [p for p in products if p.key_source == "pool"]
+    resold_products = [p for p in products if p.key_source != "pool"]
     cheat_statuses = {}
     product_tiers = {}
     for p in products:
@@ -124,7 +228,7 @@ def cheats():
             .order_by(PricingTier.duration_days)
             .all()
         )
-    return render_template("cheats.html", products=products, cheat_statuses=cheat_statuses, product_tiers=product_tiers)
+    return render_template("cheats.html", products=products, cheat_statuses=cheat_statuses, product_tiers=product_tiers, private_products=private_products, resold_products=resold_products)
 
 
 @main_bp.route("/product/<slug>")

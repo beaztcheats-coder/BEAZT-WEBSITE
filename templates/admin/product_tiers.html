@@ -39,6 +39,10 @@
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Features <span style="font-weight:400;">(one per line)</span></label>
         <textarea name="features_text" rows="6" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Legit ESP suite&#10;Debug camera&#10;Player and resource overlays&#10;Distance and visibility tools">{{ product.features_text or '' }}</textarea>
       </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Custom Image URL <span style="font-weight:400;">(overrides auto-generated banner)</span></label>
+        <input type="text" name="image_url" value="{{ product.image_url or '' }}" placeholder="https://example.com/cheat-banner.png" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+      </div>
       <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;align-self:flex-start;">Save Content</button>
     </div>
   </form>

@@ -51,22 +51,55 @@
   </div>
 </section>
 
-{% if all_products %}
-<section class="section" style="padding-bottom:0;">
+{% if private_products %}
+<section class="section" style="padding-bottom:0.5rem;">
+  <div class="container">
+    <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
+      <span class="section-eyebrow" style="color:var(--accent-l)">BeaZt</span>
+      <h2 class="t-h2">Private Cheats</h2>
+      <p style="color:var(--text-dim);font-size:0.82rem;">Externally hosted, private builds. Key pool operated by BeaZt.</p>
+    </div>
+    <div class="cheats-grid cheats-grid--private reveal">
+      {% for p in private_products %}
+        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private">
+          <div class="cheat-card-banner">
+            <img src="{{ url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
+          </div>
+          <div class="cheat-card-top">
+            <span class="cheat-card-status {{ 'status-online' if cheat_statuses_home.get(p.id, '') == 'online' else 'status-offline' if cheat_statuses_home.get(p.id, '') == 'offline' else 'status-unknown' }}"></span>
+            <span class="cheat-source-badge cheat-source-badge--gold">BeaZt Private</span>
+          </div>
+          <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% if p.tiers.count() > 0 %}
+          <div class="cheat-card-pricing">
+            <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(p.tiers[0].price_pounds) }}</span>
+          </div>
+          {% else %}
+          <p class="cheat-card-noprice">Coming soon</p>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if resold_products %}
+<section class="section" style="padding-bottom:0.5rem;">
   <div class="container">
     <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
       <span class="section-eyebrow">Catalog</span>
-      <h2 class="t-h2">Available Cheats</h2>
+      <h2 class="t-h2">All Cheats</h2>
       <a href="{{ url_for('main.cheats') }}" style="font-size:0.78rem;color:var(--accent-h);">View all &rarr;</a>
     </div>
-    <div class="cheats-grid reveal" style="margin-bottom:0;">
-      {% for p in all_products %}
+    <div class="cheats-grid reveal">
+      {% for p in resold_products %}
         <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
+          <div class="cheat-card-banner">
+            <img src="{{ url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
+          </div>
           <div class="cheat-card-top">
             <span class="cheat-card-status {{ 'status-online' if cheat_statuses_home.get(p.id, '') == 'online' else 'status-offline' if cheat_statuses_home.get(p.id, '') == 'offline' else 'status-unknown' }}"></span>
-            {% if p.key_source == 'pool' %}
-            <span class="cheat-source-badge">Private</span>
-            {% endif %}
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
           {% if p.tiers.count() > 0 %}

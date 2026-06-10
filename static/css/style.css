@@ -2026,6 +2026,39 @@ textarea::placeholder {
 .cheat-card-arrow { position:absolute; bottom:1rem; right:1.2rem; color:var(--text-dim); font-size:1.1rem; opacity:0; transition:opacity var(--transition); }
 .cheat-card:hover .cheat-card-arrow { opacity:1; }
 
+.cheat-card-banner {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #090e23, #050918);
+  border: 1px solid rgba(116,168,255,0.1);
+}
+.cheat-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cheat-card--private {
+  border-color: rgba(196, 162, 106, 0.28);
+  background: linear-gradient(180deg, rgba(20, 17, 10, 0.88), rgba(12, 10, 6, 0.94));
+}
+.cheat-card--private:hover {
+  border-color: rgba(196, 162, 106, 0.55);
+  box-shadow: 0 0 30px rgba(196, 162, 106, 0.1);
+}
+.cheat-card--private .cheat-card-banner {
+  border-color: rgba(196, 162, 106, 0.15);
+}
+
+.cheat-source-badge--gold {
+  background: rgba(196, 162, 106, 0.18);
+  color: #e2c97e;
+  border-color: rgba(196, 162, 106, 0.35);
+}
+
 /* ── Product Detail ────────────────────────────── */
 .product-detail-page { padding-top: var(--space-3xl); }
 

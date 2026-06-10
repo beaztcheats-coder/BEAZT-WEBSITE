@@ -327,6 +327,7 @@ def product_tiers(product_id):
         product.chairfbi_cheat_id = cheat_id if cheat_id else None
         product.description = request.form.get("description", "").strip() or None
         product.features_text = request.form.get("features_text", "").strip() or None
+        product.image_url = request.form.get("image_url", "").strip() or None
         db.session.commit()
         flash("Product settings updated.", "success")
         return redirect(url_for("admin.product_tiers", product_id=product.id))
