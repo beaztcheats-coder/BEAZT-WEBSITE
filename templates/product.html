@@ -2,27 +2,40 @@
 {% block title %}{{ product.name }} | BEAZT{% endblock %}
 
 {% block content %}
+<script>
+  window.BEAZT_PRODUCT = {
+    variants: {{ variants | tojson }},
+    selectedVariantId: {{ selected_tier.id if selected_tier else 0 }},
+    isAuthenticated: {{ 'true' if current_user.is_authenticated else 'false' }},
+    isUnavailable: {{ 'true' if cheat_status != 'online' and product.key_source != 'pool' else 'false' }}
+  };
+  window.productState = function() {
+    var d = window.BEAZT_PRODUCT;
+    return {
+      selectedVariantId: d.selectedVariantId,
+      variants: d.variants,
+      activeTab: 'description',
+      get currentVariant() {
+        return this.variants.find(function(v) { return v.id === this.selectedVariantId; }.bind(this)) || this.variants[0] || null;
+      },
+      get currentPrice() {
+        var v = this.currentVariant;
+        return v ? v.price_pounds : 0;
+      },
+      get buyLabel() {
+        if (!d.isAuthenticated) return 'Sign in to Buy';
+        if (d.isUnavailable) return 'Unavailable';
+        var v = this.currentVariant;
+        return v ? 'Buy ' + v.label + ' Plan' : 'Buy Now';
+      },
+      get canBuy() {
+        return d.isAuthenticated;
+      }
+    };
+  };
+</script>
 <div class="container section product-detail-page"
-     x-data="{
-       selectedVariantId: {{ selected_tier.id if selected_tier else 0 }},
-       variants: {{ variants | tojson }},
-       activeTab: 'description',
-       get currentVariant() {
-         return this.variants.find(v => v.id === this.selectedVariantId) || this.variants[0] || null;
-       },
-       get currentPrice() {
-         return this.currentVariant ? this.currentVariant.price_pounds : 0;
-       },
-       get buyLabel() {
-         {% if not current_user.is_authenticated %}return 'Sign in to Buy';
-         {% elif cheat_status != 'online' and product.key_source != 'pool' %}return 'Unavailable';
-         {% else %}return 'Buy ' + (this.currentVariant ? this.currentVariant.label + ' Plan' : 'Now');
-         {% endif %}
-       },
-       get canBuy() {
-         return {{ 'true' if current_user.is_authenticated else 'false' }};
-       }
-     }">
+     x-data="productState()">
   <div class="page-header">
     <span class="section-eyebrow">{{ 'BEAZT' if product.visibility == 'private' else 'Catalogue' }}</span>
     <h1 class="t-h1">{{ product.name }}</h1>
