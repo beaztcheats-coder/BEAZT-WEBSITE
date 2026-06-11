@@ -336,12 +336,16 @@ def product_tiers(product_id):
                 product.chairfbi_cheat_id = None
                 cheat_id = None
         product.chairfbi_cheat_id = cheat_id if cheat_id else None
-        visibility_val = request.form.get("visibility", "").strip()
-        if visibility_val in ("private", "public"):
-            product.visibility = visibility_val
-        product.description = request.form.get("description", "").strip() or None
-        product.features_text = request.form.get("features_text", "").strip() or None
-        product.buyer_notes = request.form.get("buyer_notes", "").strip() or None
+        if "visibility" in request.form:
+            visibility_val = request.form.get("visibility", "").strip()
+            if visibility_val in ("private", "public"):
+                product.visibility = visibility_val
+        if "description" in request.form:
+            product.description = request.form.get("description", "").strip() or None
+        if "features_text" in request.form:
+            product.features_text = request.form.get("features_text", "").strip() or None
+        if "buyer_notes" in request.form:
+            product.buyer_notes = request.form.get("buyer_notes", "").strip() or None
 
         image_file = request.files.get("image_file")
         if image_file and image_file.filename:
@@ -355,7 +359,7 @@ def product_tiers(product_id):
             else:
                 flash("Only PNG and JPEG files are accepted.", "error")
                 return redirect(url_for("admin.product_tiers", product_id=product.id))
-        else:
+        elif "image_url" in request.form:
             image_url_val = request.form.get("image_url", "").strip()
             product.image_url = image_url_val if image_url_val else None
 
