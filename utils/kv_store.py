@@ -46,12 +46,12 @@ def kv_get(key):
     return None
 
 
-def kv_set(key, value):
+def kv_set(key, value, ex=2592000):
     r = _get_redis()
     if r is None:
         return False
     try:
-        r.set(key, json.dumps(value, ensure_ascii=False))
+        r.set(key, json.dumps(value, ensure_ascii=False), ex=ex)
         return True
     except Exception as e:
         logger.warning("KV set failed for %s: %s", key, e)
@@ -94,7 +94,7 @@ def backup_products():
         from flask import current_app
         if not current_app:
             return False
-        from models import Product, db
+        from models import Product, PricingTier, db
 
         rows = Product.query.all()
         data = []
@@ -107,6 +107,13 @@ def backup_products():
                 if isinstance(val, bytes):
                     val = val.decode("utf-8", errors="replace")
                 row[field] = val
+            tiers = PricingTier.query.filter_by(product_id=p.id).order_by(PricingTier.duration_days).all()
+            row["_tiers"] = [{
+                "label": t.label,
+                "duration_days": t.duration_days,
+                "price_pence": t.price_pence,
+                "is_subscription": t.is_subscription,
+            } for t in tiers]
             data.append(row)
 
         ok = kv_set("beazt_products", data)
@@ -140,7 +147,7 @@ def restore_products_to_db():
         return
 
     try:
-        from models import Product, db
+        from models import Product, PricingTier, db
 
         for p_data in backup:
             slug = p_data.get("slug", "")
@@ -150,6 +157,7 @@ def restore_products_to_db():
             if existing:
                 continue
 
+            tiers_data = p_data.pop("_tiers", [])
             kwargs = {k: v for k, v in p_data.items() if k in PRODUCT_FIELDS}
             for dt_field in ("created_at", "last_synced_at"):
                 if dt_field in kwargs and isinstance(kwargs[dt_field], str):
@@ -159,6 +167,16 @@ def restore_products_to_db():
                         kwargs[dt_field] = None
             product = Product(**kwargs)
             db.session.add(product)
+            db.session.flush()
+
+            for t in tiers_data:
+                db.session.add(PricingTier(
+                    product_id=product.id,
+                    label=t.get("label", ""),
+                    duration_days=int(t.get("duration_days", 1)),
+                    price_pence=int(t.get("price_pence", 0)),
+                    is_subscription=bool(t.get("is_subscription", False)),
+                ))
 
         db.session.commit()
         logger.info("Restored %d products from backup", len(backup))
