@@ -275,30 +275,34 @@ def download_image(url, save_path):
 
 
 def download_product_media(product, static_dir):
-    """Download all product images and logo to static directory."""
+    """Download all product images and logo to static directory.
+
+    On read-only filesystems (Vercel), returns remote VenomCheats CDN URLs.
+    """
     slug = product.get("slug", "unknown")
-    name = product.get("name", slug)
-    base_dir = Path(static_dir) / "images" / "venomcheats" / slug
-    base_dir.mkdir(parents=True, exist_ok=True)
-
     images, _videos = get_media_urls(product)
-    downloaded = []
 
-    for i, img_url in enumerate(images):
-        ext = os.path.splitext(img_url.split("?")[0])[1] or ".webp"
-        fname = f"{i + 1}{ext}"
-        save_path = base_dir / fname
-        if download_image(img_url, str(save_path)):
-            downloaded.append(f"/static/images/venomcheats/{slug}/{fname}")
+    try:
+        base_dir = Path(static_dir) / "images" / "venomcheats" / slug
+        base_dir.mkdir(parents=True, exist_ok=True)
 
-    logo_url = get_logo_url(product)
-    if logo_url:
-        ext = os.path.splitext(logo_url.split("?")[0])[1] or ".webp"
-        logo_path = base_dir / f"logo{ext}"
-        if download_image(logo_url, str(logo_path)):
-            pass
+        downloaded = []
+        for i, img_url in enumerate(images):
+            ext = os.path.splitext(img_url.split("?")[0])[1] or ".webp"
+            fname = f"{i + 1}{ext}"
+            save_path = base_dir / fname
+            if download_image(img_url, str(save_path)):
+                downloaded.append(f"/static/images/venomcheats/{slug}/{fname}")
 
-    return downloaded
+        logo_url = get_logo_url(product)
+        if logo_url:
+            ext = os.path.splitext(logo_url.split("?")[0])[1] or ".webp"
+            logo_path = base_dir / f"logo{ext}"
+            download_image(logo_url, str(logo_path))
+
+        return downloaded
+    except OSError:
+        return images
 
 
 def get_primary_image_url(product):
