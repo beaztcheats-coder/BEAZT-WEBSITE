@@ -15,6 +15,11 @@
       selectedVariantId: d.selectedVariantId,
       variants: d.variants,
       activeTab: 'description',
+      activeImage: '',
+      init() {
+        var firstImg = document.querySelector('.product-hero-img');
+        this.activeImage = firstImg ? firstImg.src : '';
+      },
       get currentVariant() {
         return this.variants.find(function(v) { return v.id === this.selectedVariantId; }.bind(this)) || this.variants[0] || null;
       },
@@ -46,15 +51,46 @@
 
     <!-- Left column: gallery + specs -->
     <div>
-      <div class="product-main-media">
-        {% if gallery_images %}
-        <img src="{{ gallery_images[0] }}" alt="{{ product.name }}" class="product-hero-img">
+      <div class="product-main-media" x-data="{ activeImage: '' }" x-init="activeImage = $el.querySelector('.product-hero-img').src">
+        {% if gallery_images and gallery_images|length > 0 %}
+        <img :src="activeImage" src="{{ gallery_images[0] }}" alt="{{ product.name }}" class="product-hero-img">
+        {% if gallery_images|length > 1 %}
+        <div class="product-thumb-strip">
+          {% for img in gallery_images %}
+          <button type="button" class="product-thumb"
+                  :class="{ 'is-active': activeImage === '{{ img }}' }"
+                  @click="activeImage = '{{ img }}'">
+            <img src="{{ img }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% else %}
         <img src="{{ url_for('main.cheat_image', slug=product.slug) }}" alt="{{ product.name }}" class="product-hero-img">
         {% endif %}
       </div>
 
       <div class="specs-grid">
+        {% if vc_specs %}
+        <div class="spec">
+          <span class="spec-label">Anti-Cheat</span>
+          <span class="spec-value">{{ vc_specs.ac }}</span>
+        </div>
+        <div class="spec">
+          <span class="spec-label">Operating System</span>
+          <span class="spec-value">{{ vc_specs.os }}</span>
+        </div>
+        <div class="spec">
+          <span class="spec-label">Processor</span>
+          <span class="spec-value">{{ vc_specs.cpu }}</span>
+        </div>
+        <div class="spec">
+          <span class="spec-label">VC Status</span>
+          <span class="spec-value">
+            <span class="pill {{ 'pill-success' if vc_status == 'UNDETECTED' else 'pill-danger' }} pill-dot">{{ vc_status }}</span>
+          </span>
+        </div>
+        {% else %}
         <div class="spec">
           <span class="spec-label">Status</span>
           <span class="spec-value">
@@ -69,12 +105,13 @@
         </div>
         <div class="spec">
           <span class="spec-label">Type</span>
-           <span class="spec-value"><span class="pill">{{ 'Private' if product.visibility == 'private' else 'License' }}</span></span>
+          <span class="spec-value"><span class="pill">{{ 'Private' if product.visibility == 'private' else 'License' }}</span></span>
         </div>
         <div class="spec">
           <span class="spec-label">Support</span>
           <span class="spec-value"><span class="pill pill-success">24/7</span></span>
         </div>
+        {% endif %}
       </div>
     </div>
 
@@ -130,11 +167,12 @@
 
   <!-- Tabs -->
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" :class="{ 'is-active': activeTab === 'description' }" @click="activeTab = 'description'">Description</button>
+    <button class="tab" role="tab" :class="{ 'is-active': activeTab === 'description' }" @click="activeTab = 'description'">Features</button>
+    <button class="tab" role="tab" :class="{ 'is-active': activeTab === 'architecture' }" @click="activeTab = 'architecture'">Architecture</button>
     <button class="tab" role="tab" :class="{ 'is-active': activeTab === 'reviews' }" @click="activeTab = 'reviews'">Buyer Info</button>
   </div>
 
-  <!-- Description tab -->
+  <!-- Features tab -->
   <div x-show="activeTab === 'description'" role="tabpanel">
     {% if product.description %}
     <div class="card" style="margin-bottom:1.5rem;">
@@ -144,9 +182,18 @@
 
     <div class="detailed-feature">
       <div class="feature-text">
-        <h3>{{ product.name }} Features</h3>
+        <h3>{{ product.name }} Capabilities</h3>
         <p>Everything included with your license.</p>
-        {% if product_features and product_features['items'] %}
+        {% if vc_features %}
+        <ul class="feature-list">
+          {% for cap in vc_features %}
+          <li>
+            <span class="icon icon-sm" data-lucide="check-circle-2" style="color:var(--success);"></span>
+            {{ vc_cap_names.get(cap, cap|replace('_', ' ')|title) }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% elif product_features and product_features['items'] %}
         <ul class="feature-list">
           {% for item in product_features['items'] %}
           <li>{{ item }}</li>
@@ -154,6 +201,31 @@
         </ul>
         {% endif %}
       </div>
+    </div>
+  </div>
+
+  <!-- Architecture tab -->
+  <div x-show="activeTab === 'architecture'" role="tabpanel" x-cloak>
+    {% if vc_system_features %}
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.8rem;">System Architecture</h3>
+      <div class="arch-grid">
+        {% for feat in vc_system_features %}
+        <div class="arch-card">
+          <div class="arch-card-icon">
+            <span class="icon" data-lucide="{{ 'cpu' if 'Engine' in feat.title else 'monitor' if 'Stream' in feat.title else 'gauge' if 'FPS' in feat.title else 'shield' }}"></span>
+          </div>
+          <strong class="arch-card-title">{{ feat.title }}</strong>
+          <p class="arch-card-desc">{{ feat.description }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem;">Important</h3>
+      <p class="text-muted" style="font-size:0.84rem;">No product guarantees zero enforcement risk. Use responsibly.</p>
     </div>
   </div>
 
@@ -180,24 +252,4 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script>
-  (function () {
-    var mainImage = document.getElementById("product-main-image");
-    if (!mainImage) return;
-    var thumbs = document.querySelectorAll(".product-thumb");
-    thumbs.forEach(function (thumb) {
-      thumb.addEventListener("click", function () {
-        var nextSrc = thumb.getAttribute("data-full-image");
-        if (!nextSrc) return;
-        mainImage.src = nextSrc;
-        thumbs.forEach(function (node) { node.classList.remove("is-active"); });
-        thumb.classList.add("is-active");
-      });
-    });
-  })();
-</script>
 {% endblock %}

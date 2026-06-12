@@ -1,5 +1,6 @@
 from pathlib import Path
 import io
+import json
 
 from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for
 from flask_login import login_required, current_user
@@ -266,6 +267,31 @@ def product_detail(slug):
     cheat_status = _get_chairfbi_cheat_status(product)
     gallery_images = _get_product_gallery(product.slug, product=product)
 
+    vc_specs = None
+    vc_features = []
+    vc_status = None
+    vc_system_features = []
+    vc_cap_names = {}
+    if product.venomcheats_data:
+        try:
+            vc_data = json.loads(product.venomcheats_data)
+            vc_specs = {
+                'os': vc_data.get('operatingSystem', ''),
+                'cpu': vc_data.get('processor', ''),
+                'ac': vc_data.get('antiCheat', ''),
+            }
+            vc_features = vc_data.get('capabilities', [])
+            vc_status = vc_data.get('status', '')
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    try:
+        from utils.venomcheats import CAPABILITY_NAMES, SYSTEM_FEATURES
+        vc_cap_names = CAPABILITY_NAMES
+        vc_system_features = SYSTEM_FEATURES
+    except ImportError:
+        pass
+
     variants = []
     for t in tiers:
         variants.append({
@@ -285,6 +311,11 @@ def product_detail(slug):
         product_features=product_features,
         cheat_status=cheat_status,
         variants=variants,
+        vc_specs=vc_specs,
+        vc_features=vc_features,
+        vc_status=vc_status,
+        vc_cap_names=vc_cap_names,
+        vc_system_features=vc_system_features,
     )
 
 
