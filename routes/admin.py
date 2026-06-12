@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config
+from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_payfast_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -83,6 +83,8 @@ def _backup_products_safe():
 
 
 _FALLBACK_TIERS = [
+    ("1 Day", 1, 4.99),
+    ("3 Days", 3, 9.99),
     ("7 Days", 7, 16.99),
     ("30 Days", 30, 49.99),
 ]
@@ -131,10 +133,7 @@ def _sync_product_tiers(product):
     if not tiers_data:
         tiers_data = _FALLBACK_TIERS
 
-    IVNO_MIN_USD = 20.0
     for label, days, price in tiers_data:
-        if price < IVNO_MIN_USD:
-            continue
         db.session.add(PricingTier(
             product_id=product.id,
             label=label,
@@ -870,6 +869,9 @@ def settings():
             "chairfbi_api_base": "ChairFBI API Base URL",
             "ivno_api_key": "Ivno API Key",
             "ivno_api_secret": "Ivno API Secret",
+            "payfast_merchant_id": "PayFast Merchant ID",
+            "payfast_merchant_key": "PayFast Merchant Key",
+            "payfast_passphrase": "PayFast Passphrase",
             "loader_token": "Loader Token",
             "loader_url": "Loader Download URL",
             "loader_public_url": "Public Loader Download URL",
@@ -894,6 +896,7 @@ def settings():
     loader_cfg = get_loader_config()
     discord_cfg = get_discord_config()
     ivno_cfg = get_ivno_config()
+    pf_cfg = get_payfast_config()
     return render_template("admin/settings.html",
         site_url=Config.SITE_URL,
         chairfbi_api_token=cf_cfg["api_token"],
@@ -906,7 +909,10 @@ def settings():
         loader_public_url=loader_cfg.get("loader_public_url", ""),
         loader_private_url=loader_cfg.get("loader_private_url", ""),
         discord_public_url=discord_cfg.get("public_url", ""),
-        discord_private_url=discord_cfg.get("private_url", ""))
+        discord_private_url=discord_cfg.get("private_url", ""),
+        payfast_merchant_id=pf_cfg["merchant_id"],
+        payfast_merchant_key=pf_cfg["merchant_key"],
+        payfast_passphrase=pf_cfg["passphrase"])
 
 
 @admin_bp.route("/chairfbi")

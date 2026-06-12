@@ -182,3 +182,85 @@ def handle_fulfillment(order):
     )
     db.session.add(key)
     db.session.commit()
+
+
+@checkout_bp.route("/payfast", methods=["POST"])
+@login_required
+def payfast_session():
+    tier_id = request.form.get("tier_id")
+    if not tier_id:
+        return jsonify({"error": "No tier selected"}), 400
+
+    tier = db.session.get(PricingTier, int(tier_id))
+    if not tier:
+        return jsonify({"error": "Invalid tier"}), 400
+
+    from config import get_payfast_config
+    cfg = get_payfast_config()
+    if not cfg["merchant_id"] or not cfg["merchant_key"]:
+        return jsonify({"error": "PayFast not configured"}), 500
+
+    order = Order(
+        user_id=current_user.id,
+        tier_id=tier.id,
+        status="pending",
+    )
+    db.session.add(order)
+    db.session.flush()
+
+    try:
+        from utils.payfast import gbp_to_zar, build_payment_form
+
+        amount_zar = gbp_to_zar(tier.price_pounds)
+        item_name = f"{tier.product.name} ({tier.label})"[:100]
+        order_ref = f"BEAZT-PF-{order.id}"
+
+        result = build_payment_form(
+            amount_zar=amount_zar,
+            item_name=item_name,
+            order_id=order_ref,
+            return_url=url_for("main.my_keys", _external=True),
+            cancel_url=url_for("main.cheats", _external=True),
+            notify_url=url_for("checkout.payfast_itn", _external=True),
+            merchant_id=cfg["merchant_id"],
+            merchant_key=cfg["merchant_key"],
+            passphrase=cfg["passphrase"],
+            email=current_user.email,
+        )
+
+        return jsonify(result)
+    except Exception as e:
+        logger.exception("PayFast session creation failed")
+        return jsonify({"error": str(e)}), 500
+
+
+@checkout_bp.route("/payfast-itn", methods=["POST"])
+def payfast_itn():
+    from utils.payfast import validate_itn
+    valid, msg = validate_itn(request.form)
+    if not valid:
+        logger.warning("PayFast ITN validation failed: %s", msg)
+        return "INVALID"
+
+    pf_payment_id = request.form.get("pf_payment_id", "")
+    order_ref = request.form.get("m_payment_id", "")
+    payment_status = request.form.get("payment_status", "")
+
+    if not order_ref or not order_ref.startswith("BEAZT-PF-"):
+        logger.warning("PayFast ITN: unrecognized order %s", order_ref)
+        return "OK"
+
+    try:
+        order_id = int(order_ref.replace("BEAZT-PF-", ""))
+    except (ValueError, TypeError):
+        return "OK"
+
+    order = db.session.get(Order, order_id)
+    if not order:
+        logger.warning("PayFast ITN: order %s not found", order_id)
+        return "OK"
+
+    if payment_status == "COMPLETE" and order.status != "completed":
+        handle_fulfillment(order)
+
+    return "OK"

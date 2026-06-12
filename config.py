@@ -30,6 +30,9 @@ class Config:
     IVNO_API_KEY = os.getenv("IVNO_API_KEY", "")
     IVNO_API_SECRET = os.getenv("IVNO_API_SECRET", "")
     IVNO_BASE_URL = os.getenv("IVNO_BASE_URL", "https://app.ivno.io/api/ivno/v1")
+    PAYFAST_MERCHANT_ID = os.getenv("PAYFAST_MERCHANT_ID", "")
+    PAYFAST_MERCHANT_KEY = os.getenv("PAYFAST_MERCHANT_KEY", "")
+    PAYFAST_PASSPHRASE = os.getenv("PAYFAST_PASSPHRASE", "")
     LOADER_PUBLIC_URL = os.getenv("LOADER_PUBLIC_URL", "")
     LOADER_PRIVATE_URL = os.getenv("LOADER_PRIVATE_URL", "")
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY", "")
@@ -105,4 +108,23 @@ def get_discord_config():
     return {
         "public_url": _lookup("discord_public_url", Config.DISCORD_PUBLIC_URL),
         "private_url": _lookup("discord_private_url", Config.DISCORD_PRIVATE_URL),
+    }
+
+
+def get_payfast_config():
+    from models import Setting
+
+    def _lookup(key, default):
+        try:
+            val = Setting.get(key)
+            if val:
+                return val
+        except Exception:
+            pass
+        return default
+
+    return {
+        "merchant_id": _lookup("payfast_merchant_id", Config.PAYFAST_MERCHANT_ID),
+        "merchant_key": _lookup("payfast_merchant_key", Config.PAYFAST_MERCHANT_KEY),
+        "passphrase": _lookup("payfast_passphrase", Config.PAYFAST_PASSPHRASE),
     }
