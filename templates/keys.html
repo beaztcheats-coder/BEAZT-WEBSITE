@@ -8,23 +8,31 @@
       <span class="section-eyebrow">Dashboard</span>
       <h1 class="t-h1">My Keys</h1>
       <p class="text-muted">Your active plans, keys, and expiry details.</p>
-      <div class="page-chip-row">
-        <span class="chip">
-          <span class="icon icon-sm" data-lucide="shield"></span>
-          Legit presets
-        </span>
-        <span class="chip">
-          <span class="icon icon-sm" data-lucide="timer"></span>
-          Instant drop
-        </span>
-        <span class="chip">
-          <span class="icon icon-sm" data-lucide="headset"></span>
-          Discord support
-        </span>
-      </div>
     </div>
 
-    {% if loader_url or loader_token %}
+    {% if has_private and discord_private_url %}
+    <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(30,58,95,0.5);">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
+        <span class="icon" data-lucide="shield-check" style="color:var(--accent-l);width:22px;height:22px;"></span>
+        <strong style="font-size:0.95rem;">Private Access Unlocked</strong>
+      </div>
+      <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:0.85rem;">
+        You own an active private cheat license. Download the private loader and join the exclusive Discord server.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+        {% if loader_private_url %}
+        <a href="{{ loader_private_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+          <span class="icon icon-sm" data-lucide="download"></span> Download Private Loader
+        </a>
+        {% endif %}
+        <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+          <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if loader_public_url or loader_token %}
     <div class="loader-card reveal" style="margin-bottom:2rem;">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;">
         <span class="icon" data-lucide="download" style="color:var(--accent-l);width:22px;height:22px;"></span>
@@ -44,11 +52,15 @@
         </div>
       </div>
       {% endif %}
-      {% if loader_url %}
-      <a href="{{ loader_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+      {% if loader_public_url %}
+      <a href="{{ loader_public_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
         <span class="icon icon-sm" data-lucide="download"></span> Download Loader
       </a>
       {% endif %}
+      <p style="color:var(--text-dim);font-size:0.72rem;margin-top:0.6rem;">
+        <span class="icon icon-sm" data-lucide="info" style="width:14px;height:14px;"></span>
+        Before running: download <a href="https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download/" target="_blank" rel="noopener" style="color:var(--accent-l);">RivaTuner Statistics Server</a> and disable your antivirus real-time protection.
+      </p>
     </div>
     {% endif %}
 
@@ -62,6 +74,9 @@
                 <strong>{{ key.product.name if key.product else 'License' }}</strong>
                 {% if key.tier %}
                   <span class="key-tier-badge">{{ key.tier.label }}</span>
+                {% endif %}
+                {% if key.is_subscription %}
+                  <span class="key-tier-badge" style="border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:var(--success);">Subscription</span>
                 {% endif %}
                 <span class="key-created">Received {{ key.assigned_at.strftime('%d %b %Y') if key.assigned_at else key.created_at.strftime('%d %b %Y') }}</span>
               </div>
@@ -95,6 +110,12 @@
                 </div>
                 {% endif %}
               </div>
+              {% if key.product and key.product.buyer_notes %}
+              <div style="margin-top:0.8rem;padding-top:0.65rem;border-top:1px solid rgba(255,255,255,0.08);">
+                <span class="key-label">Instructions</span>
+                <p style="color:var(--text-soft);font-size:0.78rem;margin-top:0.2rem;white-space:pre-line;">{{ key.product.buyer_notes }}</p>
+              </div>
+              {% endif %}
             </div>
           </div>
         {% endfor %}

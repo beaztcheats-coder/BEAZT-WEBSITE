@@ -59,6 +59,7 @@ class PricingTier(db.Model):
     duration_days = db.Column(db.Integer, nullable=False)
     price_pence = db.Column(db.Integer, nullable=False)
     stripe_price_id = db.Column(db.String(128), nullable=True)
+    is_subscription = db.Column(db.Boolean, default=False)
 
     orders = db.relationship("Order", backref="tier", lazy="dynamic")
     keys = db.relationship("Key", backref="pricing_tier", lazy="dynamic")
@@ -75,6 +76,7 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     tier_id = db.Column(db.Integer, db.ForeignKey("pricing_tiers.id"), nullable=False)
     stripe_session_id = db.Column(db.String(128), unique=True, nullable=True)
+    stripe_subscription_id = db.Column(db.String(128), nullable=True)
     status = db.Column(db.String(32), default="pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -94,6 +96,7 @@ class Key(db.Model):
     assigned_at = db.Column(db.DateTime, nullable=True)
     expires_at = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    is_subscription = db.Column(db.Boolean, default=False)
     chairfbi_key_id = db.Column(db.String(64), nullable=True, index=True)
     chairfbi_cheat_id = db.Column(db.String(32), nullable=True)
 

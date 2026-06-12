@@ -41,6 +41,16 @@ def page_not_found(e):
     return render_template("404.html"), 404
 
 
+@app.context_processor
+def inject_discord():
+    try:
+        from config import get_discord_config
+        cfg = get_discord_config()
+        return {"discord_public_url": cfg["public_url"]}
+    except Exception:
+        return {"discord_public_url": "https://discord.gg/TvxrADZhNR"}
+
+
 with app.app_context():
     db.create_all()
 
@@ -115,6 +125,27 @@ with app.app_context():
         _cols = [r[1] for r in _cursor.fetchall()]
         if "gallery_images" not in _cols:
             _cursor.execute("ALTER TABLE products ADD COLUMN gallery_images TEXT")
+            _conn.commit()
+
+        # Ensure pricing_tiers table has is_subscription
+        _cursor.execute("PRAGMA table_info(pricing_tiers)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "is_subscription" not in _cols:
+            _cursor.execute("ALTER TABLE pricing_tiers ADD COLUMN is_subscription BOOLEAN DEFAULT 0")
+            _conn.commit()
+
+        # Ensure orders table has stripe_subscription_id
+        _cursor.execute("PRAGMA table_info(orders)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "stripe_subscription_id" not in _cols:
+            _cursor.execute("ALTER TABLE orders ADD COLUMN stripe_subscription_id VARCHAR(128)")
+            _conn.commit()
+
+        # Ensure keys table has is_subscription
+        _cursor.execute("PRAGMA table_info(keys)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "is_subscription" not in _cols:
+            _cursor.execute("ALTER TABLE keys ADD COLUMN is_subscription BOOLEAN DEFAULT 0")
             _conn.commit()
 
         # Ensure keys table has tier_id, assigned_at

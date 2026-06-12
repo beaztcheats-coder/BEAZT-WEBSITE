@@ -31,7 +31,7 @@
           {% if tiers %}
           <div class="cheat-card-pricing">
             {% for t in tiers[:3] %}
-              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d</span></span>
+              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
             {% endfor %}
           </div>
           {% else %}
@@ -63,7 +63,7 @@
           {% if tiers %}
           <div class="cheat-card-pricing">
             {% for t in tiers[:3] %}
-              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d</span></span>
+              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
             {% endfor %}
           </div>
           {% else %}

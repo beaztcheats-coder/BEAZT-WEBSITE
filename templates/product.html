@@ -106,8 +106,8 @@
               <input type="radio" name="variant_picker" value="{{ t.id }}"
                      x-model.number="selectedVariantId"
                      x-ref="variant_{{ t.id }}">
-              <span class="v-name">{{ t.label }}</span>
-              <span class="v-price">&pound;{{ "%.2f"|format(t.price_pounds) }}</span>
+              <span class="v-name">{{ t.label }}{% if t.is_subscription %} &#x21bb;{% endif %}</span>
+              <span class="v-price">&pound;{{ "%.2f"|format(t.price_pounds) }}{% if t.is_subscription %} / {{ t.duration_days }}d{% endif %}</span>
             </label>
             {% endfor %}
           </div>

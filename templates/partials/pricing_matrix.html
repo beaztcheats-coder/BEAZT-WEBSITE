@@ -76,7 +76,9 @@
                 <span class="per">{{ "%.2f"|format((tier.price_pounds / 30)) }} / month</span>
               {% endif %}
             </div>
-            {% if savings_pct > 0 %}
+            {% if tier.is_subscription %}
+            <span class="plan-saving" style="border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:var(--success);">&#x21bb; Recurring billing</span>
+            {% elif savings_pct > 0 %}
               <span class="plan-saving">Save {{ savings_pct|round(0)|int }}%</span>
             {% else %}
             <span class="plan-saving">Starter access tier</span>

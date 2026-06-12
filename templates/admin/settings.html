@@ -107,9 +107,38 @@
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.35rem;">
-            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Loader Download URL</label>
-            <input type="text" name="loader_url" value="{{ loader_url }}" placeholder="https://example.com/loader.zip" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-            {% if loader_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Direct download link for the loader.</span>{% endif %}
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Public Loader Download URL</label>
+            <input type="text" name="loader_public_url" value="{{ loader_public_url }}" placeholder="https://example.com/public-loader.zip" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            {% if loader_public_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Download link visible to all users.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Private Loader Download URL</label>
+            <input type="text" name="loader_private_url" value="{{ loader_private_url }}" placeholder="https://example.com/private-loader.zip" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            {% if loader_private_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Only shown to users with active private keys.</span>{% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== DISCORD SECTION ===== -->
+      <div>
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
+          <span class="icon icon-sm" data-lucide="message-circle"></span> Discord
+        </h3>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Public Discord URL</label>
+            <input type="text" name="discord_public_url" value="{{ discord_public_url }}" placeholder="https://discord.gg/TvxrADZhNR" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            {% if discord_public_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">Default: https://discord.gg/TvxrADZhNR</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Private Discord URL</label>
+            <input type="text" name="discord_private_url" value="{{ discord_private_url }}" placeholder="https://discord.gg/..." style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            {% if discord_private_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--warn);">Only shown to users with active private keys.</span>{% endif %}
           </div>
 
         </div>

@@ -73,7 +73,7 @@
 </div>
 
 <table class="admin-table" style="margin-bottom:2rem;">
-  <thead><tr><th>ID</th><th>Label</th><th>Duration</th><th>Price</th><th>Actions</th></tr></thead>
+  <thead><tr><th>ID</th><th>Label</th><th>Duration</th><th>Price</th><th>Subscription</th><th>Actions</th></tr></thead>
   <tbody>
     {% for t in tiers %}
     <tr>
@@ -81,11 +81,21 @@
       <td>{{ t.label }}</td>
       <td>{{ t.duration_days }} days</td>
       <td>&pound;{{ "%.2f"|format(t.price_pounds) }}</td>
-      <td style="display:flex;gap:0.35rem;">
-        <form method="POST" action="{{ url_for('admin.edit_tier', tier_id=t.id) }}" class="form-inline" style="display:inline-flex;">
+      <td>
+        <span class="badge-sm {{ 'badge-green' if t.is_subscription else '' }}" style="{% if not t.is_subscription %}background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid rgba(255,255,255,0.08);{% endif %}">
+          {{ 'Recurring' if t.is_subscription else 'One-time' }}
+        </span>
+      </td>
+      <td style="display:flex;gap:0.35rem;flex-wrap:wrap;align-items:center;">
+        <form method="POST" action="{{ url_for('admin.edit_tier', tier_id=t.id) }}" style="display:flex;gap:0.35rem;align-items:center;flex-wrap:wrap;">
           <input type="text" name="label" value="{{ t.label }}" style="width:70px;" placeholder="Label">
           <input type="number" name="duration_days" value="{{ t.duration_days }}" style="width:50px;" placeholder="Days">
           <input type="number" name="price_pounds" value="{{ t.price_pounds }}" step="0.01" style="width:60px;" placeholder="Price">
+          <label style="font-size:0.62rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;">
+            <input type="hidden" name="is_subscription" value="0">
+            <input type="checkbox" name="is_subscription" value="1" {% if t.is_subscription %}checked{% endif %}>
+            Sub
+          </label>
           <button type="submit" class="btn-xs btn-success-sm">Save</button>
         </form>
         <form method="POST" action="{{ url_for('admin.delete_tier', tier_id=t.id) }}" style="display:inline;" onsubmit="return confirm('Delete this tier?')">
@@ -98,10 +108,15 @@
 </table>
 
 <h3 style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">Add New Tier</h3>
-<form method="POST" action="{{ url_for('admin.add_tier', product_id=product.id) }}" class="form-inline">
+<form method="POST" action="{{ url_for('admin.add_tier', product_id=product.id) }}" style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
   <input type="text" name="label" placeholder="e.g. 3 Months" required style="width:100px;">
   <input type="number" name="duration_days" placeholder="Days" required style="width:70px;">
   <input type="number" name="price_pounds" placeholder="Price" step="0.01" required style="width:80px;">
+  <label style="font-size:0.68rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;">
+    <input type="hidden" name="is_subscription" value="0">
+    <input type="checkbox" name="is_subscription" value="1">
+    Subscription
+  </label>
   <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add Tier</button>
 </form>
 {% endblock %}

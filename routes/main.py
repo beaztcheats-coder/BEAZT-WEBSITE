@@ -4,7 +4,7 @@ import io
 from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for
 from flask_login import login_required, current_user
 from models import db, Product, Key, PricingTier
-from config import get_loader_config
+from config import get_loader_config, get_discord_config
 
 main_bp = Blueprint("main", __name__)
 
@@ -209,7 +209,8 @@ def index():
         )
         product_features = _get_product_features_from_db(product)
         cheat_status = _get_chairfbi_cheat_status(product)
-    return render_template("index.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status, all_products=all_products, cheat_statuses_home=cheat_statuses_home, private_products=private_products, resold_products=resold_products)
+    discord_cfg = get_discord_config()
+    return render_template("index.html", product=product, tiers=tiers, product_features=product_features, cheat_status=cheat_status, all_products=all_products, cheat_statuses_home=cheat_statuses_home, private_products=private_products, resold_products=resold_products, discord_public_url=discord_cfg["public_url"])
 
 
 @main_bp.route("/cheats")
@@ -289,7 +290,9 @@ def plan_detail(tier_id):
 @main_bp.route("/loader")
 def loader():
     loader = get_loader_config()
-    return render_template("loader.html", loader_token=loader["loader_token"], loader_url=loader["loader_url"])
+    return render_template("loader.html", 
+        loader_token=loader["loader_token"],
+        loader_public_url=loader.get("loader_public_url", loader.get("loader_url", "")))
 
 
 @main_bp.route("/feedback")
@@ -322,4 +325,12 @@ def my_keys():
         .all()
     )
     loader = get_loader_config()
-    return render_template("keys.html", keys=keys, loader_token=loader["loader_token"], loader_url=loader["loader_url"])
+    discord_cfg = get_discord_config()
+    has_private = any(k.product and k.product.visibility == "private" and k.is_active for k in keys)
+    return render_template("keys.html", keys=keys, 
+        loader_token=loader["loader_token"],
+        loader_public_url=loader.get("loader_public_url", loader.get("loader_url", "")),
+        loader_private_url=loader.get("loader_private_url", ""),
+        discord_public_url=discord_cfg["public_url"],
+        discord_private_url=discord_cfg["private_url"],
+        has_private=has_private)

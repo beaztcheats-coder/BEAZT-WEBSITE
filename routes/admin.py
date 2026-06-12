@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import get_stripe_config, get_chairfbi_config, get_loader_config
+from config import get_stripe_config, get_chairfbi_config, get_loader_config, get_discord_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -442,6 +442,7 @@ def add_tier(product_id):
         label=label,
         duration_days=duration,
         price_pence=int(price * 100),
+        is_subscription=request.form.get("is_subscription") == "1",
     )
     db.session.add(tier)
     db.session.commit()
@@ -457,6 +458,7 @@ def edit_tier(tier_id):
         abort(404)
     tier.label = request.form.get("label", tier.label).strip()
     tier.duration_days = request.form.get("duration_days", tier.duration_days, type=int)
+    tier.is_subscription = request.form.get("is_subscription") == "1"
     price = request.form.get("price_pounds", type=float)
     if price:
         tier.price_pence = int(price * 100)
@@ -650,6 +652,10 @@ def settings():
             "chairfbi_api_base": "ChairFBI API Base URL",
             "loader_token": "Loader Token",
             "loader_url": "Loader Download URL",
+            "loader_public_url": "Public Loader Download URL",
+            "loader_private_url": "Private Loader Download URL",
+            "discord_public_url": "Public Discord URL",
+            "discord_private_url": "Private Discord URL",
         }
         for key, label in fields.items():
             val = request.form.get(key, "").strip()
@@ -661,6 +667,7 @@ def settings():
     cfg = get_stripe_config()
     cf_cfg = get_chairfbi_config()
     loader_cfg = get_loader_config()
+    discord_cfg = get_discord_config()
     return render_template("admin/settings.html",
         stripe_secret=cfg["secret_key"],
         stripe_publishable=cfg["publishable_key"],
@@ -669,7 +676,11 @@ def settings():
         chairfbi_api_token=cf_cfg["api_token"],
         chairfbi_api_base=cf_cfg["api_base"],
         loader_token=loader_cfg["loader_token"],
-        loader_url=loader_cfg["loader_url"])
+        loader_url=loader_cfg.get("loader_url", ""),
+        loader_public_url=loader_cfg.get("loader_public_url", ""),
+        loader_private_url=loader_cfg.get("loader_private_url", ""),
+        discord_public_url=discord_cfg.get("public_url", ""),
+        discord_private_url=discord_cfg.get("private_url", ""))
 
 
 @admin_bp.route("/chairfbi")
