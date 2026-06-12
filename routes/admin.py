@@ -79,7 +79,7 @@ def _backup_products_safe():
         logger.error("Product backup to KV failed: %s", e)
 
 
-DEFAULT_TIERS = [
+_FALLBACK_TIERS = [
     ("1 Day", 1, 499),
     ("3 Days", 3, 999),
     ("7 Days", 7, 1699),
@@ -87,17 +87,38 @@ DEFAULT_TIERS = [
 ]
 
 
-def _create_default_tiers(product):
-    if product.visibility != "public":
-        return
+def _get_vc_slug(product):
+    if product.venomcheats_slug:
+        return product.venomcheats_slug
+    try:
+        from utils.venomcheats import match_chairfbi_to_venom
+        return match_chairfbi_to_venom(product.name)
+    except Exception:
+        return None
+
+
+def _sync_product_tiers(product):
     if PricingTier.query.filter_by(product_id=product.id).first():
         return
-    for label, days, pence in DEFAULT_TIERS:
+
+    tiers_data = None
+    slug = _get_vc_slug(product)
+    if slug:
+        try:
+            from utils.venomcheats import fetch_product_pricing
+            tiers_data = fetch_product_pricing(slug)
+        except Exception:
+            pass
+
+    if not tiers_data:
+        tiers_data = _FALLBACK_TIERS
+
+    for label, days, price in tiers_data:
         db.session.add(PricingTier(
             product_id=product.id,
             label=label,
             duration_days=days,
-            price_pence=pence,
+            price_pence=int(price * 100),
         ))
     db.session.commit()
 
@@ -869,7 +890,7 @@ def chairfbi_import_one():
     db.session.add(product)
     db.session.commit()
     _backup_products_safe()
-    _create_default_tiers(product)
+    _sync_product_tiers(product)
 
     enriched = _enrich_product_from_venomcheats(product)
     if enriched:
@@ -945,7 +966,7 @@ def chairfbi_import_all():
             pass
 
         for product in Product.query.order_by(Product.id).all():
-            _create_default_tiers(product)
+            _sync_product_tiers(product)
             if vc_prefetched:
                 if _enrich_product_from_venomcheats(product, vc_products=vc_prefetched):
                     enriched += 1
@@ -1054,7 +1075,7 @@ def chairfbi_sync_venomcheats():
         updated = 0
         for product in products:
             if _enrich_product_from_venomcheats(product, vc_products=vc_data):
-                _create_default_tiers(product)
+                _sync_product_tiers(product)
                 updated += 1
 
         rating = get_rating()

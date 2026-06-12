@@ -383,3 +383,41 @@ def sync_all(static_dir=None):
 
     logger.info("Synced %d VenomCheats products", len(result))
     return result
+
+
+def fetch_product_pricing(slug, timeout=15):
+    """Fetch pricing tiers from an individual VenomCheats product page.
+
+    Returns list of (label, duration_days, price_usd) tuples, or None on failure.
+    """
+    url = f"{BASE_URL}/en/cheats/{slug}"
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=timeout)
+        resp.raise_for_status()
+    except Exception as e:
+        logger.warning("Failed to fetch pricing for %s: %s", slug, e)
+        return None
+
+    tiers = re.findall(
+        r'(\d+)\s+(Day|Days).*?\$(\d+\.\d{2})',
+        resp.text, re.DOTALL,
+    )
+
+    if not tiers:
+        logger.warning("No pricing tiers found for %s", slug)
+        return None
+
+    result = []
+    seen = set()
+    for days_str, _, price_str in tiers:
+        days = int(days_str)
+        if days not in seen:
+            seen.add(days)
+            label = f"{days} Day{'s' if days > 1 else ''}"
+            result.append((label, days, float(price_str)))
+
+    if result:
+        result.sort(key=lambda x: x[1])
+        logger.info("Extracted %d pricing tiers for %s", len(result), slug)
+        return result
+    return None
