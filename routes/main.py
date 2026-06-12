@@ -366,16 +366,34 @@ def health_sellix():
     key = cfg.get("api_key", "")
     if not key:
         return {"ok": False, "error": "No API key configured"}
-    resp = _r.get(
-        "https://api.sellix.gg/v1/products",
-        headers={"Authorization": f"Bearer {key}"},
-        timeout=10,
-    )
+
+    results = {}
+    for base_url in [
+        "https://api.sellix.gg/v1",
+        "https://api.sellix.gg/api/v1",
+        "https://sellix.io/v1",
+    ]:
+        for label, hdrs in [
+            ("Bearer", {"Authorization": f"Bearer {key}"}),
+            ("X-API-Key", {"X-API-Key": key}),
+            ("Basic", {"Authorization": f"Basic {key}"}),
+        ]:
+            try:
+                resp = _r.get(
+                    f"{base_url}/products",
+                    headers=hdrs,
+                    timeout=10,
+                )
+                results[f"{base_url} | {label}"] = {
+                    "status": resp.status_code,
+                    "body": resp.text[:300],
+                }
+            except Exception as e:
+                results[f"{base_url} | {label}"] = {"status": "error", "body": str(e)}
+
     return {
-        "ok": resp.status_code in (200, 201),
-        "status": resp.status_code,
-        "key_prefix": key[:10] + "..." if len(key) > 10 else "short",
-        "body": resp.text[:500],
+        "key_prefix": key[:10] + "...",
+        "results": results,
     }
 
 

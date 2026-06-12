@@ -16,7 +16,8 @@ SELLIX_API = "https://api.sellix.gg/v1"
 
 def _sellix_headers():
     cfg = get_sellix_config()
-    return {"Authorization": f"Bearer {cfg['api_key']}"}
+    key = cfg["api_key"]
+    return {"X-API-Key": key}
 
 
 @checkout_bp.route("/create-session", methods=["POST"])
