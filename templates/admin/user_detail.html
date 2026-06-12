@@ -32,7 +32,7 @@
     <tr>
       <td>{{ o.id }}</td>
       <td>{{ o.tier.product.name if o.tier and o.tier.product else '-' }} ({{ o.tier.label if o.tier else '-' }})</td>
-      <td><span class="badge-sm {{ 'badge-green' if o.status == 'completed' else 'badge-yellow' }}">{{ o.status }}</span></td>
+      <td><span class="badge-sm {{ 'badge-green' if o.status == 'completed' else 'badge-blue' }}">{{ o.status }}</span></td>
       <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
     </tr>
     {% else %}

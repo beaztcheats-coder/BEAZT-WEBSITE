@@ -66,8 +66,8 @@ def cheat_image(slug):
     from PIL import Image, ImageDraw, ImageFont
 
     is_private = product.visibility == "private"
-    accent = (59, 130, 246) if is_private else (212, 212, 216)
-    accent_dark = (30, 80, 170) if is_private else (100, 100, 110)
+    accent = (30, 58, 95) if is_private else (212, 212, 216)
+    accent_dark = (21, 42, 68) if is_private else (100, 100, 110)
 
     width, height = 600, 340
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))

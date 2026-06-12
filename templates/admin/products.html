@@ -48,7 +48,7 @@
   </a>
   <form method="POST" action="{{ url_for('admin.import_products') }}" enctype="multipart/form-data" style="display:flex;gap:0.5rem;align-items:center;">
     <input type="file" name="products_file" accept=".json" style="font-size:0.72rem;color:var(--text-dim);">
-    <button type="submit" class="btn-xs" style="background:rgba(59,130,246,0.12);color:var(--accent-l);border:1px solid rgba(59,130,246,0.25);">Import JSON</button>
+    <button type="submit" class="btn-xs" style="background:rgba(30,58,95,0.12);color:var(--accent-l);border:1px solid rgba(30,58,95,0.25);">Import JSON</button>
   </form>
 </div>
 
@@ -61,12 +61,12 @@
       <td>{{ p.name }}</td>
       <td><code>{{ p.slug }}</code></td>
       <td>{{ 'Yes' if p.is_private else 'No' }}</td>
-      <td><span class="badge-sm {{ 'badge-green' if p.key_source == 'chairfbi' else 'badge-yellow' }}">{{ p.key_source }}</span></td>
+      <td><span class="badge-sm {{ 'badge-green' if p.key_source == 'chairfbi' else 'badge-blue' }}">{{ p.key_source }}</span></td>
       <td><span class="badge-sm {{ 'badge-green' if p.visibility == 'private' else 'badge-blue' }}">{{ p.visibility }}</span></td>
       <td><code>{{ p.chairfbi_cheat_id or '-' }}</code></td>
       <td>{{ p.tiers.count() }}</td>
       <td style="display:flex;gap:0.35rem;flex-wrap:wrap;">
-        <a href="{{ url_for('admin.product_tiers', product_id=p.id) }}" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-h);border:1px solid rgba(59,130,246,0.25);text-decoration:none;">
+        <a href="{{ url_for('admin.product_tiers', product_id=p.id) }}" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-h);border:1px solid rgba(30,58,95,0.25);text-decoration:none;">
           Tiers
         </a>
         <a href="{{ url_for('admin.product_keys', product_id=p.id) }}" class="btn-xs" style="background:rgba(90,206,168,0.18);color:var(--accent-2);border:1px solid rgba(90,206,168,0.35);text-decoration:none;">

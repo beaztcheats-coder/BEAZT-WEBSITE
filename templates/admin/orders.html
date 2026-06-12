@@ -35,7 +35,7 @@
       <td>{{ o.tier.label if o.tier else '-' }}</td>
       <td>&pound;{{ "%.2f"|format(o.tier.price_pounds) if o.tier else '-' }}</td>
       <td>
-        <span class="badge-sm {{ 'badge-green' if o.status == 'completed' else ('badge-yellow' if o.status == 'pending' else ('badge-orange' if o.status == 'awaiting_keys' else '')) }}">
+        <span class="badge-sm {{ 'badge-green' if o.status == 'completed' else ('badge-blue' if o.status == 'pending' else ('badge-orange' if o.status == 'awaiting_keys' else '')) }}">
           {{ o.status.replace('_', ' ') }}
         </span>
       </td>

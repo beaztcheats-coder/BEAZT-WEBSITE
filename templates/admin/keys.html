@@ -4,10 +4,10 @@
   <h1>All Keys</h1>
   <p>Manage every license key in the system.</p>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;">
-    <a href="{{ url_for('admin.keys') }}" class="btn-xs" style="text-decoration:none;background:{% if not request.args.get('filter') %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">All</a>
-    <a href="{{ url_for('admin.keys', filter='pool') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'pool' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Pool</a>
-    <a href="{{ url_for('admin.keys', filter='active') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'active' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Active</a>
-    <a href="{{ url_for('admin.keys', filter='expired') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'expired' %}var(--accent);color:#031136{% else %}rgba(96,147,255,0.12);color:var(--text-soft){% endif %}">Expired</a>
+    <a href="{{ url_for('admin.keys') }}" class="btn-xs" style="text-decoration:none;background:{% if not request.args.get('filter') %}var(--accent);color:#0D1A2E{% else %}rgba(58,106,158,0.12);color:var(--text-soft){% endif %}">All</a>
+    <a href="{{ url_for('admin.keys', filter='pool') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'pool' %}var(--accent);color:#0D1A2E{% else %}rgba(58,106,158,0.12);color:var(--text-soft){% endif %}">Pool</a>
+    <a href="{{ url_for('admin.keys', filter='active') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'active' %}var(--accent);color:#0D1A2E{% else %}rgba(58,106,158,0.12);color:var(--text-soft){% endif %}">Active</a>
+    <a href="{{ url_for('admin.keys', filter='expired') }}" class="btn-xs" style="text-decoration:none;background:{% if request.args.get('filter') == 'expired' %}var(--accent);color:#0D1A2E{% else %}rgba(58,106,158,0.12);color:var(--text-soft){% endif %}">Expired</a>
   </div>
 </div>
 
@@ -28,7 +28,7 @@
       <td>{{ k.user.username if k.user else '<span style="color:var(--text-dim);">Pool</span>'|safe }}</td>
       <td>
         {% if not k.user_id %}
-          <span class="badge-sm" style="background:rgba(255,185,112,0.15);color:var(--accent-warm);">Pool</span>
+          <span class="badge-sm" style="background:rgba(58,106,158,0.15);color:var(--accent-warm);">Pool</span>
         {% elif k.is_active %}
           <span class="badge-sm badge-green">Active</span>
         {% else %}

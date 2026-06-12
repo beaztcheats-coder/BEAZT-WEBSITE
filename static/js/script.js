@@ -52,7 +52,7 @@
         if (s.isHot) {
           ctx.fillStyle = "rgba(239,68,68," + s.alpha + ")";
         } else {
-          ctx.fillStyle = "rgba(59,130,246," + s.alpha + ")";
+          ctx.fillStyle = "rgba(30,58,95," + s.alpha + ")";
         }
         ctx.fillText(text, s.x, s.y);
         s.y += s.speed;
@@ -76,7 +76,7 @@
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(96,165,250," + p.a + ")";
+        ctx.fillStyle = "rgba(58,106,158," + p.a + ")";
         ctx.fill();
       }
     }
