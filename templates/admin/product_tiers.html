@@ -157,11 +157,11 @@
   <input type="text" name="label" placeholder="e.g. 3 Months" required style="width:100px;">
   <input type="number" name="duration_days" placeholder="Days" required style="width:70px;">
   <input type="number" name="price_pounds" placeholder="Price" step="0.01" required style="width:80px;">
-  <label style="font-size:0.68rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;">
-    <input type="hidden" name="is_subscription" value="0">
-    <input type="checkbox" name="is_subscription" value="1" {% if product.visibility == 'private' %}checked{% endif %}>
-    Subscription
-  </label>
+  <select name="billing_type" style="width:110px;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.78rem;">
+    <option value="one_time">One-time</option>
+    <option value="subscription" {% if product.visibility == 'private' %}selected{% endif %}>Subscription</option>
+  </select>
+  <input type="text" name="ivno_subscription_link" placeholder="Ivno sub link" style="width:180px;font-family:var(--mono);font-size:0.72rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
   <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add Tier</button>
 </form>
 {% endblock %}

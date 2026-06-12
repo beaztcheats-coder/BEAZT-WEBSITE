@@ -105,6 +105,16 @@ with app.app_context():
             _cursor.execute("UPDATE products SET visibility='private' WHERE key_source='pool'")
             _conn.commit()
 
+        # Ensure pricing_tiers has billing_type, ivno_subscription_link
+        _cursor.execute("PRAGMA table_info(pricing_tiers)")
+        _tier_cols = [r[1] for r in _cursor.fetchall()]
+        if "billing_type" not in _tier_cols:
+            _cursor.execute("ALTER TABLE pricing_tiers ADD COLUMN billing_type VARCHAR(16) DEFAULT 'one_time'")
+            _conn.commit()
+        if "ivno_subscription_link" not in _tier_cols:
+            _cursor.execute("ALTER TABLE pricing_tiers ADD COLUMN ivno_subscription_link VARCHAR(512)")
+            _conn.commit()
+
         # Ensure products table has venomcheats_slug
         _cursor.execute("PRAGMA table_info(products)")
         _cols = [r[1] for r in _cursor.fetchall()]

@@ -300,6 +300,8 @@ def product_detail(slug):
             "duration_days": t.duration_days,
             "price_pence": t.price_pence,
             "price_pounds": t.price_pounds,
+            "billing_type": t.billing_type,
+            "subscription_link": t.ivno_subscription_link or "",
         })
 
     return render_template(

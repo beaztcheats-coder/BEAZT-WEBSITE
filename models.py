@@ -59,6 +59,8 @@ class PricingTier(db.Model):
     duration_days = db.Column(db.Integer, nullable=False)
     price_pence = db.Column(db.Integer, nullable=False)
     stripe_price_id = db.Column(db.String(128), nullable=True)
+    billing_type = db.Column(db.String(16), default="one_time")
+    ivno_subscription_link = db.Column(db.String(512), nullable=True)
     is_subscription = db.Column(db.Boolean, default=False)
     sellix_product_id = db.Column(db.String(64), nullable=True)
 

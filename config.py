@@ -29,6 +29,9 @@ class Config:
     CHAIRFBI_API_BASE = os.getenv("CHAIRFBI_API_BASE", "https://access.chairfbi.com")
     LOADER_TOKEN = os.getenv("LOADER_TOKEN", "")
     LOADER_URL = os.getenv("LOADER_URL", "")
+    IVNO_API_KEY = os.getenv("IVNO_API_KEY", "")
+    IVNO_API_SECRET = os.getenv("IVNO_API_SECRET", "")
+    IVNO_BASE_URL = os.getenv("IVNO_BASE_URL", "https://app.ivno.io/api/ivno/v1")
     LOADER_PUBLIC_URL = os.getenv("LOADER_PUBLIC_URL", "")
     LOADER_PRIVATE_URL = os.getenv("LOADER_PRIVATE_URL", "")
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY", "")
@@ -85,8 +88,25 @@ def get_loader_config():
     return {
         "loader_token": _lookup("loader_token", Config.LOADER_TOKEN),
         "loader_url": _lookup("loader_url", Config.LOADER_URL),
-        "loader_public_url": _lookup("loader_public_url", Config.LOADER_PUBLIC_URL),
-        "loader_private_url": _lookup("loader_private_url", Config.LOADER_PRIVATE_URL),
+    }
+
+
+def get_ivno_config():
+    from models import Setting
+
+    def _lookup(key, default):
+        try:
+            val = Setting.get(key)
+            if val:
+                return val
+        except Exception:
+            pass
+        return default
+
+    return {
+        "api_key": _lookup("ivno_api_key", Config.IVNO_API_KEY),
+        "api_secret": _lookup("ivno_api_secret", Config.IVNO_API_SECRET),
+        "base_url": _lookup("ivno_base_url", Config.IVNO_BASE_URL),
     }
 
 

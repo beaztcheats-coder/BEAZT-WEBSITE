@@ -226,3 +226,155 @@ def _handle_charge(charge):
     db.session.add(key)
     db.session.commit()
     logger.info("Key auto-generated for SellApp order %s", order.id)
+
+
+# ── Ivno Payments ─────────────────────────────
+
+@checkout_bp.route("/ivno", methods=["POST"])
+@login_required
+def ivno_session():
+    tier_id = request.form.get("tier_id")
+    if not tier_id:
+        return jsonify({"error": "No tier selected"}), 400
+
+    tier = db.session.get(PricingTier, int(tier_id))
+    if not tier:
+        return jsonify({"error": "Invalid tier"}), 400
+
+    from config import get_ivno_config
+    cfg = get_ivno_config()
+    if not cfg["api_key"]:
+        return jsonify({"error": "Ivno API key not configured"}), 500
+
+    order = Order(
+        user_id=current_user.id,
+        tier_id=tier.id,
+        status="pending",
+    )
+    db.session.add(order)
+    db.session.flush()
+
+    try:
+        from utils.ivno import IvnoPayments
+        ivno = IvnoPayments(api_key=cfg["api_key"], api_secret=cfg["api_secret"], base_url=cfg["base_url"])
+
+        product = tier.product
+        domain = request.host
+        if domain and ":" in domain:
+            domain = domain.split(":")[0]
+
+        result = ivno.create_payment(
+            amount=tier.price_pounds,
+            currency="GBP",
+            order_id=f"BEAZT-{order.id}",
+            return_url=url_for("main.my_keys", _external=True),
+            email=current_user.email,
+            webhook_url=url_for("checkout.ivno_webhook", _external=True),
+            domain=domain,
+        )
+
+        if not result.get("success") or not result.get("payment_url"):
+            logger.error("Ivno payment creation failed: %s", result)
+            return jsonify({"error": "Payment initialization failed"}), 500
+
+        return jsonify({"payment_url": result["payment_url"]})
+
+    except Exception as e:
+        logger.exception("Ivno session creation failed")
+        return jsonify({"error": str(e)}), 500
+
+
+@checkout_bp.route("/ivno-webhook", methods=["POST"])
+def ivno_webhook():
+    data = request.get_json(silent=True) or {}
+    event = data.get("event", "")
+    status = data.get("status", "")
+    order_id_raw = data.get("order_id", "")
+    transaction_id = data.get("transaction_id")
+
+    if not order_id_raw or not order_id_raw.startswith("BEAZT-"):
+        logger.warning("Ivno webhook: unrecognized order_id %s", order_id_raw)
+        return jsonify({"received": True})
+
+    try:
+        order_id = int(order_id_raw.replace("BEAZT-", ""))
+    except (ValueError, TypeError):
+        return jsonify({"received": True})
+
+    order = db.session.get(Order, order_id)
+    if not order:
+        logger.warning("Ivno webhook: order %s not found", order_id)
+        return jsonify({"received": True})
+
+    if event != "payment.updated":
+        return jsonify({"received": True})
+
+    if status == "completed" and order.status != "completed":
+        handle_checkout_completed_ivno(order)
+    elif status == "failed":
+        order.status = "failed"
+        db.session.commit()
+
+    return jsonify({"received": True})
+
+
+def handle_checkout_completed_ivno(order):
+    tier = order.tier
+    if not tier:
+        return
+
+    product = tier.product
+    product_id = product.id if product else 1
+    duration_days = tier.duration_days
+    expires_at = datetime.utcnow() + timedelta(days=duration_days)
+
+    pool_key = (
+        Key.query
+        .filter_by(product_id=product_id, tier_id=tier.id, user_id=None, is_active=False)
+        .order_by(Key.created_at.asc())
+        .first()
+    )
+    if pool_key:
+        pool_key.user_id = order.user_id
+        pool_key.order_id = order.id
+        pool_key.expires_at = expires_at
+        pool_key.assigned_at = datetime.utcnow()
+        pool_key.is_active = True
+        order.status = "completed"
+        db.session.commit()
+        return
+
+    if product and product.key_source == "pool":
+        order.status = "awaiting_keys"
+        db.session.commit()
+        return
+
+    from config import get_chairfbi_config
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    cheat_id = product.chairfbi_cheat_id if product else ""
+
+    if cheat_id and api_token:
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
+            result = cf.create_key(cheat_id=cheat_id, days=duration_days)
+            keys = result.get("keys", [])
+            key_value = keys[0] if keys else ""
+        except Exception:
+            logger.exception("ChairFBI key creation failed for Ivno order %s", order.id)
+            key_value = ""
+
+    if not key_value:
+        key_value = "BEAZT-" + secrets.token_hex(16).upper()
+
+    order.status = "completed"
+    key = Key(
+        user_id=order.user_id, order_id=order.id,
+        product_id=product_id, tier_id=tier.id,
+        key_value=key_value, expires_at=expires_at,
+        chairfbi_key_id=key_value,
+        chairfbi_cheat_id=cheat_id,
+    )
+    db.session.add(key)
+    db.session.commit()

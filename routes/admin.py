@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_sellapp_config, get_chairfbi_config, get_loader_config, get_discord_config
+from config import Config, get_sellapp_config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -656,7 +656,8 @@ def add_tier(product_id):
         label=label,
         duration_days=duration,
         price_pence=int(price * 100),
-        is_subscription="1" in request.form.getlist("is_subscription"),
+        billing_type=request.form.get("billing_type", "one_time", type=str),
+        ivno_subscription_link=request.form.get("ivno_subscription_link", "").strip() or None,
     )
     db.session.add(tier)
     db.session.commit()
@@ -672,10 +673,15 @@ def edit_tier(tier_id):
         abort(404)
     tier.label = request.form.get("label", tier.label).strip()
     tier.duration_days = request.form.get("duration_days", tier.duration_days, type=int)
-    tier.is_subscription = "1" in request.form.getlist("is_subscription")
     price = request.form.get("price_pounds", type=float)
     if price:
         tier.price_pence = int(price * 100)
+    billing_type = request.form.get("billing_type")
+    if billing_type in ("one_time", "subscription"):
+        tier.billing_type = billing_type
+    sub_link = request.form.get("ivno_subscription_link", "").strip()
+    if sub_link:
+        tier.ivno_subscription_link = sub_link
     db.session.commit()
     flash("Tier updated.", "success")
     return redirect(url_for("admin.product_tiers", product_id=tier.product_id))
@@ -863,6 +869,8 @@ def settings():
             "site_url": "Site URL",
             "chairfbi_api_token": "ChairFBI API Token",
             "chairfbi_api_base": "ChairFBI API Base URL",
+            "ivno_api_key": "Ivno API Key",
+            "ivno_api_secret": "Ivno API Secret",
             "loader_token": "Loader Token",
             "loader_url": "Loader Download URL",
             "loader_public_url": "Public Loader Download URL",
@@ -887,12 +895,16 @@ def settings():
     cf_cfg = get_chairfbi_config()
     loader_cfg = get_loader_config()
     discord_cfg = get_discord_config()
+    ivno_cfg = get_ivno_config()
     return render_template("admin/settings.html",
         sellapp_api_key=sellapp_cfg["api_key"],
         sellapp_webhook_secret=sellapp_cfg["webhook_secret"],
         site_url=Config.SITE_URL,
         chairfbi_api_token=cf_cfg["api_token"],
         chairfbi_api_base=cf_cfg["api_base"],
+        ivno_api_key=ivno_cfg["api_key"],
+        ivno_api_secret=ivno_cfg["api_secret"],
+        ivno_base_url=ivno_cfg["base_url"],
         loader_token=loader_cfg["loader_token"],
         loader_url=loader_cfg.get("loader_url", ""),
         loader_public_url=loader_cfg.get("loader_public_url", ""),

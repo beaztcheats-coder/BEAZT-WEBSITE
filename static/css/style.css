@@ -2174,8 +2174,13 @@ textarea::placeholder {
 .variant-card:hover { border-color: rgba(255,255,255,0.16); }
 .variant-card.is-active {
   border-color: var(--accent-h);
-  background: rgba(30,58,95,0.1);
-  box-shadow: 0 0 16px rgba(30,58,95,0.08);
+  background: rgba(59,130,246,0.1);
+  box-shadow: 0 0 16px rgba(59,130,246,0.08);
+}
+.variant-card--sub.is-active {
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.08);
+  box-shadow: 0 0 16px rgba(34,197,94,0.08);
 }
 .variant-card input[type="radio"] { display: none; }
 .v-name { font-size: 0.82rem; font-weight: 600; }

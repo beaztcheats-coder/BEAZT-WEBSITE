@@ -15,11 +15,6 @@
       selectedVariantId: d.selectedVariantId,
       variants: d.variants,
       activeTab: 'description',
-      activeImage: '',
-      init() {
-        var firstImg = document.querySelector('.product-hero-img');
-        this.activeImage = firstImg ? firstImg.src : '';
-      },
       get currentVariant() {
         return this.variants.find(function(v) { return v.id === this.selectedVariantId; }.bind(this)) || this.variants[0] || null;
       },
@@ -27,14 +22,29 @@
         var v = this.currentVariant;
         return v ? v.price_pounds : 0;
       },
+      get isSubscription() {
+        var v = this.currentVariant;
+        return v ? v.billing_type === 'subscription' : false;
+      },
+      get subscriptionLink() {
+        var v = this.currentVariant;
+        return v ? v.subscription_link : '';
+      },
       get buyLabel() {
         if (!d.isAuthenticated) return 'Sign in to Buy';
         if (d.isUnavailable) return 'Unavailable';
         var v = this.currentVariant;
-        return v ? 'Buy ' + v.label + ' Plan' : 'Buy Now';
+        if (!v) return 'Buy Now';
+        if (v.billing_type === 'subscription') return 'Subscribe - ' + v.label;
+        return 'Buy ' + v.label + ' Plan';
       },
       get canBuy() {
         return d.isAuthenticated;
+      },
+      get checkoutAction() {
+        var v = this.currentVariant;
+        if (v && v.billing_type === 'subscription' && v.subscription_link) return v.subscription_link;
+        return '{{ url_for('checkout.create_session') }}';
       }
     };
   };
@@ -131,30 +141,58 @@
         <span class="pill pill-success">Instant Delivery</span>
       </div>
 
-      <form method="POST" action="{{ url_for('checkout.create_session') }}" autocomplete="off">
+      <form method="POST" :action="checkoutAction" autocomplete="off"
+            x-data="{ subTiers: variants.filter(function(v) { return v.billing_type === 'subscription'; }), oneTiers: variants.filter(function(v) { return v.billing_type !== 'subscription'; }) }">
         <input type="hidden" name="tier_id" :value="selectedVariantId">
 
-        <div class="field">
-          <span class="field-label">Select Duration</span>
-          <div class="variant-grid">
-            {% for t in tiers %}
-            <label class="variant-card"
-                   :class="{ 'is-active': selectedVariantId === {{ t.id }} }">
-              <input type="radio" name="variant_picker" value="{{ t.id }}"
-                     x-model.number="selectedVariantId"
-                     x-ref="variant_{{ t.id }}">
-              <span class="v-name">{{ t.label }}{% if t.is_subscription %} &#x21bb;{% endif %}</span>
-              <span class="v-price">&pound;{{ "%.2f"|format(t.price_pounds) }}{% if t.is_subscription %} / {{ t.duration_days }}d{% endif %}</span>
-            </label>
-            {% endfor %}
+        <template x-if="subTiers.length > 0">
+          <div class="field">
+            <span class="field-label">Subscribe</span>
+            <div class="variant-grid">
+              <template x-for="t in subTiers" :key="t.id">
+                <label class="variant-card variant-card--sub"
+                       :class="{ 'is-active': selectedVariantId === t.id }">
+                  <input type="radio" name="variant_picker" :value="t.id"
+                         x-model.number="selectedVariantId">
+                  <span class="v-name" x-text="t.label"></span>
+                  <span class="v-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span> / <span x-text="t.duration_days"></span>d</span>
+                </label>
+              </template>
+            </div>
           </div>
-        </div>
+        </template>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg"
-                :disabled="!canBuy || buyLabel === 'Unavailable'">
-          <span class="icon" data-lucide="shopping-cart"></span>
-          <span x-text="buyLabel">Buy Now</span>
-        </button>
+        <template x-if="oneTiers.length > 0">
+          <div class="field">
+            <span class="field-label" x-text="subTiers.length > 0 ? 'One-Time Purchase' : 'Select Duration'"></span>
+            <div class="variant-grid">
+              <template x-for="t in oneTiers" :key="t.id">
+                <label class="variant-card"
+                       :class="{ 'is-active': selectedVariantId === t.id }">
+                  <input type="radio" name="variant_picker" :value="t.id"
+                         x-model.number="selectedVariantId">
+                  <span class="v-name" x-text="t.label"></span>
+                  <span class="v-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span></span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="isSubscription && subscriptionLink">
+          <a :href="subscriptionLink" target="_blank" rel="noopener"
+             class="btn btn-primary btn-block btn-lg" style="display:flex;text-decoration:none;">
+            <span class="icon" data-lucide="credit-card"></span>
+            <span x-text="buyLabel">Subscribe</span>
+          </a>
+        </template>
+        <template x-if="!isSubscription">
+          <button type="submit" class="btn btn-primary btn-block btn-lg"
+                  :disabled="!canBuy || buyLabel === 'Unavailable'">
+            <span class="icon" data-lucide="shopping-cart"></span>
+            <span x-text="buyLabel">Buy Now</span>
+          </button>
+        </template>
       </form>
 
       <div class="trust-row">
