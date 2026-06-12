@@ -36,13 +36,14 @@ def gbp_to_zar(gbp_amount):
 
 
 def _build_signature(data, passphrase):
+    from urllib.parse import quote_plus
     fields = []
     for k in sorted(data.keys()):
         v = data.get(k, "")
         if v:
-            fields.append(f"{k}={v}")
+            fields.append(f"{k}={quote_plus(str(v))}")
     if passphrase:
-        fields.append(f"passphrase={passphrase}")
+        fields.append(f"passphrase={quote_plus(str(passphrase))}")
     raw = "&".join(fields)
     return hashlib.md5(raw.encode()).hexdigest()
 
