@@ -28,7 +28,7 @@ def _enrich_product_from_venomcheats(product):
             download_product_media,
         )
 
-        slug = match_chairfbi_to_venom(product.name)
+        slug = product.venomcheats_slug or match_chairfbi_to_venom(product.name)
         if not slug:
             return False
 
@@ -1037,6 +1037,7 @@ def chairfbi_sync_venomcheats():
         updated = 0
         for product in products:
             if _enrich_product_from_venomcheats(product):
+                _create_default_tiers(product)
                 updated += 1
 
         rating = get_rating()
@@ -1049,7 +1050,7 @@ def chairfbi_sync_venomcheats():
 
         db.session.commit()
         _backup_products_safe()
-        flash(f"Synced {len(vc_data)} products from VenomCheats. Updated {updated} local product(s).", "success")
+        flash(f"Updated {updated} product(s) from VenomCheats.", "success")
     except Exception as e:
         flash(f"VenomCheats sync failed: {e}", "error")
 
