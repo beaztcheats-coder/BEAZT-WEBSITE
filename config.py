@@ -47,7 +47,6 @@ def get_sellix_config():
 
     return {
         "api_key": _lookup("sellix_api_key", Config.SELLIX_API_KEY),
-        "webhook_secret": _lookup("sellix_webhook_secret", Config.SELLIX_WEBHOOK_SECRET),
     }
 
 
