@@ -53,7 +53,6 @@ def create_session():
             }
 
         session_kwargs = {
-            "payment_method_types": ["card"],
             "customer_email": current_user.email,
             "client_reference_id": str(current_user.id),
             "line_items": [line_item],
@@ -77,6 +76,8 @@ def create_session():
         pmd = os.environ.get("STRIPE_PAYMENT_METHOD_DOMAIN", "") or cfg.get("payment_method_domain", "")
         if pmd:
             session_kwargs["payment_method_configuration"] = pmd
+        else:
+            session_kwargs["payment_method_types"] = ["card"]
 
         session = stripe.checkout.Session.create(**session_kwargs)
 

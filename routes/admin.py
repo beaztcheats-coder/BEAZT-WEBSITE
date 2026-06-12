@@ -489,10 +489,9 @@ def product_tiers(product_id):
                 product.chairfbi_cheat_id = None
                 cheat_id = None
         product.chairfbi_cheat_id = cheat_id if cheat_id else None
-        if "visibility" in request.form:
-            visibility_val = request.form.get("visibility", "").strip()
-            if visibility_val in ("private", "public"):
-                product.visibility = visibility_val
+        visibility_val = request.form.get("visibility", "").strip()
+        if visibility_val in ("private", "public"):
+            product.visibility = visibility_val
         if "name" in request.form:
             new_name = request.form.get("name", "").strip()
             if new_name and new_name != product.name:
