@@ -255,7 +255,7 @@ def create_product():
         slug=slug,
         description=description or None,
         image_url=image_url or None,
-        is_private=True,
+        is_private=(visibility_val == "private"),
         key_source=key_source,
         chairfbi_cheat_id=chairfbi_cheat_id or None,
         visibility=visibility_val,
@@ -852,16 +852,6 @@ def chairfbi_import_all():
             created += 1
 
         db.session.commit()
-
-        for cheat in cheats:
-            cheat_name = cheat.get("name", "").strip()
-            if not cheat_name:
-                continue
-            slug = re.sub(r"[^a-z0-9]+", "-", cheat_name.lower()).strip("-")
-            product = Product.query.filter_by(slug=slug).first()
-            if product:
-                if _enrich_product_from_venomcheats(product):
-                    enriched += 1
 
         msg = f"Imported {created} new cheat(s) from ChairFBI. {skipped} already exist."
         if enriched:

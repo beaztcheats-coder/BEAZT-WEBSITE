@@ -173,17 +173,29 @@ def _get_chairfbi_cheat_status(product):
     return None
 
 
-def _get_product_gallery(slug, fallback_image=None):
-    gallery_dir = Path(current_app.root_path) / "static" / "images" / "products" / slug
+def _get_product_gallery(slug, product=None):
     images = []
+
+    if product and product.gallery_images:
+        try:
+            import json
+            vc_images = json.loads(product.gallery_images)
+            if isinstance(vc_images, list):
+                images.extend(vc_images)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    gallery_dir = Path(current_app.root_path) / "static" / "images" / "products" / slug
     if gallery_dir.exists() and gallery_dir.is_dir():
         allowed = {".png", ".jpg", ".jpeg", ".webp", ".avif"}
         for file_path in sorted(gallery_dir.iterdir()):
             if file_path.suffix.lower() in allowed:
                 images.append(f"/static/images/products/{slug}/{file_path.name}")
 
-    if not images and fallback_image:
-        images.append(fallback_image)
+    if not images and product and product.image_url:
+        images.append(product.image_url)
+    elif not images and product is None:
+        pass
 
     return images
 
@@ -216,8 +228,8 @@ def index():
 @main_bp.route("/cheats")
 def cheats():
     products = Product.query.order_by(Product.created_at.asc()).all()
-    private_products = [p for p in products if p.key_source == "pool"]
-    resold_products = [p for p in products if p.key_source != "pool"]
+    private_products = [p for p in products if p.visibility == "private"]
+    resold_products = [p for p in products if p.visibility != "private"]
     cheat_statuses = {}
     product_tiers = {}
     for p in products:
@@ -252,7 +264,7 @@ def product_detail(slug):
 
     product_features = _get_product_features_from_db(product)
     cheat_status = _get_chairfbi_cheat_status(product)
-    gallery_images = _get_product_gallery(product.slug, product.image_url)
+    gallery_images = _get_product_gallery(product.slug, product=product)
 
     variants = []
     for t in tiers:
