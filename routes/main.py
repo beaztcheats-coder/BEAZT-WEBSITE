@@ -382,6 +382,21 @@ def health_products():
     }
 
 
+@main_bp.route("/health/kv")
+def health_kv():
+    import os as _os
+    keys_found = {}
+    for k in sorted(_os.environ.keys()):
+        kl = k.lower()
+        if "kv" in kl or "redis" in kl or "upstash" in kl:
+            keys_found[k] = _os.environ[k][:20] + "..."
+    return {
+        "kv_available": bool(_os.environ.get("KV_REST_API_URL") or _os.environ.get("KV_URL")),
+        "kv_keys_found": keys_found,
+        "all_env_prefixes": sorted(set(k.split("_")[0] for k in _os.environ.keys())),
+    }
+
+
 @main_bp.route("/my-keys")
 @login_required
 def my_keys():
