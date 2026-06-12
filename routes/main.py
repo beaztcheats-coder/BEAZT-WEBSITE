@@ -358,6 +358,27 @@ def privacy():
     return render_template("privacy.html")
 
 
+@main_bp.route("/health/sellix")
+def health_sellix():
+    from config import get_sellix_config
+    import requests as _r
+    cfg = get_sellix_config()
+    key = cfg.get("api_key", "")
+    if not key:
+        return {"ok": False, "error": "No API key configured"}
+    resp = _r.get(
+        "https://api.sellix.gg/v1/products",
+        headers={"Authorization": f"Bearer {key}"},
+        timeout=10,
+    )
+    return {
+        "ok": resp.status_code in (200, 201),
+        "status": resp.status_code,
+        "key_prefix": key[:10] + "..." if len(key) > 10 else "short",
+        "body": resp.text[:500],
+    }
+
+
 @main_bp.route("/health/products")
 def health_products():
     from models import Product
