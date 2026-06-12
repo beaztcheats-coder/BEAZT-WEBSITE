@@ -530,6 +530,38 @@ def product_tiers(product_id):
             image_url_val = request.form.get("image_url", "").strip()
             product.image_url = image_url_val if image_url_val else None
 
+        # Gallery image manager
+        gallery = []
+        if product.gallery_images:
+            try:
+                gallery = json.loads(product.gallery_images)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        delete_idx = request.form.get("delete_gallery_image", type=int)
+        if delete_idx is not None and 0 <= delete_idx < len(gallery):
+            gallery.pop(delete_idx)
+
+        add_url = request.form.get("add_gallery_url", "").strip()
+        if add_url:
+            gallery.append(add_url)
+
+        gallery_file = request.files.get("gallery_upload")
+        if gallery_file and gallery_file.filename:
+            ext = os.path.splitext(gallery_file.filename)[1].lower()
+            if ext in (".png", ".jpg", ".jpeg", ".webp"):
+                try:
+                    upload_dir = os.path.join(current_app.root_path, "static", "images", "products", product.slug)
+                    os.makedirs(upload_dir, exist_ok=True)
+                    count = len([f for f in os.listdir(upload_dir) if f.startswith("gallery_")])
+                    fname = f"gallery_{count}{ext}"
+                    gallery_file.save(os.path.join(upload_dir, fname))
+                    gallery.append(f"/static/images/products/{product.slug}/{fname}")
+                except OSError:
+                    flash("Upload unavailable on serverless. Use the URL field to add images.", "warn")
+
+        product.gallery_images = json.dumps(gallery) if gallery else None
+
         db.session.commit()
         ok = _backup_products_safe()
         product = db.session.get(Product, product_id)
@@ -539,8 +571,15 @@ def product_tiers(product_id):
             flash(f"Saved locally (KV unavailable). Visibility: {product.visibility}. Link KV and redeploy.", "warn")
         return redirect(url_for("admin.product_tiers", product_id=product.id))
 
+    gallery_imgs = []
+    if product.gallery_images:
+        try:
+            gallery_imgs = json.loads(product.gallery_images)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     tiers = PricingTier.query.filter_by(product_id=product.id).order_by(PricingTier.duration_days).all()
-    return render_template("admin/product_tiers.html", product=product, tiers=tiers)
+    return render_template("admin/product_tiers.html", product=product, tiers=tiers, gallery_imgs=gallery_imgs)
 
 
 @admin_bp.route("/products/<int:product_id>/tiers/add", methods=["POST"])
@@ -824,8 +863,10 @@ def chairfbi_dashboard():
 
             try:
                 cf_balance = cf.get_balance()
-                if cf_balance and float(cf_balance) > 10000:
-                    cf_balance = float(cf_balance) / 100
+                if cf_balance:
+                    bal = float(cf_balance)
+                    if bal > 500 and bal == int(bal):
+                        cf_balance = bal / 10
             except Exception as e:
                 balance_error = str(e)
 

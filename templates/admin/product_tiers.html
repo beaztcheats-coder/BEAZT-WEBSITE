@@ -69,6 +69,38 @@
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Custom Image URL <span style="font-weight:400;">(or upload above)</span></label>
         <input type="text" name="image_url" value="{{ product.image_url or '' }}" placeholder="https://example.com/cheat-banner.png" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
       </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Gallery Images</label>
+        {% if gallery_imgs %}
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          {% for img in gallery_imgs %}
+          <div style="position:relative;width:100px;height:64px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);flex-shrink:0;">
+            <img src="{{ img }}" style="width:100%;height:100%;object-fit:cover;">
+            <form method="POST" style="position:absolute;top:2px;right:2px;margin:0;">
+              <input type="hidden" name="visibility" value="{{ product.visibility }}">
+              <input type="hidden" name="key_source" value="{{ product.key_source }}">
+              <input type="hidden" name="name" value="{{ product.name }}">
+              <input type="hidden" name="slug" value="{{ product.slug }}">
+              <input type="hidden" name="delete_gallery_image" value="{{ loop.index0 }}">
+              <button type="submit" class="btn-xs btn-danger" style="padding:0.1rem 0.3rem;font-size:0.55rem;min-height:18px;">&#x2715;</button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:0.72rem;color:var(--text-dim);">No images yet. Add via URL or upload below.</p>
+        {% endif %}
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <input type="text" name="add_gallery_url" placeholder="https://example.com/image.webp" style="width:100%;font-family:var(--mono);font-size:0.78rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+          </div>
+          <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <input type="file" name="gallery_upload" accept=".png,.jpg,.jpeg,.webp" style="font-size:0.7rem;color:var(--text-dim);">
+          <button type="submit" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-l);border:1px solid rgba(30,58,95,0.25);">Upload</button>
+        </div>
+      </div>
       <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;align-self:flex-start;">Save Product</button>
     </div>
   </form>
