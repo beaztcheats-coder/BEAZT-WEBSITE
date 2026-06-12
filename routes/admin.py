@@ -81,15 +81,15 @@ def _backup_products_safe():
 
 
 _FALLBACK_TIERS = [
-    ("1 Day", 1, 499),
-    ("3 Days", 3, 999),
-    ("7 Days", 7, 1699),
-    ("30 Days", 30, 4999),
+    ("1 Day", 1, 4.99),
+    ("3 Days", 3, 9.99),
+    ("7 Days", 7, 16.99),
+    ("30 Days", 30, 49.99),
 ]
 
 _PRIVATE_TIERS = [
-    ("1 Month", 30, 4999, True),
-    ("12 Months", 365, 39999, True),
+    ("1 Month", 30, 49.99, True),
+    ("12 Months", 365, 399.99, True),
 ]
 
 
@@ -515,11 +515,14 @@ def product_tiers(product_id):
         if image_file and image_file.filename:
             ext = os.path.splitext(image_file.filename)[1].lower()
             if ext in (".png", ".jpg", ".jpeg"):
-                upload_dir = os.path.join(current_app.root_path, "static", "images", "products", product.slug)
-                os.makedirs(upload_dir, exist_ok=True)
-                path = os.path.join(upload_dir, f"banner{ext}")
-                image_file.save(path)
-                product.image_url = f"/static/images/products/{product.slug}/banner{ext}"
+                try:
+                    upload_dir = os.path.join(current_app.root_path, "static", "images", "products", product.slug)
+                    os.makedirs(upload_dir, exist_ok=True)
+                    path = os.path.join(upload_dir, f"banner{ext}")
+                    image_file.save(path)
+                    product.image_url = f"/static/images/products/{product.slug}/banner{ext}"
+                except OSError:
+                    flash("Image upload unavailable on serverless. Use the Image URL field below.", "warn")
             else:
                 flash("Only PNG and JPEG files are accepted.", "error")
                 return redirect(url_for("admin.product_tiers", product_id=product.id))
@@ -557,7 +560,7 @@ def add_tier(product_id):
         label=label,
         duration_days=duration,
         price_pence=int(price * 100),
-        is_subscription=request.form.get("is_subscription") == "1",
+        is_subscription="1" in request.form.getlist("is_subscription"),
     )
     db.session.add(tier)
     db.session.commit()
@@ -573,7 +576,7 @@ def edit_tier(tier_id):
         abort(404)
     tier.label = request.form.get("label", tier.label).strip()
     tier.duration_days = request.form.get("duration_days", tier.duration_days, type=int)
-    tier.is_subscription = request.form.get("is_subscription") == "1"
+    tier.is_subscription = "1" in request.form.getlist("is_subscription")
     price = request.form.get("price_pounds", type=float)
     if price:
         tier.price_pence = int(price * 100)
@@ -821,6 +824,8 @@ def chairfbi_dashboard():
 
             try:
                 cf_balance = cf.get_balance()
+                if cf_balance and float(cf_balance) > 10000:
+                    cf_balance = float(cf_balance) / 100
             except Exception as e:
                 balance_error = str(e)
 

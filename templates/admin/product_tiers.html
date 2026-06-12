@@ -105,8 +105,8 @@
           <input type="number" name="duration_days" value="{{ t.duration_days }}" style="width:50px;" placeholder="Days">
           <input type="number" name="price_pounds" value="{{ t.price_pounds }}" step="0.01" style="width:60px;" placeholder="Price">
           <label style="font-size:0.62rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;">
-            <input type="hidden" name="is_subscription" value="0">
             <input type="checkbox" name="is_subscription" value="1" {% if t.is_subscription or (product.visibility == 'private' and not t.is_subscription is defined) %}checked{% endif %}>
+            <input type="hidden" name="is_subscription" value="0">
             Sub
           </label>
           <button type="submit" class="btn-xs btn-success-sm">Save</button>
