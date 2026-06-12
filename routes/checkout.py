@@ -137,29 +137,37 @@ def handle_fulfillment(order):
         db.session.commit()
         return
 
-    from config import get_chairfbi_config
-    cfg = get_chairfbi_config()
-    api_token = cfg.get("api_token", "")
-    cheat_id = product.chairfbi_cheat_id if product else ""
+    from config import get_ivno_config
+    cfg_ivno = get_ivno_config()
+    if cfg_ivno.get("api_key", "").startswith("iv_test_"):
+        logger.info("Test mode — skipping ChairFBI, generating test key for order %s", order.id)
+        key_value = "BEAZT-TEST-" + secrets.token_hex(12).upper()
+        chairfbi_key_id = None
+        chairfbi_cheat_id = None
+    else:
+        from config import get_chairfbi_config
+        cfg = get_chairfbi_config()
+        api_token = cfg.get("api_token", "")
+        cheat_id = product.chairfbi_cheat_id if product else ""
 
-    key_value = ""
-    chairfbi_key_id = None
-    chairfbi_cheat_id = None
+        key_value = ""
+        chairfbi_key_id = None
+        chairfbi_cheat_id = None
 
-    if cheat_id and api_token:
-        try:
-            from utils.chairfbi import ChairFBI
-            cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
-            result = cf.create_key(cheat_id=cheat_id, days=duration_days)
-            keys = result.get("keys", [])
-            key_value = keys[0] if keys else ""
-            chairfbi_key_id = key_value
-            chairfbi_cheat_id = cheat_id
-        except Exception:
-            logger.exception("ChairFBI key creation failed for Ivno order %s", order.id)
+        if cheat_id and api_token:
+            try:
+                from utils.chairfbi import ChairFBI
+                cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
+                result = cf.create_key(cheat_id=cheat_id, days=duration_days)
+                keys = result.get("keys", [])
+                key_value = keys[0] if keys else ""
+                chairfbi_key_id = key_value
+                chairfbi_cheat_id = cheat_id
+            except Exception:
+                logger.exception("ChairFBI key creation failed for Ivno order %s", order.id)
 
-    if not key_value:
-        key_value = "BEAZT-" + secrets.token_hex(16).upper()
+        if not key_value:
+            key_value = "BEAZT-" + secrets.token_hex(16).upper()
 
     order.status = "completed"
     key = Key(
