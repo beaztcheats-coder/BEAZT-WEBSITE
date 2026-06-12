@@ -370,8 +370,9 @@ def health_sellix():
     results = {}
     for base_url in [
         "https://api.sellix.gg/v1",
-        "https://api.sellix.gg/api/v1",
-        "https://sellix.io/v1",
+        "https://api.sellix.gg/v2",
+        "https://sellix.gg/api/v1",
+        "https://app.sellix.gg/api/v1",
     ]:
         for label, hdrs in [
             ("Bearer", {"Authorization": f"Bearer {key}"}),
