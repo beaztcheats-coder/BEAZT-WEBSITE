@@ -15,16 +15,21 @@ def _get_redis():
     global _redis_client
     if not KV_AVAILABLE:
         return None
-    if _redis_client is None:
-        try:
+    try:
+        if _redis_client is None:
             import redis as _redis
-            _redis_client = _redis.from_url(KV_URL, socket_connect_timeout=5)
-            _redis_client.ping()
-            logger.info("Connected to Vercel KV (Redis)")
-        except Exception as e:
-            logger.warning("Redis connection failed: %s", e)
-            _redis_client = None
-    return _redis_client
+            _redis_client = _redis.from_url(
+                KV_URL,
+                socket_connect_timeout=5,
+                socket_keepalive=True,
+                retry_on_timeout=True,
+            )
+        _redis_client.ping()
+        return _redis_client
+    except Exception as e:
+        logger.warning("Redis connection failed, will reconnect: %s", e)
+        _redis_client = None
+        return None
 
 
 def kv_get(key):
@@ -92,6 +97,7 @@ def restore_products():
 
 def restore_products_to_db():
     if not KV_AVAILABLE:
+        logger.info("KV not configured — skipping product restore")
         return
     try:
         from models import Product, db
