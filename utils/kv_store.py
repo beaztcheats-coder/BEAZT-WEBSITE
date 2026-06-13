@@ -471,6 +471,21 @@ def restore_settings_to_db():
         logger.warning("Settings restore failed: %s", e)
 
 
+def backup_everything():
+    """Inline backup of all critical data. Call after state-changing ops."""
+    try:
+        from flask import current_app
+        if not current_app:
+            return
+        with current_app.app_context() if hasattr(current_app, 'app_context') else __import__('contextlib').nullcontext():
+            backup_users()
+            backup_orders()
+            backup_keys()
+            backup_settings()
+    except Exception as e:
+        logger.warning("Inline backup failed: %s", e)
+
+
 def _periodic_backup(app, interval=120):
     logger.info("KV backup thread started (interval=%ds)", interval)
     while not _backup_stop.is_set():

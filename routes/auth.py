@@ -59,6 +59,11 @@ def signup():
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
+        try:
+            from utils.kv_store import backup_everything
+            backup_everything()
+        except Exception:
+            pass
 
         login_user(user)
         return redirect(url_for("main.my_keys"))

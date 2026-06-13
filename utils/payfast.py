@@ -119,7 +119,9 @@ def validate_itn(request_form):
         pass
 
     received_sig = data.pop("signature", "")
-    computed = _build_signature(data, passphrase, sort_keys=True)
+
+    checkout_fields = {k: data[k] for k in PAYFAST_FIELD_ORDER if k in data}
+    computed = _build_signature(checkout_fields, passphrase, sort_keys=True)
     if received_sig != computed:
         return False, "Signature mismatch"
 

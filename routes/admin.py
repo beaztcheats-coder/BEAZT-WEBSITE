@@ -890,6 +890,11 @@ def settings():
                     db.session.delete(row)
                     db.session.commit()
                     flash(f"{label} cleared.", "info")
+        try:
+            from utils.kv_store import backup_everything
+            backup_everything()
+        except Exception:
+            pass
         return redirect(url_for("admin.settings"))
 
     cf_cfg = get_chairfbi_config()

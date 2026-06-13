@@ -98,7 +98,13 @@ def ivno_webhook():
         return jsonify({"received": True})
 
     if status == "completed" and order.status != "completed":
-        handle_fulfillment(order)
+        from config import get_ivno_config
+        cfg_ivno = get_ivno_config()
+        if cfg_ivno.get("api_key", "").startswith("iv_test_"):
+            logger.info("Test mode — generating test key via Ivno for order %s", order.id)
+            handle_fulfillment_test(order)
+        else:
+            handle_fulfillment(order)
     elif status == "failed":
         order.status = "failed"
         db.session.commit()
@@ -130,44 +136,46 @@ def handle_fulfillment(order):
         pool_key.is_active = True
         order.status = "completed"
         db.session.commit()
+        try:
+            from utils.kv_store import backup_everything
+            backup_everything()
+        except Exception:
+            pass
         return
 
     if product and product.key_source == "pool":
         order.status = "awaiting_keys"
         db.session.commit()
+        try:
+            from utils.kv_store import backup_everything
+            backup_everything()
+        except Exception:
+            pass
         return
 
-    from config import get_ivno_config
-    cfg_ivno = get_ivno_config()
-    if cfg_ivno.get("api_key", "").startswith("iv_test_"):
-        logger.info("Test mode — skipping ChairFBI, generating test key for order %s", order.id)
-        key_value = "BEAZT-TEST-" + secrets.token_hex(12).upper()
-        chairfbi_key_id = None
-        chairfbi_cheat_id = None
-    else:
-        from config import get_chairfbi_config
-        cfg = get_chairfbi_config()
-        api_token = cfg.get("api_token", "")
-        cheat_id = product.chairfbi_cheat_id if product else ""
+    from config import get_chairfbi_config
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    cheat_id = product.chairfbi_cheat_id if product else ""
 
-        key_value = ""
-        chairfbi_key_id = None
-        chairfbi_cheat_id = None
+    key_value = ""
+    chairfbi_key_id = None
+    chairfbi_cheat_id = None
 
-        if cheat_id and api_token:
-            try:
-                from utils.chairfbi import ChairFBI
-                cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
-                result = cf.create_key(cheat_id=cheat_id, days=duration_days)
-                keys = result.get("keys", [])
-                key_value = keys[0] if keys else ""
-                chairfbi_key_id = key_value
-                chairfbi_cheat_id = cheat_id
-            except Exception:
-                logger.exception("ChairFBI key creation failed for Ivno order %s", order.id)
+    if cheat_id and api_token:
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
+            result = cf.create_key(cheat_id=cheat_id, days=duration_days)
+            keys = result.get("keys", [])
+            key_value = keys[0] if keys else ""
+            chairfbi_key_id = key_value
+            chairfbi_cheat_id = cheat_id
+        except Exception:
+            logger.exception("ChairFBI key creation failed for order %s", order.id)
 
-        if not key_value:
-            key_value = "BEAZT-" + secrets.token_hex(16).upper()
+    if not key_value:
+        key_value = "BEAZT-" + secrets.token_hex(16).upper()
 
     order.status = "completed"
     key = Key(
@@ -182,6 +190,56 @@ def handle_fulfillment(order):
     )
     db.session.add(key)
     db.session.commit()
+    try:
+        from utils.kv_store import backup_everything
+        backup_everything()
+    except Exception:
+        pass
+
+
+def handle_fulfillment_test(order):
+    tier = order.tier
+    if not tier:
+        return
+
+    product = tier.product
+    product_id = product.id if product else 1
+    duration_days = tier.duration_days
+    expires_at = datetime.utcnow() + timedelta(days=duration_days)
+
+    pool_key = (
+        Key.query
+        .filter_by(product_id=product_id, tier_id=tier.id, user_id=None, is_active=False)
+        .order_by(Key.created_at.asc())
+        .first()
+    )
+    if pool_key:
+        pool_key.user_id = order.user_id
+        pool_key.order_id = order.id
+        pool_key.expires_at = expires_at
+        pool_key.assigned_at = datetime.utcnow()
+        pool_key.is_active = True
+        order.status = "completed"
+        db.session.commit()
+        return
+
+    key_value = "BEAZT-TEST-" + secrets.token_hex(12).upper()
+    order.status = "completed"
+    key = Key(
+        user_id=order.user_id,
+        order_id=order.id,
+        product_id=product_id,
+        tier_id=tier.id,
+        key_value=key_value,
+        expires_at=expires_at,
+    )
+    db.session.add(key)
+    db.session.commit()
+    try:
+        from utils.kv_store import backup_everything
+        backup_everything()
+    except Exception:
+        pass
 
 
 @checkout_bp.route("/payfast", methods=["POST"])
