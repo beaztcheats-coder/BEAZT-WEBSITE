@@ -38,32 +38,6 @@
         </div>
       </div>
 
-      <!-- ===== NOWPAYMENTS SECTION ===== -->
-      <div>
-        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
-            <span class="icon icon-sm" data-lucide="bitcoin"></span> NOWPayments (Crypto)
-        </h3>
-
-        <div style="display:flex;flex-direction:column;gap:1.25rem;">
-
-          <div style="display:flex;flex-direction:column;gap:0.35rem;">
-            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API Key</label>
-            <input type="text" name="nowpayments_api_key" value="{{ nowpayments_api_key }}" placeholder="NOWPayments API key" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-            {% if nowpayments_api_key %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--text-mut);">For crypto payments.</span>{% endif %}
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:0.35rem;">
-            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">IPN Secret</label>
-            <div style="display:flex;gap:0.5rem;">
-              <input :type="reveal.nwp_secret ? 'text' : 'password'" name="nowpayments_ipn_secret" value="{{ nowpayments_ipn_secret }}" placeholder="IPN callback secret" style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-              <button type="button" @click="reveal.nwp_secret = !reveal.nwp_secret" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.nwp_secret ? 'HIDE' : 'SHOW'"></button>
-            </div>
-            {% if nowpayments_ipn_secret %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--warn);">Recommended for webhook security.</span>{% endif %}
-          </div>
-
-        </div>
-      </div>
-
       <!-- ===== CHAIRFBI SECTION ===== -->
       <div>
         <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">

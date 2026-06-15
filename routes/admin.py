@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_nowpayments_config
+from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -133,12 +133,20 @@ def _sync_product_tiers(product):
     if not tiers_data:
         tiers_data = _FALLBACK_TIERS
 
+    MARKUP = 1.20
+    IVNO_MIN_USD = 20.0
+    GBP_USD = 1.27
+    MIN_GBP = IVNO_MIN_USD / GBP_USD
+
     for label, days, price in tiers_data:
+        marked_up = round(price * MARKUP, 2)
+        if marked_up < MIN_GBP:
+            continue
         db.session.add(PricingTier(
             product_id=product.id,
             label=label,
             duration_days=days,
-            price_pence=int(price * 100),
+            price_pence=int(marked_up * 100),
         ))
     db.session.commit()
 
@@ -888,8 +896,6 @@ def settings():
             "chairfbi_api_base": "ChairFBI API Base URL",
             "ivno_api_key": "Ivno API Key",
             "ivno_api_secret": "Ivno API Secret",
-            "nowpayments_api_key": "NOWPayments API Key",
-            "nowpayments_ipn_secret": "NOWPayments IPN Secret",
             "loader_token": "Loader Token",
             "loader_url": "Loader Download URL",
             "loader_public_url": "Public Loader Download URL",
@@ -918,7 +924,6 @@ def settings():
     cf_cfg = get_chairfbi_config()
     loader_cfg = get_loader_config()
     discord_cfg = get_discord_config()
-    nxp_cfg = get_nowpayments_config()
     ivno_cfg = get_ivno_config()
     return render_template("admin/settings.html",
         site_url=Config.SITE_URL,
@@ -926,8 +931,6 @@ def settings():
         chairfbi_api_base=cf_cfg["api_base"],
         ivno_api_key=ivno_cfg["api_key"],
         ivno_api_secret=ivno_cfg["api_secret"],
-        nowpayments_api_key=nxp_cfg["api_key"],
-        nowpayments_ipn_secret=nxp_cfg["ipn_secret"],
         loader_token=loader_cfg["loader_token"],
         loader_url=loader_cfg.get("loader_url", ""),
         loader_public_url=loader_cfg.get("loader_public_url", ""),

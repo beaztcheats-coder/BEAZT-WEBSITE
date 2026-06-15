@@ -16,7 +16,6 @@
       activeTab: 'description',
       checkingOut: false,
       checkoutError: '',
-      paymentMethod: 'ivno',
       get currentVariant() {
         return this.variants.find(function(v) { return v.id === this.selectedVariantId; }.bind(this)) || this.variants[0] || null;
       },
@@ -167,24 +166,6 @@
       <form @submit.prevent="handleCheckout()" autocomplete="off"
             x-data="{ subTiers: variants.filter(function(v) { return v.billing_type === 'subscription'; }), oneTiers: variants.filter(function(v) { return v.billing_type !== 'subscription'; }) }">
         <input type="hidden" name="tier_id" :value="selectedVariantId">
-
-        <template x-if="!isSubscription && oneTiers.length > 0">
-          <div class="field">
-            <span class="field-label">Payment Method</span>
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-              <label style="font-size:0.76rem;color:var(--text-soft);display:flex;align-items:center;gap:0.3rem;cursor:pointer;">
-                <input type="radio" value="ivno" x-model="paymentMethod" checked>
-                Card (Ivno)
-              </label>
-              {% if nowpayments_available %}
-              <label style="font-size:0.76rem;color:var(--text-soft);display:flex;align-items:center;gap:0.3rem;cursor:pointer;">
-                <input type="radio" value="nowpayments" x-model="paymentMethod">
-                Crypto
-              </label>
-              {% endif %}
-            </div>
-          </div>
-        </template>
 
         <template x-if="subTiers.length > 0">
           <div class="field">

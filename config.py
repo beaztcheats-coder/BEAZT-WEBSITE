@@ -27,10 +27,8 @@ class Config:
     CHAIRFBI_API_BASE = os.getenv("CHAIRFBI_API_BASE", "https://access.chairfbi.com")
     LOADER_TOKEN = os.getenv("LOADER_TOKEN", "")
     LOADER_URL = os.getenv("LOADER_URL", "")
-    IVNO_API_KEY = os.getenv("IVNO_API_KEY", "")
-    IVNO_API_SECRET = os.getenv("IVNO_API_SECRET", "")
-    NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY", "")
-    NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
+    IVNO_API_KEY = os.getenv("IVNO_API_KEY", "iv_live_e7528accefcd1520564284ed4ef94344")
+    IVNO_API_SECRET = os.getenv("IVNO_API_SECRET", "iv_secret_a7882954e04272d2c72ba98127994fe7a9b2e4f67dd58dfe")
     LOADER_PUBLIC_URL = os.getenv("LOADER_PUBLIC_URL", "")
     LOADER_PRIVATE_URL = os.getenv("LOADER_PRIVATE_URL", "")
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY", "")
@@ -87,24 +85,6 @@ def get_ivno_config():
     return {
         "api_key": _lookup("ivno_api_key", Config.IVNO_API_KEY),
         "api_secret": _lookup("ivno_api_secret", Config.IVNO_API_SECRET),
-    }
-
-
-def get_nowpayments_config():
-    from models import Setting
-
-    def _lookup(key, default):
-        try:
-            val = Setting.get(key)
-            if val:
-                return val
-        except Exception:
-            pass
-        return default
-
-    return {
-        "api_key": _lookup("nowpayments_api_key", Config.NOWPAYMENTS_API_KEY),
-        "ipn_secret": _lookup("nowpayments_ipn_secret", Config.NOWPAYMENTS_IPN_SECRET),
     }
 
 
