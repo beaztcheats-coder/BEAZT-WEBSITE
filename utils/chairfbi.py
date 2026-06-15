@@ -64,9 +64,9 @@ class ChairFBI:
         return resp.json()
 
     # -- Keys --
-    def create_key(self, cheat_id, days, notes=None, prefix=None):
-        """POST /api/keys - creates 1 key, returns {balance, keys: [string]}"""
-        payload = {"cheat": int(cheat_id), "amount": 1, "days": days}
+    def create_key(self, cheat_id, days, notes=None, prefix=None, amount=1):
+        """POST /api/keys - creates keys, returns {balance, keys: [string]}"""
+        payload = {"cheat": int(cheat_id), "amount": amount, "days": days}
         if prefix:
             payload["prefix"] = prefix
         if notes:

@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_nexapay_config
+from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_nowpayments_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -673,6 +673,7 @@ def add_tier(product_id):
         price_pence=int(price * 100),
         billing_type=request.form.get("billing_type", "one_time", type=str),
         ivno_subscription_link=request.form.get("ivno_subscription_link", "").strip() or None,
+        bundle_count=request.form.get("bundle_count", 1, type=int),
     )
     db.session.add(tier)
     db.session.commit()
@@ -697,6 +698,9 @@ def edit_tier(tier_id):
     sub_link = request.form.get("ivno_subscription_link", "").strip()
     if sub_link:
         tier.ivno_subscription_link = sub_link
+    bundle_count = request.form.get("bundle_count", type=int)
+    if bundle_count and bundle_count >= 1:
+        tier.bundle_count = bundle_count
     db.session.commit()
     flash("Tier updated.", "success")
     return redirect(url_for("admin.product_tiers", product_id=tier.product_id))
@@ -882,8 +886,10 @@ def settings():
             "site_url": "Site URL",
             "chairfbi_api_token": "ChairFBI API Token",
             "chairfbi_api_base": "ChairFBI API Base URL",
-            "nexapay_api_key": "NexaPay API Key",
-            "nexapay_webhook_secret": "NexaPay Webhook Secret",
+            "ivno_api_key": "Ivno API Key",
+            "ivno_api_secret": "Ivno API Secret",
+            "nowpayments_api_key": "NOWPayments API Key",
+            "nowpayments_ipn_secret": "NOWPayments IPN Secret",
             "loader_token": "Loader Token",
             "loader_url": "Loader Download URL",
             "loader_public_url": "Public Loader Download URL",
@@ -912,13 +918,16 @@ def settings():
     cf_cfg = get_chairfbi_config()
     loader_cfg = get_loader_config()
     discord_cfg = get_discord_config()
-    nxp_cfg = get_nexapay_config()
+    nxp_cfg = get_nowpayments_config()
+    ivno_cfg = get_ivno_config()
     return render_template("admin/settings.html",
         site_url=Config.SITE_URL,
         chairfbi_api_token=cf_cfg["api_token"],
         chairfbi_api_base=cf_cfg["api_base"],
-        nexapay_api_key=nxp_cfg["api_key"],
-        nexapay_webhook_secret=nxp_cfg["webhook_secret"],
+        ivno_api_key=ivno_cfg["api_key"],
+        ivno_api_secret=ivno_cfg["api_secret"],
+        nowpayments_api_key=nxp_cfg["api_key"],
+        nowpayments_ipn_secret=nxp_cfg["ipn_secret"],
         loader_token=loader_cfg["loader_token"],
         loader_url=loader_cfg.get("loader_url", ""),
         loader_public_url=loader_cfg.get("loader_public_url", ""),

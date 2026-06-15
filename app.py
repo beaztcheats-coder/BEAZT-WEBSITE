@@ -114,6 +114,9 @@ with app.app_context():
         if "ivno_subscription_link" not in _tier_cols:
             _cursor.execute("ALTER TABLE pricing_tiers ADD COLUMN ivno_subscription_link VARCHAR(512)")
             _conn.commit()
+        if "bundle_count" not in _tier_cols:
+            _cursor.execute("ALTER TABLE pricing_tiers ADD COLUMN bundle_count INTEGER DEFAULT 1")
+            _conn.commit()
 
         # Ensure products table has venomcheats_slug
         _cursor.execute("PRAGMA table_info(products)")

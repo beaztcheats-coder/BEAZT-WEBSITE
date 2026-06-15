@@ -29,6 +29,10 @@ class Config:
     LOADER_URL = os.getenv("LOADER_URL", "")
     NEXAPAY_API_KEY = os.getenv("NEXAPAY_API_KEY", "")
     NEXAPAY_WEBHOOK_SECRET = os.getenv("NEXAPAY_WEBHOOK_SECRET", "")
+    IVNO_API_KEY = os.getenv("IVNO_API_KEY", "")
+    IVNO_API_SECRET = os.getenv("IVNO_API_SECRET", "")
+    NOWPAYMENTS_API_KEY = os.getenv("NOWPAYMENTS_API_KEY", "")
+    NOWPAYMENTS_IPN_SECRET = os.getenv("NOWPAYMENTS_IPN_SECRET", "")
     LOADER_PUBLIC_URL = os.getenv("LOADER_PUBLIC_URL", "")
     LOADER_PRIVATE_URL = os.getenv("LOADER_PRIVATE_URL", "")
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY", "")
@@ -70,7 +74,7 @@ def get_loader_config():
     }
 
 
-def get_nexapay_config():
+def get_ivno_config():
     from models import Setting
 
     def _lookup(key, default):
@@ -83,8 +87,26 @@ def get_nexapay_config():
         return default
 
     return {
-        "api_key": _lookup("nexapay_api_key", Config.NEXAPAY_API_KEY),
-        "webhook_secret": _lookup("nexapay_webhook_secret", Config.NEXAPAY_WEBHOOK_SECRET),
+        "api_key": _lookup("ivno_api_key", Config.IVNO_API_KEY),
+        "api_secret": _lookup("ivno_api_secret", Config.IVNO_API_SECRET),
+    }
+
+
+def get_nowpayments_config():
+    from models import Setting
+
+    def _lookup(key, default):
+        try:
+            val = Setting.get(key)
+            if val:
+                return val
+        except Exception:
+            pass
+        return default
+
+    return {
+        "api_key": _lookup("nowpayments_api_key", Config.NOWPAYMENTS_API_KEY),
+        "ipn_secret": _lookup("nowpayments_ipn_secret", Config.NOWPAYMENTS_IPN_SECRET),
     }
 
 
