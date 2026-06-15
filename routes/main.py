@@ -304,6 +304,9 @@ def product_detail(slug):
             "subscription_link": t.ivno_subscription_link or "",
         })
 
+    from config import get_nowpayments_config
+    nwp_cfg = get_nowpayments_config()
+
     return render_template(
         "product.html",
         product=product,
@@ -313,6 +316,7 @@ def product_detail(slug):
         product_features=product_features,
         cheat_status=cheat_status,
         variants=variants,
+        nowpayments_available=bool(nwp_cfg.get("api_key")),
         vc_specs=vc_specs,
         vc_features=vc_features,
         vc_status=vc_status,

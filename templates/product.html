@@ -176,10 +176,12 @@
                 <input type="radio" value="ivno" x-model="paymentMethod" checked>
                 Card (Ivno)
               </label>
+              {% if nowpayments_available %}
               <label style="font-size:0.76rem;color:var(--text-soft);display:flex;align-items:center;gap:0.3rem;cursor:pointer;">
                 <input type="radio" value="nowpayments" x-model="paymentMethod">
                 Crypto
               </label>
+              {% endif %}
             </div>
           </div>
         </template>

@@ -30,11 +30,13 @@ def create_session():
     price_usd = tier.price_pounds * GBP_USD_RATE
 
     if payment_method == "nowpayments":
+        from config import get_nowpayments_config
+        nwp_cfg = get_nowpayments_config()
+        if nwp_cfg.get("api_key"):
+            return _nowpayments_session(tier)
+    if payment_method != "ivno" and not (price_usd >= IVNO_MIN_USD):
         return _nowpayments_session(tier)
-    elif price_usd >= IVNO_MIN_USD:
-        return _ivno_session(tier)
-    else:
-        return _nowpayments_session(tier)
+    return _ivno_session(tier)
 
 
 def _ivno_session(tier):
