@@ -2,9 +2,9 @@ from pathlib import Path
 import io
 import json
 
-from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for
+from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for, flash
 from flask_login import login_required, current_user
-from models import db, Product, Key, PricingTier
+from models import db, Product, Key, PricingTier, User
 from config import get_loader_config, get_discord_config
 
 main_bp = Blueprint("main", __name__)
@@ -418,3 +418,38 @@ def my_keys():
         discord_public_url=discord_cfg["public_url"],
         discord_private_url=discord_cfg["private_url"],
         has_private=has_private)
+
+
+@main_bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if email and email != current_user.email:
+            existing = User.query.filter_by(email=email).first()
+            if existing and existing.id != current_user.id:
+                flash("Email already in use.", "error")
+                return redirect(url_for("main.profile"))
+            current_user.email = email
+
+        if new_password:
+            if not current_user.check_password(current_password):
+                flash("Current password is incorrect.", "error")
+                return redirect(url_for("main.profile"))
+            if new_password != confirm_password:
+                flash("New passwords do not match.", "error")
+                return redirect(url_for("main.profile"))
+            if len(new_password) < 6:
+                flash("Password must be at least 6 characters.", "error")
+                return redirect(url_for("main.profile"))
+            current_user.set_password(new_password)
+
+        db.session.commit()
+        flash("Profile updated.", "success")
+        return redirect(url_for("main.profile"))
+
+    return render_template("profile.html")
