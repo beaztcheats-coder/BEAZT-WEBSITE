@@ -181,7 +181,11 @@ def dashboard():
             cf = ChairFBI(api_token=cf_config["api_token"], base_url=cf_config.get("api_base"))
             cf_balance = cf.get_balance()
         except Exception as e:
-            cf_balance_error = str(e)
+            err_str = str(e)
+            if "502" in err_str or "Bad Gateway" in err_str:
+                cf_balance_error = "ChairFBI temporarily unavailable — retrying shortly"
+            else:
+                cf_balance_error = err_str
 
     return render_template(
         "admin/dashboard.html",
@@ -965,7 +969,11 @@ def chairfbi_dashboard():
                     if bal > 500 and bal == int(bal):
                         cf_balance = bal / 10
             except Exception as e:
-                balance_error = str(e)
+                err_str = str(e)
+                if "502" in err_str or "Bad Gateway" in err_str:
+                    balance_error = "ChairFBI temporarily unavailable — retrying shortly"
+                else:
+                    balance_error = err_str
 
             try:
                 cheats_data = cf.get_cheats()

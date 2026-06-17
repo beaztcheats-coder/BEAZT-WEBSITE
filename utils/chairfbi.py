@@ -1,5 +1,6 @@
 import requests
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -7,6 +8,7 @@ logger = logging.getLogger(__name__)
 class ChairFBI:
     BASE = "https://access.chairfbi.com"
     TIMEOUT = 15
+    RETRIES = 2
 
     def __init__(self, api_token=None, base_url=None):
         self.token = api_token
@@ -21,7 +23,21 @@ class ChairFBI:
         url = f"{self.base.rstrip('/')}/{path.lstrip('/')}"
         kwargs.setdefault("timeout", self.TIMEOUT)
         kwargs.setdefault("headers", self.headers)
-        resp = requests.request(method, url, **kwargs)
+
+        for attempt in range(self.RETRIES + 1):
+            try:
+                resp = requests.request(method, url, **kwargs)
+                if resp.status_code < 500:
+                    return resp
+                if attempt < self.RETRIES:
+                    logger.warning("ChairFBI 5xx error (attempt %d/%d), retrying...", attempt + 1, self.RETRIES + 1)
+                    time.sleep(1)
+            except requests.RequestException as e:
+                if attempt < self.RETRIES:
+                    logger.warning("ChairFBI request failed (attempt %d/%d): %s", attempt + 1, self.RETRIES + 1, e)
+                    time.sleep(1)
+                else:
+                    raise
         return resp
 
     # -- Status --
