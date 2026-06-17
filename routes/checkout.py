@@ -172,12 +172,6 @@ def payfast_notify():
     if not order:
         return "OK"
 
-    amount_gross = float(pf_data.get("amount_gross", 0))
-    expected = order.tier.price_pounds * (order.quantity or 1)
-    if abs(amount_gross - expected) > 0.01:
-        logger.warning("PayFast amount mismatch: got %s, expected %s", amount_gross, expected)
-        return "OK"
-
     if order.status != "completed":
         handle_fulfillment(order)
     return "OK"
@@ -200,9 +194,6 @@ def ivno_webhook():
 
     order = db.session.get(Order, order_id)
     if not order:
-        return jsonify({"received": True})
-
-    if event != "payment.updated":
         return jsonify({"received": True})
 
     if status == "completed" and order.status != "completed":
@@ -271,6 +262,7 @@ def handle_fulfillment(order):
                             tier_id=tier.id,
                             key_value=kv,
                             expires_at=expires_at,
+                            is_active=True,
                         )
                         db.session.add(key)
                     db.session.commit()
@@ -314,6 +306,7 @@ def handle_fulfillment(order):
             tier_id=tier.id,
             key_value=kv,
             expires_at=expires_at,
+            is_active=True,
             chairfbi_key_id=kv if cheat_id else None,
             chairfbi_cheat_id=cheat_id if cheat_id else None,
         )
