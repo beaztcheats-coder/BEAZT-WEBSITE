@@ -32,10 +32,10 @@ def _payfast_vars(order, amount, tier):
         "item_name": name,
     }
 
-    from urllib.parse import urlencode
-    param_string = urlencode(sorted(pf_data.items()))
+    from urllib.parse import quote_plus
+    param_string = "&".join(f"{k}={quote_plus(str(v))}" for k, v in sorted(pf_data.items()))
     if passphrase:
-        param_string += "&passphrase=" + passphrase
+        param_string += "&passphrase=" + quote_plus(passphrase)
 
     pf_data["signature"] = hashlib.md5(param_string.encode()).hexdigest()
     return pf_host, pf_data
