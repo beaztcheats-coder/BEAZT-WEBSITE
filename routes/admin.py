@@ -510,7 +510,6 @@ def product_tiers(product_id):
         key_api = request.form.get("key_api", "").strip()
         if key_api == "license":
             product.chairfbi_cheat_id = None
-            product.key_source = "chairfbi"
             product.license_api_app_id = request.form.get("license_api_app_id", "").strip() or None
             logger.info("Key API set to License — app_id=%s", product.license_api_app_id)
         elif key_api == "chairfbi":
