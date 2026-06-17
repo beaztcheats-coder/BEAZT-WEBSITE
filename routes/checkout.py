@@ -1,8 +1,6 @@
 import secrets
 import logging
 import hashlib
-import json
-import requests as _requests
 from datetime import datetime, timedelta
 
 from flask import Blueprint, request, jsonify, url_for
@@ -18,11 +16,12 @@ _ZAR_RATE_TIME = None
 
 
 def _get_gbp_to_zar():
+    import requests as _r
     global _ZAR_RATE, _ZAR_RATE_TIME
     if _ZAR_RATE and _ZAR_RATE_TIME and (datetime.utcnow() - _ZAR_RATE_TIME).seconds < 600:
         return _ZAR_RATE
     try:
-        resp = _requests.get("https://open.er-api.com/v6/latest/GBP", timeout=5)
+        resp = _r.get("https://open.er-api.com/v6/latest/GBP", timeout=5)
         data = resp.json()
         _ZAR_RATE = data["rates"]["ZAR"]
         _ZAR_RATE_TIME = datetime.utcnow()
@@ -163,7 +162,8 @@ def payfast_notify():
             pf_param_string += f"&{k}={v}"
     pf_param_string = pf_param_string[1:]
 
-    resp = _requests.post(pf_host, data=pf_data, params=pf_param_string, timeout=15)
+    import requests as _r
+    resp = _r.post(pf_host, data=pf_data, params=pf_param_string, timeout=15)
     if resp.text != "VALID":
         return "INVALID", 400
 
