@@ -5,19 +5,12 @@ load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-_is_vercel = os.environ.get("VERCEL") == "1"
-
-if _is_vercel:
-    _db_path = "/tmp/beazt.db"
-else:
-    _db_path = os.path.join(basedir, "instance", "beazt.db")
-
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-in-production")
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "sqlite:///" + _db_path,
+        "sqlite:///" + os.path.join(basedir, "instance", "beazt.db"),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SITE_URL = os.getenv("SITE_URL", "http://localhost:5000")

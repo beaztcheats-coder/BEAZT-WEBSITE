@@ -31,15 +31,31 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-from routes.main import main_bp
-from routes.auth import auth_bp
-from routes.checkout import checkout_bp
-from routes.admin import admin_bp
+try:
+    from routes.main import main_bp
+except Exception:
+    main_bp = None
+try:
+    from routes.auth import auth_bp
+except Exception:
+    auth_bp = None
+try:
+    from routes.checkout import checkout_bp
+except Exception:
+    checkout_bp = None
+try:
+    from routes.admin import admin_bp
+except Exception:
+    admin_bp = None
 
-app.register_blueprint(main_bp)
-app.register_blueprint(auth_bp, url_prefix="/auth")
-app.register_blueprint(checkout_bp, url_prefix="/checkout")
-app.register_blueprint(admin_bp, url_prefix="/admin")
+if main_bp:
+    app.register_blueprint(main_bp)
+if auth_bp:
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+if checkout_bp:
+    app.register_blueprint(checkout_bp, url_prefix="/checkout")
+if admin_bp:
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
 
 @app.errorhandler(404)
@@ -254,38 +270,22 @@ with app.app_context():
     except Exception:
         pass
 
-    from utils.kv_store import (
-        restore_users_to_db, restore_products_to_db,
-        restore_orders_to_db, restore_keys_to_db, restore_settings_to_db,
-        start_backup_thread,
-    )
     try:
+        from utils.kv_store import (
+            restore_users_to_db, restore_products_to_db,
+            restore_orders_to_db, restore_keys_to_db, restore_settings_to_db,
+            start_backup_thread,
+        )
         restore_users_to_db()
-    except Exception:
-        pass
-    try:
         restore_products_to_db()
-    except Exception:
-        pass
-    try:
         restore_orders_to_db()
-    except Exception:
-        pass
-    try:
         restore_keys_to_db()
-    except Exception:
-        pass
-    try:
         restore_settings_to_db()
+        start_backup_thread(app, interval=120)
     except Exception:
         pass
 
     seed_products()
-
-    try:
-        start_backup_thread(app, interval=120)
-    except Exception:
-        pass
 
     try:
         from utils.sync import start_sync_service
