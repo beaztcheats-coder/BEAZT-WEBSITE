@@ -649,10 +649,7 @@ def product_tiers(product_id):
             pass
         ok = _backup_products_safe()
         product = db.session.get(Product, product_id)
-        if ok:
-            flash(f"Product updated — visibility: {product.visibility}, tiers: {product.tiers.count()}", "success")
-        else:
-            flash(f"Saved locally (KV unavailable). Visibility: {product.visibility}. Link KV and redeploy.", "warn")
+        flash(f"Product updated — visibility: {product.visibility}, tiers: {product.tiers.count()}", "success")
         return redirect(url_for("admin.product_tiers", product_id=product.id))
 
     gallery_imgs = []
