@@ -2,7 +2,6 @@ import secrets
 import logging
 import hashlib
 from datetime import datetime, timedelta
-from urllib.parse import urlencode
 
 from flask import Blueprint, request, jsonify, url_for
 from flask_login import current_user, login_required
@@ -18,7 +17,7 @@ def _payfast_vars(order, amount, tier):
     merchant_id = Setting.get("payfast_merchant_id") or ""
     merchant_key = Setting.get("payfast_merchant_key") or ""
     passphrase = Setting.get("payfast_passphrase") or ""
-    name = f"BEAZT - {tier.product.name} ({tier.label})" if tier else "BEAZT Order"
+    name = f"BEAZT - {tier.product.name}" if tier else "BEAZT Order"
 
     pf_data = {
         "merchant_id": merchant_id,
@@ -33,14 +32,10 @@ def _payfast_vars(order, amount, tier):
         "item_name": name,
     }
 
-    from urllib.parse import quote
-    param_string = ""
-    for key in sorted(pf_data):
-        if pf_data[key]:
-            param_string += f"{key}={quote(str(pf_data[key]), safe='')}&"
-    param_string = param_string.rstrip("&")
+    from urllib.parse import urlencode
+    param_string = urlencode(sorted(pf_data.items()))
     if passphrase:
-        param_string += f"&passphrase={quote(passphrase, safe='')}"
+        param_string += "&passphrase=" + passphrase
 
     pf_data["signature"] = hashlib.md5(param_string.encode()).hexdigest()
     return pf_host, pf_data
