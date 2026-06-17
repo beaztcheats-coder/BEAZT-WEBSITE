@@ -16,6 +16,12 @@ app = Flask(
 )
 app.config.from_object(Config)
 
+
+@app.route("/ping")
+def ping():
+    return "ok"
+
+
 db.init_app(app)
 login_manager.init_app(app)
 
