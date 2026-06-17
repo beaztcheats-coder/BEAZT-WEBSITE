@@ -694,6 +694,12 @@ def edit_tier(tier_id):
     billing_type = request.form.get("billing_type")
     if billing_type in ("one_time", "subscription"):
         tier.billing_type = billing_type
+        tier.is_subscription = (billing_type == "subscription")
+    # Also handle is_subscription checkbox from tier row form
+    is_sub = request.form.get("is_subscription")
+    if is_sub is not None:
+        tier.is_subscription = (is_sub == "1")
+        tier.billing_type = "subscription" if tier.is_subscription else "one_time"
     sub_link = request.form.get("ivno_subscription_link", "").strip()
     if sub_link:
         tier.ivno_subscription_link = sub_link
@@ -712,6 +718,12 @@ def delete_tier(tier_id):
     if not tier:
         abort(404)
     pid = tier.product_id
+    # Check for dependent keys/orders first
+    has_keys = Key.query.filter_by(tier_id=tier_id).first() is not None
+    has_orders = Order.query.filter_by(tier_id=tier_id).first() is not None
+    if has_keys or has_orders:
+        flash("Cannot delete tier — it has existing keys or orders attached. Remove those first.", "error")
+        return redirect(url_for("admin.product_tiers", product_id=pid))
     db.session.delete(tier)
     db.session.commit()
     flash("Tier deleted.", "success")
