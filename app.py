@@ -189,6 +189,13 @@ with app.app_context():
             _cursor.execute("ALTER TABLE products ADD COLUMN status VARCHAR(16) DEFAULT 'undetected'")
             _conn.commit()
 
+        # Ensure products table has loader_url
+        _cursor.execute("PRAGMA table_info(products)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "loader_url" not in _cols:
+            _cursor.execute("ALTER TABLE products ADD COLUMN loader_url VARCHAR(256)")
+            _conn.commit()
+
         # Ensure pricing_tiers table has is_subscription
         _cursor.execute("PRAGMA table_info(pricing_tiers)")
         _cols = [r[1] for r in _cursor.fetchall()]
@@ -249,6 +256,7 @@ with app.app_context():
             ("license_api_app_id", "VARCHAR(64)"),
             ("updated_at", "DATETIME"),
             ("status", "VARCHAR(16) DEFAULT 'undetected'"),
+            ("loader_url", "VARCHAR(256)"),
         ]:
             try:
                 mc.execute("ALTER TABLE products ADD COLUMN {} {}".format(col, ddl))

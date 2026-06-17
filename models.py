@@ -49,6 +49,7 @@ class Product(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(16), default="undetected")
+    loader_url = db.Column(db.String(256), nullable=True)
 
     tiers = db.relationship("PricingTier", backref="product", lazy="dynamic")
 

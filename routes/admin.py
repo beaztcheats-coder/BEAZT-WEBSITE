@@ -568,6 +568,23 @@ def product_tiers(product_id):
             image_url_val = request.form.get("image_url", "").strip()
             product.image_url = image_url_val if image_url_val else None
 
+        loader_file = request.files.get("loader_file")
+        if loader_file and loader_file.filename:
+            ext = os.path.splitext(loader_file.filename)[1].lower()
+            if ext in (".exe", ".zip", ".rar", ".7z"):
+                file_bytes = loader_file.read()
+                try:
+                    upload_dir = os.path.join(current_app.root_path, "static", "loaders", product.slug)
+                    os.makedirs(upload_dir, exist_ok=True)
+                    path = os.path.join(upload_dir, f"loader{ext}")
+                    with open(path, "wb") as f:
+                        f.write(file_bytes)
+                    product.loader_url = f"/static/loaders/{product.slug}/loader{ext}"
+                except OSError:
+                    flash("Loader upload failed — check directory permissions.", "error")
+            else:
+                flash("Only .exe, .zip, .rar, .7z files accepted for loaders.", "error")
+
         # Gallery image manager
         gallery = []
         if product.gallery_images:

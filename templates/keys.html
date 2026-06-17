@@ -88,6 +88,13 @@
                 </div>
                 <code class="key-value">{{ key.key_value }}</code>
               </div>
+              {% if key.product and key.product.loader_url %}
+              <div style="margin-bottom:0.8rem;">
+                <a href="{{ key.product.loader_url }}" class="btn btn-primary key-copy-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;padding:0.35rem 0.75rem;">
+                  <span class="icon icon-sm" data-lucide="download" style="width:14px;height:14px;"></span> Download Loader
+                </a>
+              </div>
+              {% endif %}
               <div class="key-meta">
                 <div>
                   <span class="key-label">Created</span>
