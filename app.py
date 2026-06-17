@@ -232,6 +232,7 @@ with app.app_context():
             ("venomcheats_data", "TEXT"),
             ("last_synced_at", "DATETIME"),
             ("gallery_images", "TEXT"),
+            ("license_api_app_id", "VARCHAR(64)"),
         ]:
             try:
                 mc.execute("ALTER TABLE products ADD COLUMN {} {}".format(col, ddl))
