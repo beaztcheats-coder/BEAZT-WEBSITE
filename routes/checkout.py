@@ -33,11 +33,16 @@ def _payfast_vars(order, amount, tier):
         "item_name": name,
     }
 
+    from urllib.parse import quote
+    param_string = ""
+    for key in sorted(pf_data):
+        if pf_data[key]:
+            param_string += f"{key}={quote(str(pf_data[key]), safe='')}&"
+    param_string = param_string.rstrip("&")
     if passphrase:
-        pf_string = "&".join(f"{k}={urlencode({k: pf_data[k]})[k]}" for k in sorted(pf_data) if pf_data[k])
-        pf_string += f"&passphrase={urlencode({'passphrase': passphrase})['passphrase']}"
-        pf_data["signature"] = hashlib.md5(pf_string.encode()).hexdigest()
+        param_string += f"&passphrase={quote(passphrase, safe='')}"
 
+    pf_data["signature"] = hashlib.md5(param_string.encode()).hexdigest()
     return pf_host, pf_data
 
 
