@@ -33,9 +33,26 @@ def _payfast_vars(order, amount, tier):
     }
 
     from urllib.parse import quote_plus
-    param_string = "&".join(f"{k}={quote_plus(str(v))}" for k, v in sorted(pf_data.items()))
+    WHITELIST = [
+        "merchant_id", "merchant_key", "return_url", "cancel_url",
+        "notify_url", "name_first", "name_last", "email_address",
+        "cell_number", "m_payment_id", "amount", "item_name",
+        "item_description", "custom_int1", "custom_int2", "custom_int3",
+        "custom_int4", "custom_int5", "custom_str1", "custom_str2",
+        "custom_str3", "custom_str4", "custom_str5",
+        "email_confirmation", "confirmation_address", "currency",
+        "payment_method", "subscription_type", "billing_date",
+        "recurring_amount", "frequency", "cycles",
+    ]
+
+    param_string = ""
+    for field in WHITELIST:
+        if field in pf_data and pf_data[field]:
+            val = str(pf_data[field]).strip()
+            param_string += f"&{field}={quote_plus(val)}"
+    param_string = param_string.lstrip("&")
     if passphrase:
-        param_string += "&passphrase=" + quote_plus(passphrase)
+        param_string += "&passphrase=" + quote_plus(passphrase.strip())
 
     pf_data["signature"] = hashlib.md5(param_string.encode()).hexdigest()
     return pf_host, pf_data
