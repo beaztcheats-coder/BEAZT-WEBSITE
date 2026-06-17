@@ -1,21 +1,23 @@
-import sys
-import os
-import traceback
-
+import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 
-try:
-    from app import app as application
-except Exception:
-    err_file = os.path.join(os.path.dirname(__file__), "passenger_error.log")
-    with open(err_file, "w") as f:
-        f.write("IMPORT FAILED:\n")
-        traceback.print_exc(file=f)
-    # Try minimal app
-    from flask import Flask
-    application = Flask(__name__)
+from flask import Flask
+application = Flask(__name__)
 
-    @application.route("/")
-    def index():
-        with open(err_file) as f:
-            return "<pre>" + f.read() + "</pre>"
+# Try to load the real app, fall back to debug
+_real_app = None
+try:
+    from app import app
+    _real_app = app
+except Exception as e:
+    pass
+
+@application.route("/")
+def index():
+    if _real_app:
+        return _real_app.view_functions.get("index", lambda: "no index route")()
+    return f"<pre>Import failed: {e}\nPython: {sys.version}</pre>"
+
+# If main app loaded, use it
+if _real_app:
+    application = _real_app
