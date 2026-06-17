@@ -508,15 +508,12 @@ def product_tiers(product_id):
                 cheat_id = None
         product.chairfbi_cheat_id = cheat_id if cheat_id else None
         key_api = request.form.get("key_api", "").strip()
-        if key_api == "license":
-            product.chairfbi_cheat_id = None
-            product.license_api_app_id = request.form.get("license_api_app_id", "").strip() or None
-            logger.info("Key API set to License — app_id=%s", product.license_api_app_id)
-        elif key_api == "chairfbi":
+        license_app = request.form.get("license_api_app_id", "").strip()
+        if key_api == "chairfbi" or not license_app:
             product.license_api_app_id = None
-            logger.info("Key API set to ChairFBI")
         else:
-            logger.warning("Unknown key_api value: '%s'", key_api)
+            product.chairfbi_cheat_id = None
+            product.license_api_app_id = license_app
         visibility_val = request.form.get("visibility", "").strip()
         if visibility_val in ("private", "public"):
             product.visibility = visibility_val
