@@ -17,16 +17,18 @@
     </div>
     <div class="cheats-grid cheats-grid--private reveal" style="margin-bottom:2.5rem;">
       {% for p in private_products %}
-        {% set status = cheat_statuses.get(p.id) %}
         <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private">
           <div class="cheat-card-banner">
             <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-online' if status == 'online' else 'status-offline' if status == 'offline' else 'status-unknown' }}"></span>
+            <span class="cheat-card-status status-{{ p.status or 'undetected' }}"></span>
             <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% if p.updated_at %}
+          <p style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+          {% endif %}
           {% set tiers = product_tiers.get(p.id, []) %}
           {% if tiers %}
           <div class="cheat-card-pricing">
@@ -50,15 +52,18 @@
     </div>
     <div class="cheats-grid reveal">
       {% for p in resold_products %}
-        {% set status = cheat_statuses.get(p.id) %}
+        {% set status = p.status or 'undetected' %}
         <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
           <div class="cheat-card-banner">
             <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-online' if status == 'online' else 'status-offline' if status == 'offline' else 'status-unknown' }}"></span>
+            <span class="cheat-card-status status-{{ status }}"></span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% if p.updated_at %}
+          <p style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+          {% endif %}
           {% set tiers = product_tiers.get(p.id, []) %}
           {% if tiers %}
           <div class="cheat-card-pricing">

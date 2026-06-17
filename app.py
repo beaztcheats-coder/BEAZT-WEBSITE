@@ -175,6 +175,20 @@ with app.app_context():
             _cursor.execute("ALTER TABLE products ADD COLUMN gallery_images TEXT")
             _conn.commit()
 
+        # Ensure products table has updated_at
+        _cursor.execute("PRAGMA table_info(products)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "updated_at" not in _cols:
+            _cursor.execute("ALTER TABLE products ADD COLUMN updated_at DATETIME")
+            _conn.commit()
+
+        # Ensure products table has status
+        _cursor.execute("PRAGMA table_info(products)")
+        _cols = [r[1] for r in _cursor.fetchall()]
+        if "status" not in _cols:
+            _cursor.execute("ALTER TABLE products ADD COLUMN status VARCHAR(16) DEFAULT 'undetected'")
+            _conn.commit()
+
         # Ensure pricing_tiers table has is_subscription
         _cursor.execute("PRAGMA table_info(pricing_tiers)")
         _cols = [r[1] for r in _cursor.fetchall()]
@@ -233,6 +247,8 @@ with app.app_context():
             ("last_synced_at", "DATETIME"),
             ("gallery_images", "TEXT"),
             ("license_api_app_id", "VARCHAR(64)"),
+            ("updated_at", "DATETIME"),
+            ("status", "VARCHAR(16) DEFAULT 'undetected'"),
         ]:
             try:
                 mc.execute("ALTER TABLE products ADD COLUMN {} {}".format(col, ddl))

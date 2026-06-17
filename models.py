@@ -47,6 +47,8 @@ class Product(db.Model):
     venomcheats_data = db.Column(db.Text, nullable=True)
     last_synced_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(16), default="undetected")
 
     tiers = db.relationship("PricingTier", backref="product", lazy="dynamic")
 

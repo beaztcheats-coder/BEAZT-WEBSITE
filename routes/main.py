@@ -154,8 +154,14 @@ def cheat_image(slug):
 
 
 def _get_chairfbi_cheat_status(product):
-    if not product or not product.chairfbi_cheat_id:
+    if not product:
         return None
+    # Admin-set status takes priority
+    if product.status and product.status not in ("undetected",):
+        return product.status
+    # Otherwise check ChairFBI API
+    if not product.chairfbi_cheat_id:
+        return product.status or "undetected"
     try:
         from config import get_chairfbi_config
         cfg = get_chairfbi_config()

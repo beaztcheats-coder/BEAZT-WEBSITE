@@ -521,6 +521,9 @@ def product_tiers(product_id):
         visibility_val = request.form.get("visibility", "").strip()
         if visibility_val in ("private", "public"):
             product.visibility = visibility_val
+        status_val = request.form.get("status", "").strip()
+        if status_val in ("undetected", "online", "offline", "maintenance"):
+            product.status = status_val
         if "name" in request.form:
             new_name = request.form.get("name", "").strip()
             if new_name and new_name != product.name:
@@ -602,6 +605,7 @@ def product_tiers(product_id):
 
         product.gallery_images = json.dumps(gallery) if gallery else None
 
+        product.updated_at = datetime.utcnow()
         db.session.commit()
         try:
             from utils.kv_store import backup_everything
@@ -636,11 +640,13 @@ def set_license_app(product_id):
         if app_id:
             product.license_api_app_id = app_id
             product.key_source = "chairfbi"
+            product.updated_at = datetime.utcnow()
             db.session.commit()
             return {"ok": True, "app_id": app_id}
         else:
             product.license_api_app_id = None
             product.key_source = "chairfbi"
+            product.updated_at = datetime.utcnow()
             db.session.commit()
             return {"ok": True, "app_id": None}
     except Exception as e:

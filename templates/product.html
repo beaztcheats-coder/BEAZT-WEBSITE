@@ -156,11 +156,17 @@
         <div class="spec">
           <span class="spec-label">Status</span>
           <span class="spec-value">
-            <span class="pill {{ 'pill-success' if cheat_status == 'online' or product.key_source == 'pool' else 'pill-danger' }} pill-dot">
-              {{ 'Undetected' if cheat_status == 'online' or product.key_source == 'pool' else 'Offline' }}
+            <span class="pill {{ 'pill-success' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else 'pill-warn' if cheat_status == 'maintenance' else 'pill-danger' }} pill-dot">
+              {{ cheat_status|capitalize if cheat_status else 'Undetected' }}
             </span>
           </span>
         </div>
+        {% if product.updated_at %}
+        <div class="spec">
+          <span class="spec-label">Last Updated</span>
+          <span class="spec-value"><span class="pill">{{ product.updated_at.strftime('%b %d, %Y') }}</span></span>
+        </div>
+        {% endif %}
         <div class="spec">
           <span class="spec-label">Delivery</span>
           <span class="spec-value"><span class="pill pill-success">Instant</span></span>
@@ -187,8 +193,8 @@
       </div>
 
       <div class="status-row">
-        <span class="pill {{ 'pill-success' if cheat_status == 'online' or product.key_source == 'pool' else 'pill-danger' }} pill-dot">
-          {{ 'In Stock' if cheat_status == 'online' or product.key_source == 'pool' else 'Offline' }}
+        <span class="pill {{ 'pill-success' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else 'pill-warn' if cheat_status == 'maintenance' else 'pill-danger' }} pill-dot">
+          {{ 'In Stock' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else cheat_status|capitalize if cheat_status else 'Undetected' }}
         </span>
         <span class="pill pill-success">Instant Delivery</span>
       </div>

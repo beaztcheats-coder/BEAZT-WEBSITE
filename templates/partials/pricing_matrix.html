@@ -25,9 +25,9 @@
       <div class="plan-topline reveal">
         <span class="plan-tag">{{ product_features['label'] if product_features and product_features['label'] else product.name }}</span>
         {% if cheat_status %}
-        <span class="plan-status {{ 'status-online' if cheat_status == 'online' else ('status-maintenance' if cheat_status == 'maintenance' else 'status-offline') }}">
+        <span class="plan-status {{ 'status-online' if cheat_status in ('online', 'undetected') else ('status-maintenance' if cheat_status == 'maintenance' else 'status-offline') }}">
           <span class="status-dot"></span>
-          {{ cheat_status }}
+          {{ 'Undetected' if cheat_status == 'undetected' else cheat_status }}
         </span>
         {% endif %}
         <p class="plan-subtitle">One private stack. Choose your duration.</p>

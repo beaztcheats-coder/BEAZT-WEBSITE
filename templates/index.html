@@ -39,10 +39,13 @@
             <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-online' if cheat_statuses_home.get(p.id, '') == 'online' else 'status-offline' if cheat_statuses_home.get(p.id, '') == 'offline' else 'status-unknown' }}"></span>
+            <span class="cheat-card-status {{ 'status-' ~ (cheat_statuses_home.get(p.id, p.status) or 'undetected') }}"></span>
             <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% if p.updated_at %}
+          <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+          {% endif %}
           {% if p.tiers.count() > 0 %}
           <div class="cheat-card-pricing">
             <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(p.tiers[0].price_pounds) }}</span>
@@ -72,9 +75,12 @@
             <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-online' if cheat_statuses_home.get(p.id, '') == 'online' else 'status-offline' if cheat_statuses_home.get(p.id, '') == 'offline' else 'status-unknown' }}"></span>
+            <span class="cheat-card-status {{ 'status-' ~ (cheat_statuses_home.get(p.id, p.status) or 'undetected') }}"></span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
+          {% if p.updated_at %}
+          <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+          {% endif %}
           {% if p.tiers.count() > 0 %}
           <div class="cheat-card-pricing">
             <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(p.tiers[0].price_pounds) }}</span>
