@@ -1,0 +1,6 @@
+PassengerEnabled On
+PassengerAppType wsgi
+PassengerStartupFile passenger_wsgi.py
+PassengerPython python3
+PassengerAppEnv development
+PassengerFriendlyErrorPages on
