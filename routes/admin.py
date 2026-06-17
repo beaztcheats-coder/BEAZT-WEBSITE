@@ -83,10 +83,10 @@ def _backup_products_safe():
 
 
 _FALLBACK_TIERS = [
-    ("1 Day", 1, 3.99, 1),
-    ("3 Days", 3, 8.99, 1),
-    ("7 Days", 7, 16.99, 1),
-    ("30 Days", 30, 49.99, 1),
+    ("1 Day", 1, 5.72),
+    ("3 Days", 3, 14.74),
+    ("7 Days", 7, 21.56),
+    ("30 Days", 30, 41.40),
 ]
 
 _PRIVATE_TIERS = [
@@ -121,17 +121,6 @@ def _sync_product_tiers(product):
         db.session.commit()
         return
 
-    tiers_data = None
-    slug = _get_vc_slug(product)
-    if slug:
-        try:
-            from utils.venomcheats import fetch_product_pricing
-            tiers_data = fetch_product_pricing(slug)
-        except Exception:
-            pass
-
-    MARKUP = 1.30
-
     existing_durations = {t.duration_days for t in PricingTier.query.filter_by(product_id=product.id).all()}
 
     for entry in _FALLBACK_TIERS:
@@ -140,34 +129,16 @@ def _sync_product_tiers(product):
         price = entry[2]
         bundle = entry[3] if len(entry) > 3 else 1
 
-        marked_up = round(price * MARKUP, 2)
         if days in existing_durations:
             continue
         db.session.add(PricingTier(
             product_id=product.id,
             label=label,
             duration_days=days,
-            price_pence=int(marked_up * 100),
+            price_pence=int(price * 100),
             bundle_count=bundle,
         ))
         existing_durations.add(days)
-
-    if tiers_data:
-        for entry in tiers_data:
-            label = entry[0]
-            days = entry[1]
-            price = entry[2]
-
-            marked_up = round(price * MARKUP, 2)
-            if days in existing_durations:
-                continue
-            db.session.add(PricingTier(
-                product_id=product.id,
-                label=label,
-                duration_days=days,
-                price_pence=int(marked_up * 100),
-            ))
-            existing_durations.add(days)
 
     db.session.commit()
 
