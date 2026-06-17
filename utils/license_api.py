@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 class LicenseAPI:
-    BASE = "https://panel.projectinfinity.co.za:3845"
+    BASE = "https://panel.projectinfinity.co.za"
     TIMEOUT = 15
 
     def __init__(self, api_token=None, base_url=None):

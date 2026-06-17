@@ -609,8 +609,6 @@ def product_tiers(product_id):
         except Exception:
             pass
         _backup_products_safe()
-        # Force fresh reload from DB
-        db.session.expire_all()
         product = db.session.get(Product, product_id)
         flash(f"Saved — key_source: {product.key_source}, app_id: {product.license_api_app_id or 'none'}", "success")
         return redirect(url_for("admin.product_tiers", product_id=product.id))
