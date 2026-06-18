@@ -735,9 +735,12 @@ def delete_tier(tier_id):
     if not tier:
         abort(404)
     pid = tier.product_id
-    # Null tier_id on keys, delete dependent orders
+    # Get order IDs first, then clean up in correct FK order
+    order_ids = [r.id for r in Order.query.filter_by(tier_id=tier_id).all()]
+    if order_ids:
+        Key.query.filter(Key.order_id.in_(order_ids)).update({"order_id": None, "is_active": False}, synchronize_session="fetch")
+        Order.query.filter(Order.id.in_(order_ids)).delete(synchronize_session="fetch")
     Key.query.filter_by(tier_id=tier_id).update({"tier_id": None, "is_active": False}, synchronize_session="fetch")
-    Order.query.filter_by(tier_id=tier_id).delete(synchronize_session="fetch")
     db.session.delete(tier)
     db.session.commit()
     flash("Tier deleted.", "success")
