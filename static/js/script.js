@@ -43,7 +43,7 @@
         if (s.isHot) {
           ctx.fillStyle = "rgba(34,211,238," + s.alpha + ")";
         } else {
-          ctx.fillStyle = "rgba(166,243,0," + s.alpha + ")";
+          ctx.fillStyle = "rgba(30,144,255," + s.alpha + ")";
         }
         ctx.fillText(text, s.x, s.y);
         s.y += s.speed;
