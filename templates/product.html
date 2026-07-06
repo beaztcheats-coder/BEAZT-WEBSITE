@@ -55,6 +55,9 @@
         var v = this.currentVariant;
         return v ? v.subscription_link : '';
       },
+      get hasExternalSub() {
+        return this.isSubscription && !!this.subscriptionLink;
+      },
       async handleCheckout() {
         this.checkoutError = '';
         this.checkingOut = true;
@@ -256,14 +259,14 @@
           </div>
         </template>
 
-        <template x-if="isSubscription && subscriptionLink">
+        <template x-if="hasExternalSub">
           <a :href="subscriptionLink" target="_blank" rel="noopener"
              class="btn btn-primary btn-block btn-lg" style="display:flex;text-decoration:none;">
             <span class="icon" data-lucide="credit-card"></span>
             <span x-text="buyLabel">Subscribe</span>
           </a>
         </template>
-        <template x-if="!isSubscription">
+        <template x-if="!hasExternalSub">
           <div class="field">
             <span class="field-label">Payment Method</span>
             <div style="display:flex;gap:0.4rem;">
@@ -284,7 +287,7 @@
             </div>
           </div>
         </template>
-        <template x-if="!isSubscription">
+        <template x-if="!hasExternalSub">
           <button type="submit" class="btn btn-primary btn-block btn-lg"
                   :disabled="!canBuy || checkingOut">
             <span x-show="!checkingOut">
