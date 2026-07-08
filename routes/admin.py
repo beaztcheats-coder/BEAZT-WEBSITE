@@ -784,11 +784,35 @@ def fulfill_order(order_id):
         return redirect(url_for("admin.orders"))
 
     tier = order.tier
+    product = tier.product if tier else None
     product_id = tier.product_id if tier else None
     tier_id = tier.id if tier else None
     duration_days = tier.duration_days if tier else 30
     expires_at = datetime.utcnow() + timedelta(days=duration_days)
+    total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
 
+    # 1) Try License API (panel) first — especially for private products
+    if product and product.license_api_app_id:
+        try:
+            from config import Config
+            from utils.license_api import LicenseAPI
+            from routes.checkout import _extract_key_strings
+            api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
+            keys_data = api.create_keys(app_id=product.license_api_app_id, duration_days=duration_days, quantity=total_keys)
+            key_values = _extract_key_strings(keys_data)
+            if key_values:
+                for kv in key_values:
+                    key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
+                              tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True)
+                    db.session.add(key)
+                order.status = "completed"
+                db.session.commit()
+                flash(f"Order #{order.id} fulfilled via License API ({len(key_values)} key(s)).", "success")
+                return redirect(url_for("admin.orders"))
+        except Exception:
+            logger.exception("Manual License API fulfill failed for order %s", order.id)
+
+    # 2) Fall back to pool key
     pool_key = (
         Key.query
         .filter_by(product_id=product_id, tier_id=tier_id, user_id=None, is_active=False)
@@ -796,7 +820,7 @@ def fulfill_order(order_id):
         .first()
     )
     if not pool_key:
-        flash("Still no pool keys available for this product/tier. Upload more keys first.", "error")
+        flash("No keys available — License API failed and no pool keys uploaded. Configure a License API App ID or upload pool keys.", "error")
         return redirect(url_for("admin.orders", status="awaiting_keys"))
 
     pool_key.user_id = order.user_id

@@ -38,10 +38,23 @@ class LicenseAPI:
         path = f"/backend/dashboard/api/v1/apps/{app_id}/licenses"
         body = {"duration": str(duration_days), "quantity": str(quantity)}
         resp = self._request("POST", path, json=body)
+        if resp.status_code >= 400:
+            logger.error("License API error %s for app %s: %s",
+                         resp.status_code, app_id, resp.text[:500])
         resp.raise_for_status()
         data = resp.json()
-        license_list = data.get("licenses") or []
-        return license_list
+        # Normalize various response formats into a flat list
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            for fld in ("licenses", "data", "keys", "results"):
+                if data.get(fld):
+                    return data[fld]
+            # Single-key response
+            for fld in ("key", "license", "license_key"):
+                if data.get(fld):
+                    return [data]
+        return []
 
     def delete_key(self, app_id, license_key):
         resp = self._request("DELETE", f"/backend/dashboard/api/v1/apps/{app_id}/licenses/{license_key}")

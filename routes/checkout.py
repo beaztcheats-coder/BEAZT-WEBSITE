@@ -1,4 +1,3 @@
-import secrets
 import logging
 import hashlib
 from datetime import datetime, timedelta
@@ -211,6 +210,23 @@ def ivno_webhook():
     return jsonify({"received": True})
 
 
+def _extract_key_strings(keys_data):
+    """Extract key strings from various License API / ChairFBI response formats."""
+    result = []
+    if not keys_data:
+        return result
+    items = keys_data if isinstance(keys_data, list) else [keys_data]
+    for k in items:
+        if isinstance(k, str):
+            result.append(k)
+        elif isinstance(k, dict):
+            kv = (k.get("key") or k.get("license") or k.get("license_key")
+                  or k.get("code") or k.get("value") or k.get("token"))
+            if kv:
+                result.append(str(kv))
+    return result
+
+
 def handle_fulfillment(order):
     tier = order.tier
     if not tier:
@@ -223,31 +239,34 @@ def handle_fulfillment(order):
     expires_at = datetime.utcnow() + timedelta(days=duration_days)
     total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
 
-    logger.info("Fulfilling order %s — product=%s tier=%s key_source=%s app_id=%s",
+    logger.info("Fulfilling order %s — product=%s tier=%s key_source=%s app_id=%s private=%s",
                 order.id, product.name if product else "?", tier.label,
-                product.key_source if product else "?", product.license_api_app_id if product else "?")
+                product.key_source if product else "?",
+                product.license_api_app_id if product else "?",
+                product.visibility if product else "?")
 
-    # 1) License API — primary auto-generate source
+    # 1) License API (panel) — primary source, especially for private products
     if product and product.license_api_app_id:
         try:
             from config import Config
             from utils.license_api import LicenseAPI
             api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
             keys_data = api.create_keys(app_id=product.license_api_app_id, duration_days=duration_days, quantity=total_keys)
-            if isinstance(keys_data, list) and keys_data:
+            key_values = _extract_key_strings(keys_data)
+            if key_values:
                 order.status = "completed"
-                for k in keys_data:
-                    kv = k if isinstance(k, str) else (k.get("key") or k.get("license") or str(k))
+                for kv in key_values:
                     key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
                               tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True)
                     db.session.add(key)
                 db.session.commit()
-                logger.info("License API generated %d key(s) for order %s", len(keys_data), order.id)
+                logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
                 return
+            logger.warning("License API returned no usable keys for order %s — response: %s", order.id, keys_data)
         except Exception:
             logger.exception("License API failed for order %s — falling back", order.id)
 
-    # 2) Pool key — fallback if available
+    # 2) Pool key — pre-uploaded unassigned key
     pool_key = (Key.query.filter_by(product_id=product_id, tier_id=tier.id, user_id=None, is_active=False)
                 .order_by(Key.created_at.asc()).first())
     if pool_key:
@@ -258,39 +277,44 @@ def handle_fulfillment(order):
         pool_key.is_active = True
         order.status = "completed"
         db.session.commit()
+        logger.info("Pool key assigned for order %s", order.id)
         return
 
-    if product and product.key_source == "pool":
-        order.status = "awaiting_keys"
-        db.session.commit()
-        return
+    # 3) ChairFBI — for resold/catalog products with a cheat_id
+    if product and product.chairfbi_cheat_id:
+        from config import get_chairfbi_config
+        cfg = get_chairfbi_config()
+        api_token = cfg.get("api_token", "")
+        cheat_id = product.chairfbi_cheat_id
+        bundle_count = getattr(tier, "bundle_count", 1) or 1
+        buy_quantity = getattr(order, "quantity", 1) or 1
+        total_keys_cf = bundle_count * buy_quantity
+        key_values = []
 
-    # 3) ChairFBI — final fallback
-    from config import get_chairfbi_config
-    cfg = get_chairfbi_config()
-    api_token = cfg.get("api_token", "")
-    cheat_id = product.chairfbi_cheat_id if product else ""
-    bundle_count = getattr(tier, "bundle_count", 1) or 1
-    buy_quantity = getattr(order, "quantity", 1) or 1
-    total_keys_cf = bundle_count * buy_quantity
-    key_values = []
+        if api_token:
+            try:
+                from utils.chairfbi import ChairFBI
+                cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
+                result = cf.create_key(cheat_id=cheat_id, days=duration_days, amount=total_keys_cf)
+                key_values = _extract_key_strings(result.get("keys", []))
+            except Exception:
+                logger.exception("ChairFBI key creation failed for order %s", order.id)
 
-    if cheat_id and api_token:
-        try:
-            from utils.chairfbi import ChairFBI
-            cf = ChairFBI(api_token=api_token, base_url=cfg.get("api_base"))
-            result = cf.create_key(cheat_id=cheat_id, days=duration_days, amount=total_keys_cf)
-            key_values = result.get("keys", [])
-        except Exception:
-            logger.exception("ChairFBI key creation failed for order %s", order.id)
+        if key_values:
+            order.status = "completed"
+            for kv in key_values:
+                key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
+                          tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
+                          chairfbi_key_id=kv, chairfbi_cheat_id=cheat_id)
+                db.session.add(key)
+            db.session.commit()
+            logger.info("ChairFBI generated %d key(s) for order %s", len(key_values), order.id)
+            return
 
-    if not key_values:
-        key_values = ["BEAZT-" + secrets.token_hex(16).upper() for _ in range(total_keys_cf)]
-
-    order.status = "completed"
-    for kv in key_values:
-        key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
-                  tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
-                  chairfbi_key_id=kv if cheat_id else None, chairfbi_cheat_id=cheat_id if cheat_id else None)
-        db.session.add(key)
+    # 4) No key source available — NEVER generate fake keys
+    logger.warning("No key source available for order %s (product=%s, app_id=%s, key_source=%s) — marking awaiting_keys",
+                  order.id, product.name if product else "?",
+                  product.license_api_app_id if product else "none",
+                  product.key_source if product else "none")
+    order.status = "awaiting_keys"
     db.session.commit()

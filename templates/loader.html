@@ -57,7 +57,7 @@
           <h3 style="font-size:1rem;margin-bottom:0.3rem;">Enter Your License Key</h3>
           <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">
             After purchasing a license, find your key on the
-            <a href="{{ url_for('main.my_keys') }}" style="color:var(--accent-l);">My Keys</a> page.
+            <a href="{{ url_for('main.my_keys') }}" style="color:var(--accent);">My Keys</a> page.
             Copy it and paste it into the loader to activate.
           </p>
           <a href="{{ url_for('main.my_keys') }}" class="btn btn-ghost" style="text-decoration:none;">Go to My Keys</a>
@@ -69,25 +69,4 @@
     </div>
   </div>
 </section>
-
-<style>
-.loader-steps { display:flex; flex-direction:column; gap:1.5rem; }
-.loader-step {
-  display:flex; gap:1rem; align-items:flex-start;
-  border:1px solid rgba(88,122,165,0.18);
-  border-radius:16px;
-  background:rgba(9,14,35,0.7);
-  padding:1.2rem 1.3rem;
-}
-.loader-step-num {
-  flex-shrink:0; width:36px; height:36px;
-  border-radius:50%;
-  background:var(--accent-g3);
-  color:var(--accent-l);
-  font-family:var(--mono);
-  font-size:0.9rem; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-  border:1px solid rgba(30,58,95,0.3);
-}
-</style>
 {% endblock %}

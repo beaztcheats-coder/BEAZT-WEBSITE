@@ -5,5 +5,11 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
  * Restarting with stat
  * Debugger is active!
- * Debugger PIN: 272-230-495
-127.0.0.1 - - [06/Jul/2026 23:40:54] "GET /product/rust-external-private HTTP/1.1" 200 -
+ * Debugger PIN: 454-849-310
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET /cheats HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET /loader HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET /faq HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET /feedback HTTP/1.1" 200 -
+127.0.0.1 - - [08/Jul/2026 21:51:39] "GET /product/rust-external-private HTTP/1.1" 200 -

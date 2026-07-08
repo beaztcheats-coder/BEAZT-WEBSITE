@@ -10,14 +10,14 @@
       <p class="text-muted">Your active plans, keys, and expiry details.</p>
     </div>
 
-    {% if has_private and discord_private_url %}
-    <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(30,58,95,0.5);">
+    {% if has_private %}
+    <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(30,144,255,0.4);">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
-        <span class="icon" data-lucide="shield-check" style="color:var(--accent-l);width:22px;height:22px;"></span>
+        <span class="icon" data-lucide="shield-check" style="color:var(--accent);width:22px;height:22px;"></span>
         <strong style="font-size:0.95rem;">Private Access Unlocked</strong>
       </div>
       <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:0.85rem;">
-        You own an active private cheat license. Download the private loader and join the exclusive Discord server.
+        You own an active private cheat license. Download the private loader{% if discord_private_url %} and join the exclusive Discord server{% endif %}.
       </p>
       <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
         {% if loader_private_url %}
@@ -25,9 +25,11 @@
           <span class="icon icon-sm" data-lucide="download"></span> Download Private Loader
         </a>
         {% endif %}
+        {% if discord_private_url %}
         <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
           <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
         </a>
+        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -35,7 +37,7 @@
     {% if loader_public_url or loader_token %}
     <div class="loader-card reveal" style="margin-bottom:2rem;">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;">
-        <span class="icon" data-lucide="download" style="color:var(--accent-l);width:22px;height:22px;"></span>
+        <span class="icon" data-lucide="download" style="color:var(--accent);width:22px;height:22px;"></span>
         <strong style="font-size:0.95rem;">Loader Setup</strong>
       </div>
       <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:1rem;">
@@ -53,8 +55,27 @@
       {% endif %}
       <p style="color:var(--text-dim);font-size:0.72rem;margin-top:0.6rem;">
         <span class="icon icon-sm" data-lucide="info" style="width:14px;height:14px;"></span>
-        Before running: download <a href="https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download/" target="_blank" rel="noopener" style="color:var(--accent-l);">RivaTuner Statistics Server</a> and disable your antivirus real-time protection.
+        Before running: download <a href="https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download/" target="_blank" rel="noopener" style="color:var(--accent);">RivaTuner Statistics Server</a> and disable your antivirus real-time protection.
       </p>
+    </div>
+    {% endif %}
+
+    {% if pending_orders %}
+    <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(245,158,11,0.3);">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
+        <span class="icon" data-lucide="clock" style="color:var(--warn);width:22px;height:22px;"></span>
+        <strong style="font-size:0.95rem;">Processing Orders ({{ pending_orders|length }})</strong>
+      </div>
+      <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:0.4rem;">
+        These orders are waiting for key allocation. Your key will appear here automatically once ready — usually within minutes.
+      </p>
+      {% for order in pending_orders %}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.5rem 0;border-top:1px solid rgba(255,255,255,0.06);font-size:0.8rem;">
+        <span style="color:var(--text-soft);">{{ order.tier.product.name if order.tier and order.tier.product else 'Product' }} — {{ order.tier.label if order.tier else 'Plan' }}</span>
+        <span style="color:var(--text-muted);font-size:0.72rem;">{{ order.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+        <span class="pill pill-warn pill-dot">Pending</span>
+      </div>
+      {% endfor %}
     </div>
     {% endif %}
 
@@ -90,8 +111,8 @@
               </div>
               {% if key.product and key.product.loader_url %}
               <div style="margin-bottom:0.8rem;">
-                <a href="{{ key.product.loader_url }}" class="btn btn-primary key-copy-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;font-size:0.75rem;padding:0.35rem 0.75rem;">
-                  <span class="icon icon-sm" data-lucide="download" style="width:14px;height:14px;"></span> Download Loader
+                <a href="{{ key.product.loader_url }}" class="btn btn-primary btn-compact" style="text-decoration:none;">
+                  <span class="icon icon-sm" data-lucide="download"></span> Download Loader
                 </a>
               </div>
               {% endif %}

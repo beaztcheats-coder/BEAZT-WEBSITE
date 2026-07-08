@@ -4,7 +4,7 @@ import json
 
 from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for, flash
 from flask_login import login_required, current_user
-from models import db, Product, Key, PricingTier, User
+from models import db, Product, Key, PricingTier, User, Order
 from config import get_loader_config, get_discord_config
 
 main_bp = Blueprint("main", __name__)
@@ -414,10 +414,16 @@ def my_keys():
         .order_by(Key.created_at.desc())
         .all()
     )
+    pending_orders = (
+        Order.query
+        .filter_by(user_id=current_user.id, status="awaiting_keys")
+        .order_by(Order.created_at.desc())
+        .all()
+    )
     loader = get_loader_config()
     discord_cfg = get_discord_config()
     has_private = any(k.product and k.product.visibility == "private" and k.is_active for k in keys)
-    return render_template("keys.html", keys=keys, 
+    return render_template("keys.html", keys=keys, pending_orders=pending_orders,
         loader_token=loader["loader_token"],
         loader_public_url=loader.get("loader_public_url", loader.get("loader_url", "")),
         loader_private_url=loader.get("loader_private_url", ""),
