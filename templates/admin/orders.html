@@ -29,7 +29,7 @@
   <tbody>
     {% for o in orders.items %}
     <tr>
-      <td>{{ o.id }}</td>
+      <td><a href="{{ url_for('admin.order_detail', order_id=o.id) }}" style="color:var(--accent-h);font-weight:600;">#{{ o.id }}</a></td>
       <td>{{ o.user.username if o.user else '-' }}</td>
       <td>{{ o.tier.product.name if o.tier and o.tier.product else '-' }}</td>
       <td>{{ o.tier.label if o.tier else '-' }}</td>
@@ -42,10 +42,11 @@
       <td>{{ o.created_at.strftime('%d %b %Y %H:%M') }}</td>
       <td>
         {% if o.status == 'awaiting_keys' %}
-        <form method="POST" action="{{ url_for('admin.fulfill_order', order_id=o.id) }}">
+        <form method="POST" action="{{ url_for('admin.fulfill_order', order_id=o.id) }}" style="display:inline;">
           <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Fulfill</button>
         </form>
         {% endif %}
+        <a href="{{ url_for('admin.order_detail', order_id=o.id) }}" class="btn-xs" style="text-decoration:none;background:var(--bg);border:1px solid var(--border);color:var(--text-dim);">View</a>
       </td>
     </tr>
     {% endfor %}

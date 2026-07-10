@@ -10,6 +10,15 @@
   <form method="POST" enctype="multipart/form-data">
     <h3 style="font-size:0.82rem;font-weight:600;color:var(--text);margin-bottom:0.8rem;">Product Settings</h3>
 
+    {% if not product.license_api_app_id and pool_count == 0 and product.key_source != 'chairfbi' %}
+    <div class="cf-alert cf-alert-warn" style="margin-bottom:1rem;">
+      <span class="icon icon-sm" data-lucide="alert-triangle"></span>
+      <strong>Auto-fulfillment won't work for this product.</strong>
+      It has no License App ID and no pool keys uploaded. Purchases will be stuck in "awaiting keys" until you assign one manually.
+      Set a License App ID below, or <a href="{{ url_for('admin.product_keys', product_id=product.id) }}" style="color:var(--accent-h);">upload pool keys &rarr;</a>
+    </div>
+    {% endif %}
+
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
       <div style="flex:1;min-width:180px;">
         <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Key Source</label>
@@ -29,6 +38,10 @@
           <input type="text" id="license_app_id_val" value="{{ product.license_api_app_id or '' }}" placeholder="App ID from license dashboard" style="flex:1;min-width:0;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
           <button type="button" class="btn-xs" style="background:var(--accent);color:#fff;border:none;white-space:nowrap;padding:0.6rem 0.8rem;" onclick="setLicenseApp({{ product.id }}, '{{ url_for('admin.set_license_app', product_id=product.id) }}')">Set</button>
         </div>
+        <button type="button" class="btn-xs" style="margin-top:0.4rem;background:var(--bg);border:1px solid var(--border);color:var(--accent-h);font-size:0.68rem;" onclick="testLicenseApi({{ product.id }})">
+          <span class="icon icon-sm" data-lucide="activity"></span> Test Project Infinity API
+        </button>
+        <pre id="license-test-result" style="display:none;margin-top:0.5rem;font-size:0.62rem;font-family:var(--mono);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:0.6rem;max-height:280px;overflow:auto;white-space:pre-wrap;color:var(--text-dim);"></pre>
       </div>
       <div style="flex:1;min-width:180px;">
         <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Visibility</label>
@@ -202,6 +215,22 @@ function setLicenseApp(pid, url) {
       else { alert('Error: ' + (r.data && r.data.error ? r.data.error : 'Unknown')); }
     })
     .catch(function(e) { alert('Network error: ' + e.message); });
+}
+
+function testLicenseApi(pid) {
+  var box = document.getElementById('license-test-result');
+  box.style.display = 'block';
+  box.textContent = 'Testing Project Infinity API...';
+  fetch("{{ url_for('admin.test_license_api', product_id=product.id) }}", {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'}
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      box.textContent = JSON.stringify(d, null, 2);
+    })
+    .catch(function(e) {
+      box.textContent = 'Error: ' + e.message;
+    });
 }
 </script>
 {% endblock %}

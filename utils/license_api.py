@@ -5,23 +5,43 @@ logger = logging.getLogger(__name__)
 
 
 class LicenseAPI:
+    """Client for the Project Infinity license panel API.
+
+    Auth: the panel accepts the token as ``Bearer <token>`` (default, matching
+    the ChairFBI client convention). Use ``auth_scheme="raw"`` if the panel
+    expects the bare token in the ``Authorization`` header.
+    """
+
     BASE = "https://panel.projectinfinity.co.za"
     TIMEOUT = 15
 
-    def __init__(self, api_token=None, base_url=None):
+    def __init__(self, api_token=None, base_url=None, auth_scheme="bearer"):
         self.token = api_token
         self.base = base_url or self.BASE
-        self.headers = {
-            "Authorization": self.token,
+        self.auth_scheme = auth_scheme
+        self.headers = self._build_headers(auth_scheme)
+        # Captured for diagnostics — most recent response object.
+        self.last_response = None
+
+    def _build_headers(self, scheme):
+        headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
+        if not self.token:
+            return headers
+        if scheme == "raw":
+            headers["Authorization"] = self.token
+        else:  # "bearer" (default)
+            headers["Authorization"] = f"Bearer {self.token}"
+        return headers
 
     def _request(self, method, path, **kwargs):
         url = f"{self.base.rstrip('/')}/{path.lstrip('/')}"
         kwargs.setdefault("timeout", self.TIMEOUT)
         kwargs.setdefault("headers", self.headers)
         resp = requests.request(method, url, **kwargs)
+        self.last_response = resp
         return resp
 
     def get_apps(self):
@@ -65,3 +85,33 @@ class LicenseAPI:
         resp = self._request("POST", f"/backend/dashboard/api/v1/apps/{app_id}/licenses/{license_key}/reset-hwid")
         resp.raise_for_status()
         return resp.json()
+
+    def diagnose(self):
+        """Probe the panel to determine the working auth scheme.
+
+        Tries ``get_apps`` with both ``bearer`` and ``raw`` Authorization
+        formats and reports the HTTP status + truncated body for each, plus a
+        recommended scheme (the first that returned 200).
+
+        Returns a dict suitable for JSON-serialisation in the admin UI.
+        """
+        results = {}
+        for scheme in ("bearer", "raw"):
+            self.headers = self._build_headers(scheme)
+            try:
+                resp = self._request("GET", "/backend/dashboard/api/v1/apps")
+                results[scheme] = {
+                    "status": resp.status_code,
+                    "body": resp.text[:1500],
+                }
+            except Exception as exc:  # noqa: BLE001 - diagnostics surface everything
+                results[scheme] = {"status": None, "body": str(exc)[:1500]}
+
+        recommended = None
+        for scheme in ("bearer", "raw"):
+            if results[scheme]["status"] == 200:
+                recommended = scheme
+                break
+        # Restore headers to the recommended (or default) scheme.
+        self.headers = self._build_headers(recommended or "bearer")
+        return {"schemes": results, "recommended": recommended}

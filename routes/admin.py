@@ -642,7 +642,8 @@ def product_tiers(product_id):
             pass
 
     tiers = PricingTier.query.filter_by(product_id=product.id).order_by(PricingTier.duration_days).all()
-    return render_template("admin/product_tiers.html", product=product, tiers=tiers, gallery_imgs=gallery_imgs)
+    pool_count = Key.query.filter_by(product_id=product.id, user_id=None, is_active=False).count()
+    return render_template("admin/product_tiers.html", product=product, tiers=tiers, gallery_imgs=gallery_imgs, pool_count=pool_count)
 
 
 @admin_bp.route("/products/<int:product_id>/set-license-app", methods=["POST"])
@@ -793,24 +794,18 @@ def fulfill_order(order_id):
 
     # 1) Try License API (panel) first — especially for private products
     if product and product.license_api_app_id:
-        try:
-            from config import Config
-            from utils.license_api import LicenseAPI
-            from routes.checkout import _extract_key_strings
-            api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
-            keys_data = api.create_keys(app_id=product.license_api_app_id, duration_days=duration_days, quantity=total_keys)
-            key_values = _extract_key_strings(keys_data)
-            if key_values:
-                for kv in key_values:
-                    key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
-                              tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True)
-                    db.session.add(key)
-                order.status = "completed"
-                db.session.commit()
-                flash(f"Order #{order.id} fulfilled via License API ({len(key_values)} key(s)).", "success")
-                return redirect(url_for("admin.orders"))
-        except Exception:
-            logger.exception("Manual License API fulfill failed for order %s", order.id)
+        from routes.checkout import try_license_api
+        key_values, err = try_license_api(order, product, tier)
+        if key_values:
+            for kv in key_values:
+                key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
+                          tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True)
+                db.session.add(key)
+            order.status = "completed"
+            db.session.commit()
+            flash(f"Order #{order.id} fulfilled via License API ({len(key_values)} key(s)).", "success")
+            return redirect(url_for("admin.orders"))
+        flash(f"License API failed: {err}", "error")
 
     # 2) Fall back to pool key
     pool_key = (
@@ -833,6 +828,226 @@ def fulfill_order(order_id):
     db.session.commit()
     flash(f"Order #{order.id} fulfilled with key {pool_key.key_value[:20]}...", "success")
     return redirect(url_for("admin.orders"))
+
+
+def _order_fulfillment_context(order):
+    """Build the helper context (tier, product, expiry, available pool keys)
+    used by the order detail page."""
+    tier = order.tier
+    product = tier.product if tier else None
+    duration_days = tier.duration_days if tier else 30
+    expires_at = datetime.utcnow() + timedelta(days=duration_days)
+    product_id = tier.product_id if tier else None
+    tier_id = tier.id if tier else None
+
+    pool_keys = []
+    if product_id and tier_id:
+        pool_keys = (Key.query
+                     .filter_by(product_id=product_id, tier_id=tier_id, user_id=None, is_active=False)
+                     .order_by(Key.created_at.asc()).all())
+    elif product_id:
+        pool_keys = (Key.query
+                     .filter_by(product_id=product_id, user_id=None, is_active=False)
+                     .order_by(Key.created_at.asc()).all())
+
+    existing_key = Key.query.filter_by(order_id=order.id).first()
+    return {
+        "tier": tier,
+        "product": product,
+        "duration_days": duration_days,
+        "expires_at": expires_at,
+        "product_id": product_id,
+        "tier_id": tier_id,
+        "pool_keys": pool_keys,
+        "existing_key": existing_key,
+        "pool_count": len(pool_keys),
+        "has_license_app": bool(product and product.license_api_app_id),
+    }
+
+
+@admin_bp.route("/orders/<int:order_id>")
+@admin_required
+def order_detail(order_id):
+    order = db.session.get(Order, order_id)
+    if not order:
+        abort(404)
+    ctx = _order_fulfillment_context(order)
+    return render_template(
+        "admin/order_detail.html",
+        order=order,
+        fctx=ctx,
+    )
+
+
+@admin_bp.route("/orders/<int:order_id>/assign-custom", methods=["POST"])
+@admin_required
+def assign_custom_key(order_id):
+    """Admin pastes one or more key strings and assigns them to the order."""
+    order = db.session.get(Order, order_id)
+    if not order:
+        abort(404)
+
+    raw = request.form.get("key_value", "").strip()
+    if not raw:
+        flash("Paste at least one key.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    ctx = _order_fulfillment_context(order)
+    # One key per non-empty line, strip whitespace.
+    key_values = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+    if not key_values:
+        flash("No valid key text found.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    if ctx["existing_key"] and order.status == "completed":
+        flash("This order already has a key assigned. Delete the existing key first if you want to replace it.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    for kv in key_values:
+        key = Key(user_id=order.user_id, order_id=order.id,
+                  product_id=ctx["product_id"], tier_id=ctx["tier_id"],
+                  key_value=kv, expires_at=ctx["expires_at"], is_active=True)
+        db.session.add(key)
+    order.status = "completed"
+    db.session.commit()
+    logger.info("Admin %s manually assigned %d custom key(s) to order %s",
+                current_user.username, len(key_values), order.id)
+    flash(f"Order #{order.id}: {len(key_values)} key(s) assigned manually.", "success")
+    return redirect(url_for("admin.order_detail", order_id=order.id))
+
+
+@admin_bp.route("/orders/<int:order_id>/assign-pool", methods=["POST"])
+@admin_required
+def assign_pool_key(order_id):
+    """Admin picks a specific unassigned pool key to assign to the order."""
+    order = db.session.get(Order, order_id)
+    if not order:
+        abort(404)
+
+    ctx = _order_fulfillment_context(order)
+    if ctx["existing_key"] and order.status == "completed":
+        flash("This order already has a key assigned. Delete the existing key first if you want to replace it.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    key_id = request.form.get("key_id", type=int)
+    pool_key = db.session.get(Key, key_id) if key_id else None
+    if not pool_key:
+        flash("Select a valid pool key.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    if pool_key.user_id is not None or pool_key.is_active:
+        flash("That pool key is already assigned. Pick another.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    pool_key.user_id = order.user_id
+    pool_key.order_id = order.id
+    pool_key.tier_id = ctx["tier_id"]
+    pool_key.expires_at = ctx["expires_at"]
+    pool_key.assigned_at = datetime.utcnow()
+    pool_key.is_active = True
+    order.status = "completed"
+    db.session.commit()
+    logger.info("Admin %s assigned pool key %s to order %s",
+                current_user.username, pool_key.id, order.id)
+    flash(f"Order #{order.id}: pool key {pool_key.key_value[:20]}... assigned.", "success")
+    return redirect(url_for("admin.order_detail", order_id=order.id))
+
+
+@admin_bp.route("/orders/<int:order_id>/retry-license", methods=["POST"])
+@admin_required
+def retry_license(order_id):
+    """Re-run the Project Infinity License API key generation for an order."""
+    order = db.session.get(Order, order_id)
+    if not order:
+        abort(404)
+
+    ctx = _order_fulfillment_context(order)
+    product = ctx["product"]
+    tier = ctx["tier"]
+
+    if not (product and product.license_api_app_id):
+        flash("Cannot retry: this product has no License App ID configured. Set one in the product's Key Source settings.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    if ctx["existing_key"] and order.status == "completed":
+        flash("This order already has a key assigned. Delete the existing key first if you want to replace it.", "error")
+        return redirect(url_for("admin.order_detail", order_id=order.id))
+
+    from routes.checkout import try_license_api
+    key_values, err = try_license_api(order, product, tier)
+    if key_values:
+        for kv in key_values:
+            key = Key(user_id=order.user_id, order_id=order.id,
+                      product_id=ctx["product_id"], tier_id=ctx["tier_id"],
+                      key_value=kv, expires_at=ctx["expires_at"], is_active=True)
+            db.session.add(key)
+        order.status = "completed"
+        db.session.commit()
+        logger.info("Admin %s retried License API for order %s — %d key(s) generated",
+                    current_user.username, order.id, len(key_values))
+        flash(f"Order #{order.id}: {len(key_values)} key(s) generated via Project Infinity API.", "success")
+    else:
+        flash(f"License API retry failed: {err}", "error")
+    return redirect(url_for("admin.order_detail", order_id=order.id))
+
+
+@admin_bp.route("/products/<int:product_id>/test-license-api", methods=["POST"])
+@admin_required
+def test_license_api(product_id):
+    """Diagnostic: probe the Project Infinity API for a product.
+
+    Returns JSON describing: whether an app id is configured, the working auth
+    scheme (bearer vs raw, with status + body for each), the available apps,
+    and — if an app id is set — a dry-run of listing licenses for that app.
+    """
+    product = db.session.get(Product, product_id)
+    if not product:
+        return {"ok": False, "error": "Product not found"}, 404
+
+    from utils.license_api import LicenseAPI
+    token = Config.LICENSE_API_TOKEN
+    base = Config.LICENSE_API_URL
+    app_id = product.license_api_app_id
+
+    report = {
+        "ok": True,
+        "product": product.name,
+        "app_id_configured": bool(app_id),
+        "app_id": app_id,
+        "token_set": bool(token),
+        "token_preview": (token[:10] + "...") if token else "",
+        "base_url": base,
+    }
+
+    if not token:
+        report["auth"] = {"error": "LICENSE_API_TOKEN is not set."}
+        return report
+
+    api = LicenseAPI(api_token=token, base_url=base)
+    try:
+        report["auth_diagnosis"] = api.diagnose()
+    except Exception as exc:  # noqa: BLE001 - diagnostics
+        report["auth_diagnosis"] = {"error": str(exc)[:500]}
+
+    # If an app id is configured, try listing its licenses (read-only) to
+    # confirm the app is reachable with the recommended scheme.
+    if app_id:
+        recommended = (report.get("auth_diagnosis") or {}).get("recommended") or "bearer"
+        api = LicenseAPI(api_token=token, base_url=base, auth_scheme=recommended)
+        try:
+            licenses = api.get_licenses(app_id)
+            report["licenses"] = {
+                "status": api.last_response.status_code if api.last_response else None,
+                "count": len(licenses) if isinstance(licenses, list) else None,
+                "preview": str(licenses)[:800],
+            }
+        except Exception as exc:  # noqa: BLE001 - diagnostics
+            report["licenses"] = {
+                "status": api.last_response.status_code if api.last_response else None,
+                "error": str(exc)[:500],
+                "body": (api.last_response.text[:800] if api.last_response is not None else ""),
+            }
+    return report
 
 
 @admin_bp.route("/products/<int:product_id>/keys", methods=["GET", "POST"])

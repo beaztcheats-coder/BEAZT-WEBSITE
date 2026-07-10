@@ -1,0 +1,133 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<div class="page-header-admin">
+  <a href="{{ url_for('admin.orders') }}" style="font-size:0.8rem;color:var(--accent-h);">&larr; Back to Orders</a>
+  <h1>Order #{{ order.id }}</h1>
+  <p>
+    Status:
+    <span class="badge-sm {{ 'badge-green' if order.status == 'completed' else ('badge-blue' if order.status == 'pending' else ('badge-orange' if order.status == 'awaiting_keys' else '')) }}">
+      {{ order.status.replace('_', ' ') }}
+    </span>
+    &middot; {{ order.created_at.strftime('%d %b %Y %H:%M') }}
+  </p>
+</div>
+
+<table class="admin-table" style="margin-bottom:1.5rem;">
+  <thead><tr><th>Customer</th><th>Product</th><th>Tier</th><th>Price</th><th>Qty</th><th>Duration</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>
+        {% if order.user %}
+          <a href="{{ url_for('admin.user_detail', user_id=order.user.id) }}">{{ order.user.username }}</a>
+        {% else %}-{% endif %}
+      </td>
+      <td>{{ fctx.product.name if fctx.product else '-' }}</td>
+      <td>{{ fctx.tier.label if fctx.tier else '-' }}</td>
+      <td>&pound;{{ "%.2f"|format(fctx.tier.price_pounds) if fctx.tier else '-' }}</td>
+      <td>{{ order.quantity or 1 }}</td>
+      <td>{{ fctx.duration_days }} days</td>
+    </tr>
+  </tbody>
+</table>
+
+{% if fctx.existing_key %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+  <h3 style="font-size:0.85rem;font-weight:600;margin-bottom:0.6rem;">
+    <span class="icon icon-sm" data-lucide="key-round"></span> Assigned Key
+  </h3>
+  <table class="admin-table">
+    <thead><tr><th>Key</th><th>Active</th><th>Created</th><th>Expires</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>{{ fctx.existing_key.key_value }}</code></td>
+        <td><span class="badge-sm {{ 'badge-green' if fctx.existing_key.is_active else 'badge-red' }}">{{ 'Active' if fctx.existing_key.is_active else 'Expired' }}</span></td>
+        <td>{{ fctx.existing_key.created_at.strftime('%d %b %Y') }}</td>
+        <td>{{ fctx.existing_key.expires_at.strftime('%d %b %Y') if fctx.existing_key.expires_at else '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if order.status != 'completed' %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+  <h3 style="font-size:0.85rem;font-weight:600;margin-bottom:0.75rem;">
+    <span class="icon icon-sm" data-lucide="plus-circle"></span> Assign a Key
+  </h3>
+
+  {% if order.status == 'awaiting_keys' %}
+  <div class="cf-alert cf-alert-warn" style="margin-bottom:1rem;">
+    <span class="icon icon-sm" data-lucide="alert-triangle"></span>
+    This order is awaiting keys. Assign one below and the customer will see it instantly on their <strong>My Keys</strong> page.
+  </div>
+  {% endif %}
+
+  {% if not fctx.has_license_app and fctx.pool_count == 0 %}
+  <div class="cf-alert cf-alert-warn" style="margin-bottom:1rem;">
+    <span class="icon icon-sm" data-lucide="info"></span>
+    This product has <strong>no License App ID</strong> and <strong>no pool keys</strong> uploaded. Auto-fulfillment cannot work &mdash;
+    either set a License App ID in the product's settings, upload pool keys, or paste a key manually below.
+  </div>
+  {% endif %}
+
+  {# --- Action 1: Paste a custom key --- #}
+  <div style="border:1px solid var(--border);border-radius:8px;padding:0.85rem;margin-bottom:1rem;">
+    <h4 style="font-size:0.78rem;font-weight:600;margin-bottom:0.5rem;">Paste a custom key</h4>
+    <p style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.6rem;">
+      Type or paste a key you obtained elsewhere (e.g. copied from the Project Infinity panel). One key per line.
+    </p>
+    <form method="POST" action="{{ url_for('admin.assign_custom_key', order_id=order.id) }}">
+      <textarea name="key_value" rows="3" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" required></textarea>
+      <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;margin-top:0.5rem;">Assign Custom Key</button>
+    </form>
+  </div>
+
+  {# --- Action 2: Re-run the Project Infinity API --- #}
+  <div style="border:1px solid var(--border);border-radius:8px;padding:0.85rem;margin-bottom:1rem;">
+    <h4 style="font-size:0.78rem;font-weight:600;margin-bottom:0.5rem;">Re-run Project Infinity API</h4>
+    {% if fctx.has_license_app %}
+    <p style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.6rem;">
+      App ID <code>{{ fctx.product.license_api_app_id }}</code> is configured. Request a fresh key from the panel.
+    </p>
+    <form method="POST" action="{{ url_for('admin.retry_license', order_id=order.id) }}">
+      <button type="submit" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-l);border:1px solid rgba(30,58,95,0.25);">
+        <span class="icon icon-sm" data-lucide="refresh-cw"></span> Generate via API
+      </button>
+    </form>
+    {% else %}
+    <p style="font-size:0.7rem;color:var(--text-dim);">
+      No License App ID is configured for this product.
+      <a href="{{ url_for('admin.product_tiers', product_id=fctx.product.id) if fctx.product else '#' }}" style="color:var(--accent-h);">Set one in product settings &rarr;</a>
+    </p>
+    {% endif %}
+  </div>
+
+  {# --- Action 3: Pick from the unassigned pool --- #}
+  <div style="border:1px solid var(--border);border-radius:8px;padding:0.85rem;">
+    <h4 style="font-size:0.78rem;font-weight:600;margin-bottom:0.5rem;">Pick from pool</h4>
+    {% if fctx.pool_count > 0 %}
+    <p style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.6rem;">{{ fctx.pool_count }} unassigned pool key(s) available for this product/tier.</p>
+    <form method="POST" action="{{ url_for('admin.assign_pool_key', order_id=order.id) }}">
+      <select name="key_id" required style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;font-family:var(--mono);margin-bottom:0.5rem;">
+        <option value="" disabled selected>Select a pool key...</option>
+        {% for pk in fctx.pool_keys %}
+        <option value="{{ pk.id }}">{{ pk.key_value[:24] }}{% if pk.key_value|length > 24 %}...{% endif %} (added {{ pk.created_at.strftime('%d %b') }})</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Assign Selected Pool Key</button>
+    </form>
+    {% else %}
+    <p style="font-size:0.7rem;color:var(--text-dim);">
+      No unassigned pool keys for this product.
+      {% if fctx.product %}<a href="{{ url_for('admin.product_keys', product_id=fctx.product.id) }}" style="color:var(--accent-h);">Upload pool keys &rarr;</a>{% endif %}
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="cf-alert" style="background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.15);border-radius:8px;padding:0.85rem;">
+  <span class="icon icon-sm" data-lucide="check-circle"></span>
+  This order is complete. The customer can see their key on the <strong>My Keys</strong> page.
+</div>
+{% endif %}
+{% endblock %}

@@ -30,9 +30,9 @@
   <tbody>
     {% for o in orders %}
     <tr>
-      <td>{{ o.id }}</td>
+      <td><a href="{{ url_for('admin.order_detail', order_id=o.id) }}" style="color:var(--accent-h);font-weight:600;">#{{ o.id }}</a></td>
       <td>{{ o.tier.product.name if o.tier and o.tier.product else '-' }} ({{ o.tier.label if o.tier else '-' }})</td>
-      <td><span class="badge-sm {{ 'badge-green' if o.status == 'completed' else 'badge-blue' }}">{{ o.status }}</span></td>
+      <td><span class="badge-sm {{ 'badge-green' if o.status == 'completed' else ('badge-blue' if o.status == 'pending' else 'badge-orange') }}">{{ o.status.replace('_', ' ') }}</span></td>
       <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
     </tr>
     {% else %}

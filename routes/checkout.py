@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, url_for
 from flask_login import current_user, login_required
 from models import db, PricingTier, Order, Key, Product, Setting
-from config import get_ivno_config
+from config import Config, get_ivno_config
+from utils.license_api import LicenseAPI
 
 checkout_bp = Blueprint("checkout", __name__)
 logger = logging.getLogger(__name__)
@@ -227,6 +228,50 @@ def _extract_key_strings(keys_data):
     return result
 
 
+def try_license_api(order, product, tier):
+    """Attempt to generate keys via the Project Infinity License API.
+
+    Shared by automatic fulfillment (``handle_fulfillment``), the admin
+    "Fulfill" button, and the per-order "re-run" action.
+
+    Does NOT mutate the database or commit — the caller is responsible for
+    creating ``Key`` rows and setting ``order.status``.
+
+    Returns a tuple ``(key_values, error)``:
+      * On success: ``key_values`` is a non-empty list of key strings,
+        ``error`` is ``None``.
+      * On failure: ``key_values`` is ``[]`` and ``error`` is a human-readable
+        description of why (missing config, auth failure, unparseable
+        response, exception, etc.).
+    """
+    if not (product and product.license_api_app_id):
+        return [], "No License App ID is configured on this product."
+
+    duration_days = tier.duration_days if tier else 30
+    total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
+
+    api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
+    try:
+        keys_data = api.create_keys(
+            app_id=product.license_api_app_id,
+            duration_days=duration_days,
+            quantity=total_keys,
+        )
+        key_values = _extract_key_strings(keys_data)
+        if key_values:
+            logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
+            return key_values, None
+        raw = api.last_response.text[:500] if api.last_response is not None else ""
+        logger.warning("License API returned no usable keys for order %s — parsed=%r — raw=%s",
+                       order.id, keys_data, raw)
+        return [], f"API responded 2xx but no parseable keys. Raw: {raw or str(keys_data)[:300]}"
+    except Exception as exc:  # noqa: BLE001 - surfaced to admin for diagnosis
+        raw = api.last_response.text[:500] if api.last_response is not None else ""
+        status = api.last_response.status_code if api.last_response is not None else "?"
+        logger.exception("License API failed for order %s — HTTP %s — raw=%s", order.id, status, raw)
+        return [], f"API call failed (HTTP {status}): {exc}"
+
+
 def handle_fulfillment(order):
     tier = order.tier
     if not tier:
@@ -247,24 +292,17 @@ def handle_fulfillment(order):
 
     # 1) License API (panel) — primary source, especially for private products
     if product and product.license_api_app_id:
-        try:
-            from config import Config
-            from utils.license_api import LicenseAPI
-            api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
-            keys_data = api.create_keys(app_id=product.license_api_app_id, duration_days=duration_days, quantity=total_keys)
-            key_values = _extract_key_strings(keys_data)
-            if key_values:
-                order.status = "completed"
-                for kv in key_values:
-                    key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
-                              tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True)
-                    db.session.add(key)
-                db.session.commit()
-                logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
-                return
-            logger.warning("License API returned no usable keys for order %s — response: %s", order.id, keys_data)
-        except Exception:
-            logger.exception("License API failed for order %s — falling back", order.id)
+        key_values, err = try_license_api(order, product, tier)
+        if key_values:
+            order.status = "completed"
+            for kv in key_values:
+                key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
+                          tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True)
+                db.session.add(key)
+            db.session.commit()
+            logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
+            return
+        logger.warning("License API path failed for order %s — falling back. Reason: %s", order.id, err)
 
     # 2) Pool key — pre-uploaded unassigned key
     pool_key = (Key.query.filter_by(product_id=product_id, tier_id=tier.id, user_id=None, is_active=False)

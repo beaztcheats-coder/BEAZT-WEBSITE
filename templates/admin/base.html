@@ -53,7 +53,7 @@
         <a href="{{ url_for('admin.products') }}" class="{{ 'active' if request.endpoint in ('admin.products','admin.product_tiers','admin.product_keys') }}">
           <span class="icon icon-sm" data-lucide="boxes"></span> Products
         </a>
-        <a href="{{ url_for('admin.orders') }}" class="{{ 'active' if request.endpoint == 'admin.orders' }}">
+        <a href="{{ url_for('admin.orders') }}" class="{{ 'active' if request.endpoint in ('admin.orders','admin.order_detail','admin.fulfill_order','admin.assign_custom_key','admin.assign_pool_key','admin.retry_license') }}">
           <span class="icon icon-sm" data-lucide="receipt"></span> Orders
         </a>
         <a href="{{ url_for('admin.chairfbi_dashboard') }}" class="{{ 'active' if request.endpoint in ('admin.chairfbi_dashboard','admin.chairfbi_revoke','admin.chairfbi_hwid_reset','admin.chairfbi_vouche') }}">
