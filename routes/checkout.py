@@ -35,7 +35,7 @@ def _payfast_vars(order, amount, tier):
     merchant_id = Setting.get("payfast_merchant_id") or ""
     merchant_key = Setting.get("payfast_merchant_key") or ""
     passphrase = Setting.get("payfast_passphrase") or ""
-    name = f"BEAZT - {tier.product.name}" if tier else "BEAZT Order"
+    name = Setting.get("payfast_item_name") or "Private Development"
 
     pf_data = {
         "merchant_id": merchant_id,
