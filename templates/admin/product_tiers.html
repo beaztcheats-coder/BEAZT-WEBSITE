@@ -182,7 +182,7 @@
           <input type="number" name="duration_days" value="{{ t.duration_days }}" style="width:50px;" placeholder="Days">
           <input type="number" name="price_pounds" value="{{ t.price_pounds }}" step="0.01" style="width:60px;" placeholder="Price">
           <label style="font-size:0.62rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;">
-            <input type="checkbox" name="is_subscription" value="1" {% if t.is_subscription or (product.visibility == 'private' and not t.is_subscription is defined) %}checked{% endif %}>
+            <input type="checkbox" name="is_subscription" value="1" {% if t.is_subscription %}checked{% endif %}>
             <input type="hidden" name="is_subscription" value="0">
             Sub
           </label>
@@ -203,8 +203,8 @@
   <input type="number" name="duration_days" placeholder="Days" required style="width:70px;">
   <input type="number" name="price_pounds" placeholder="Price" step="0.01" required style="width:80px;">
   <select name="billing_type" style="width:110px;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.78rem;">
-    <option value="one_time">One-time</option>
-    <option value="subscription" {% if product.visibility == 'private' %}selected{% endif %}>Subscription</option>
+    <option value="one_time" selected>One-time</option>
+    <option value="subscription">Subscription</option>
   </select>
   <input type="text" name="ivno_subscription_link" placeholder="Subscription link" style="width:180px;font-family:var(--mono);font-size:0.72rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
   <input type="number" name="bundle_count" value="1" min="1" max="10" style="width:55px;font-family:var(--mono);font-size:0.72rem;padding:0.5rem 0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);" title="Keys per purchase">

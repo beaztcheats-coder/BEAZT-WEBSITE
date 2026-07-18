@@ -318,6 +318,26 @@ with app.app_context():
     except Exception:
         db.session.rollback()
 
+    # One-time (idempotent) sync: keep pricing_tiers.billing_type aligned with
+    # is_subscription. Historically these drifted because add_tier set only
+    # billing_type while the private-product seed set only is_subscription, and
+    # the storefront reads billing_type while admin/cheats read is_subscription.
+    # is_subscription is treated as the source of truth.
+    try:
+        from models import PricingTier
+        synced = 0
+        for _t in PricingTier.query.all():
+            _want = "subscription" if _t.is_subscription else "one_time"
+            if (_t.billing_type or "one_time") != _want:
+                _t.billing_type = _want
+                synced += 1
+        if synced:
+            db.session.commit()
+            print(f"Synced {synced} pricing tier(s): billing_type aligned with is_subscription.")
+    except Exception as _e:
+        db.session.rollback()
+        print("Tier sync migration skipped:", _e)
+
     seed_products()
 
     try:

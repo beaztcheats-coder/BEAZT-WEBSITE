@@ -116,7 +116,8 @@ def _sync_product_tiers(product):
                 label=label,
                 duration_days=days,
                 price_pence=int(price * 100),
-                is_subscription=True,
+                billing_type="subscription" if sub else "one_time",
+                is_subscription=bool(sub),
             ))
         db.session.commit()
         return
@@ -700,12 +701,14 @@ def add_tier(product_id):
     if not label or duration <= 0 or price <= 0:
         flash("All fields are required and must be positive.", "error")
         return redirect(url_for("admin.product_tiers", product_id=product.id))
+    billing_type_val = request.form.get("billing_type", "one_time", type=str)
     tier = PricingTier(
         product_id=product.id,
         label=label,
         duration_days=duration,
         price_pence=int(price * 100),
-        billing_type=request.form.get("billing_type", "one_time", type=str),
+        billing_type=billing_type_val,
+        is_subscription=(billing_type_val == "subscription"),
         ivno_subscription_link=request.form.get("ivno_subscription_link", "").strip() or None,
         bundle_count=request.form.get("bundle_count", 1, type=int),
     )
@@ -808,6 +811,7 @@ def fulfill_order(order_id):
     duration_days = tier.duration_days if tier else 30
     expires_at = datetime.utcnow() + timedelta(days=duration_days)
     total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
+    is_sub = bool(getattr(tier, "is_subscription", False)) if tier else False
 
     # 1) Try License API (panel) first — especially for private products
     if product and product.license_api_app_id:
@@ -816,7 +820,8 @@ def fulfill_order(order_id):
         if key_values:
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
-                          tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True)
+                          tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True,
+                          is_subscription=is_sub)
                 db.session.add(key)
             order.status = "completed"
             db.session.commit()
@@ -841,6 +846,7 @@ def fulfill_order(order_id):
     pool_key.expires_at = expires_at
     pool_key.assigned_at = datetime.utcnow()
     pool_key.is_active = True
+    pool_key.is_subscription = is_sub
     order.status = "completed"
     db.session.commit()
     flash(f"Order #{order.id} fulfilled with key {pool_key.key_value[:20]}...", "success")
@@ -868,6 +874,7 @@ def _order_fulfillment_context(order):
                      .order_by(Key.created_at.asc()).all())
 
     existing_key = Key.query.filter_by(order_id=order.id).first()
+    is_sub = bool(getattr(tier, "is_subscription", False)) if tier else False
     return {
         "tier": tier,
         "product": product,
@@ -875,6 +882,7 @@ def _order_fulfillment_context(order):
         "expires_at": expires_at,
         "product_id": product_id,
         "tier_id": tier_id,
+        "is_sub": is_sub,
         "pool_keys": pool_keys,
         "existing_key": existing_key,
         "pool_count": len(pool_keys),
@@ -923,7 +931,8 @@ def assign_custom_key(order_id):
     for kv in key_values:
         key = Key(user_id=order.user_id, order_id=order.id,
                   product_id=ctx["product_id"], tier_id=ctx["tier_id"],
-                  key_value=kv, expires_at=ctx["expires_at"], is_active=True)
+                  key_value=kv, expires_at=ctx["expires_at"], is_active=True,
+                  is_subscription=ctx["is_sub"])
         db.session.add(key)
     order.status = "completed"
     db.session.commit()
@@ -962,6 +971,7 @@ def assign_pool_key(order_id):
     pool_key.expires_at = ctx["expires_at"]
     pool_key.assigned_at = datetime.utcnow()
     pool_key.is_active = True
+    pool_key.is_subscription = ctx["is_sub"]
     order.status = "completed"
     db.session.commit()
     logger.info("Admin %s assigned pool key %s to order %s",
@@ -996,7 +1006,8 @@ def retry_license(order_id):
         for kv in key_values:
             key = Key(user_id=order.user_id, order_id=order.id,
                       product_id=ctx["product_id"], tier_id=ctx["tier_id"],
-                      key_value=kv, expires_at=ctx["expires_at"], is_active=True)
+                      key_value=kv, expires_at=ctx["expires_at"], is_active=True,
+                      is_subscription=ctx["is_sub"])
             db.session.add(key)
         order.status = "completed"
         db.session.commit()

@@ -284,6 +284,7 @@ def handle_fulfillment(order):
     duration_days = tier.duration_days
     expires_at = datetime.utcnow() + timedelta(days=duration_days)
     total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
+    is_sub = bool(getattr(tier, "is_subscription", False))
 
     logger.info("Fulfilling order %s — product=%s tier=%s key_source=%s app_id=%s private=%s",
                 order.id, product.name if product else "?", tier.label,
@@ -298,7 +299,8 @@ def handle_fulfillment(order):
             order.status = "completed"
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
-                          tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True)
+                          tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
+                          is_subscription=is_sub)
                 db.session.add(key)
             db.session.commit()
             logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
@@ -314,6 +316,7 @@ def handle_fulfillment(order):
         pool_key.expires_at = expires_at
         pool_key.assigned_at = datetime.utcnow()
         pool_key.is_active = True
+        pool_key.is_subscription = is_sub
         order.status = "completed"
         db.session.commit()
         logger.info("Pool key assigned for order %s", order.id)
@@ -344,6 +347,7 @@ def handle_fulfillment(order):
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
                           tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
+                          is_subscription=is_sub,
                           chairfbi_key_id=kv, chairfbi_cheat_id=cheat_id)
                 db.session.add(key)
             db.session.commit()
