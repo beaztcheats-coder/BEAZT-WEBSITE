@@ -340,10 +340,7 @@ def plan_detail(tier_id):
 
 @main_bp.route("/loader")
 def loader():
-    loader = get_loader_config()
-    return render_template("loader.html", 
-        loader_token=loader["loader_token"],
-        loader_public_url=loader.get("loader_public_url", loader.get("loader_url", "")))
+    return render_template("loader.html")
 
 
 @main_bp.route("/feedback")
@@ -425,8 +422,6 @@ def my_keys():
     has_private = any(k.product and k.product.visibility == "private" and k.is_active for k in keys)
     return render_template("keys.html", keys=keys, pending_orders=pending_orders,
         loader_token=loader["loader_token"],
-        loader_public_url=loader.get("loader_public_url", loader.get("loader_url", "")),
-        loader_private_url=loader.get("loader_private_url", ""),
         discord_public_url=discord_cfg["public_url"],
         discord_private_url=discord_cfg["private_url"],
         has_private=has_private)

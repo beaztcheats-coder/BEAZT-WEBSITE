@@ -113,6 +113,15 @@
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Loader URL <span style="font-weight:400;">(or upload above)</span></label>
+        <input type="text" name="loader_url" value="{{ product.loader_url or '' }}" placeholder="/static/loaders/rust-beazt-external/loader.exe" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+        {% if not product.loader_url %}
+        <span style="font-size:0.68rem;color:var(--warn);"><span class="icon icon-sm" data-lucide="alert-triangle"></span> No loader attached &mdash; buyers of this product will have no loader to download. Paste a URL or upload a file.</span>
+        {% else %}
+        <span style="font-size:0.68rem;color:var(--text-muted);">This is the loader buyers receive for this product. Clearing it leaves buyers without a loader.</span>
+        {% endif %}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Gallery Images</label>
         {% if gallery_imgs %}
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">

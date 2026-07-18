@@ -101,3 +101,31 @@ def get_discord_config():
         "public_url": _lookup("discord_public_url", Config.DISCORD_PUBLIC_URL),
         "private_url": _lookup("discord_private_url", Config.DISCORD_PRIVATE_URL),
     }
+
+
+def get_license_api_config():
+    """License API (Project Infinity / CatNip panel) credentials.
+
+    Mirrors the other integration helpers: Settings take precedence over the
+    Config env-var defaults, so the token / URL / auth scheme can be updated
+    from the admin Settings page without a redeploy.
+    """
+    from models import Setting
+
+    def _lookup(key, default):
+        try:
+            val = Setting.get(key)
+            if val:
+                return val
+        except Exception:
+            pass
+        return default
+
+    scheme = _lookup("license_api_auth_scheme", "bearer").strip().lower()
+    if scheme not in ("bearer", "raw"):
+        scheme = "bearer"
+    return {
+        "api_token": _lookup("license_api_token", Config.LICENSE_API_TOKEN),
+        "api_url": _lookup("license_api_url", Config.LICENSE_API_URL),
+        "auth_scheme": scheme,
+    }

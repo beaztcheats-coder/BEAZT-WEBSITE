@@ -10,56 +10,6 @@
       <p class="text-muted">Your active plans, keys, and expiry details.</p>
     </div>
 
-    {% if has_private %}
-    <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(30,144,255,0.4);">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
-        <span class="icon" data-lucide="shield-check" style="color:var(--accent);width:22px;height:22px;"></span>
-        <strong style="font-size:0.95rem;">Private Access Unlocked</strong>
-      </div>
-      <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:0.85rem;">
-        You own an active private cheat license. Download the private loader{% if discord_private_url %} and join the exclusive Discord server{% endif %}.
-      </p>
-      <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
-        {% if loader_private_url %}
-        <a href="{{ loader_private_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
-          <span class="icon icon-sm" data-lucide="download"></span> Download Private Loader
-        </a>
-        {% endif %}
-        {% if discord_private_url %}
-        <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
-          <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
-        </a>
-        {% endif %}
-      </div>
-    </div>
-    {% endif %}
-
-    {% if loader_public_url or loader_token %}
-    <div class="loader-card reveal" style="margin-bottom:2rem;">
-      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;">
-        <span class="icon" data-lucide="download" style="color:var(--accent);width:22px;height:22px;"></span>
-        <strong style="font-size:0.95rem;">Loader Setup</strong>
-      </div>
-      <p style="color:var(--text-dim);font-size:0.82rem;margin-bottom:1rem;">
-        Download the loader and enter your license key to activate.
-      </p>
-      {% if loader_public_url %}
-      <a href="{{ loader_public_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
-        <span class="icon icon-sm" data-lucide="download"></span> Download Loader
-      </a>
-      {% endif %}
-      {% if discord_public_url %}
-      <a href="{{ discord_public_url }}" target="_blank" rel="noopener" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;{% if loader_public_url %}margin-left:0.5rem;{% endif %}">
-        <span class="icon icon-sm" data-lucide="message-circle"></span> Join Discord
-      </a>
-      {% endif %}
-      <p style="color:var(--text-dim);font-size:0.72rem;margin-top:0.6rem;">
-        <span class="icon icon-sm" data-lucide="info" style="width:14px;height:14px;"></span>
-        Before running: download <a href="https://www.guru3d.com/download/rtss-rivatuner-statistics-server-download/" target="_blank" rel="noopener" style="color:var(--accent);">RivaTuner Statistics Server</a> and disable your antivirus real-time protection.
-      </p>
-    </div>
-    {% endif %}
-
     {% if pending_orders %}
     <div class="loader-card reveal" style="margin-bottom:1.5rem;border-color:rgba(245,158,11,0.3);">
       <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;">
@@ -110,10 +60,24 @@
                 <code class="key-value">{{ key.key_value }}</code>
               </div>
               {% if key.product and key.product.loader_url %}
-              <div style="margin-bottom:0.8rem;">
+              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.8rem;">
                 <a href="{{ key.product.loader_url }}" class="btn btn-primary btn-compact" style="text-decoration:none;">
                   <span class="icon icon-sm" data-lucide="download"></span> Download Loader
                 </a>
+                {% if key.product.visibility == 'private' and discord_private_url %}
+                <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
+                  <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
+                </a>
+                {% elif key.product.visibility == 'public' and discord_public_url %}
+                <a href="{{ discord_public_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
+                  <span class="icon icon-sm" data-lucide="message-circle"></span> Join Discord
+                </a>
+                {% endif %}
+              </div>
+              {% elif key.is_active %}
+              <div style="margin-bottom:0.8rem;padding:0.5rem 0.7rem;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:0.74rem;color:var(--warn);">
+                <span class="icon icon-sm" data-lucide="alert-triangle"></span>
+                No loader attached to this product. Contact support.
               </div>
               {% endif %}
               <div class="key-meta">

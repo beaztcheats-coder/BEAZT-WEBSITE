@@ -133,7 +133,7 @@
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.35rem;">
-            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Public Loader</label>
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Public Loader <span style="font-weight:400;">(deprecated)</span></label>
             <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
               <input type="file" name="loader_public_file" accept=".exe,.zip,.rar,.7z" style="font-size:0.72rem;color:var(--text-dim);flex:1;min-width:200px;">
               <button type="submit" name="upload_loader_public" value="1" class="btn-xs" style="background:var(--accent);color:#fff;border:none;padding:0.6rem 0.9rem;white-space:nowrap;">Upload</button>
@@ -141,11 +141,11 @@
               <a href="{{ loader_public_url }}" target="_blank" style="font-size:0.68rem;color:var(--accent-h);white-space:nowrap;">Download current</a>
               {% endif %}
             </div>
-            <span style="font-size:0.68rem;color:var(--text-mut);">Select file and click Upload. Shown to all users on My Keys.</span>
+            <span style="font-size:0.68rem;color:var(--text-mut);">Admin-only fallback. Customers now get the loader attached to each product &mdash; set it in the product editor.</span>
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.35rem;">
-            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Private Loader</label>
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Private Loader <span style="font-weight:400;">(deprecated)</span></label>
             <div style="display:flex;gap:0.5rem;align-items:end;flex-wrap:wrap;">
               <input type="file" name="loader_private_file" accept=".exe,.zip,.rar,.7z" style="font-size:0.72rem;color:var(--text-dim);flex:1;min-width:200px;">
               <button type="submit" name="upload_loader_private" value="1" class="btn-xs" style="background:var(--accent);color:#fff;border:none;padding:0.6rem 0.9rem;white-space:nowrap;">Upload</button>
@@ -153,7 +153,7 @@
               <a href="{{ loader_private_url }}" target="_blank" style="font-size:0.68rem;color:var(--accent-h);white-space:nowrap;">Download current</a>
               {% endif %}
             </div>
-            <span style="font-size:0.68rem;color:var(--text-mut);">Only shown to users with active private keys.</span>
+            <span style="font-size:0.68rem;color:var(--text-mut);">Admin-only fallback. Attach the Rust Beazt External loader to its product in the product editor instead.</span>
           </div>
 
         </div>
@@ -177,6 +177,41 @@
             <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Private Discord URL</label>
             <input type="text" name="discord_private_url" value="{{ discord_private_url }}" placeholder="https://discord.gg/..." style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
             {% if discord_private_url %}<span style="font-size:0.68rem;color:var(--success);">Set.</span>{% else %}<span style="font-size:0.68rem;color:var(--warn);">Only shown to users with active private keys.</span>{% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== LICENSE API SECTION ===== -->
+      <div>
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
+          <span class="icon icon-sm" data-lucide="key-round"></span> License API (Project Infinity)
+        </h3>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API Token</label>
+            <div style="display:flex;gap:0.5rem;">
+              <input :type="reveal.license_token ? 'text' : 'password'" name="license_api_token" value="{{ license_api_token }}" placeholder="Panel API token" style="flex:1;padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <button type="button" @click="reveal.license_token = !reveal.license_token" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.license_token ? 'HIDE' : 'SHOW'"></button>
+            </div>
+            {% if license_api_token %}<span style="font-size:0.68rem;color:var(--success);">Set ({{ license_api_token[:10] }}...)</span>{% else %}<span style="font-size:0.68rem;color:var(--warn);">Not set &mdash; key generation via API will fail.</span>{% endif %}
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API URL</label>
+            <input type="text" name="license_api_url" value="{{ license_api_url }}" placeholder="https://panel.projectinfinity.co.za" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            <span style="font-size:0.68rem;color:var(--text-mut);">Base URL of the CatNip / Project Infinity panel.</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.35rem;">
+            <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Auth Scheme</label>
+            <select name="license_api_auth_scheme" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+              <option value="bearer" {% if license_api_auth_scheme == 'bearer' %}selected{% endif %}>Bearer token (Authorization: Bearer ...)</option>
+              <option value="raw" {% if license_api_auth_scheme == 'raw' %}selected{% endif %}>Raw token (Authorization: ...)</option>
+            </select>
+            <span style="font-size:0.68rem;color:var(--text-mut);">If key creation returns HTTP 403/401, run "Test Project Infinity API" on the product and switch scheme. Default: Bearer.</span>
           </div>
 
         </div>

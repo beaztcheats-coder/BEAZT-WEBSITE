@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config
+from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_license_api_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -584,6 +584,11 @@ def product_tiers(product_id):
                     flash("Loader upload failed — check directory permissions.", "error")
             else:
                 flash("Only .exe, .zip, .rar, .7z files accepted for loaders.", "error")
+        elif "loader_url" in request.form:
+            # Loader URL text field — lets the admin paste an existing file path
+            # (e.g. a previously uploaded loader) instead of re-uploading.
+            loader_url_val = request.form.get("loader_url", "").strip()
+            product.loader_url = loader_url_val if loader_url_val else None
 
         # Gallery image manager
         gallery = []
@@ -1005,8 +1010,11 @@ def test_license_api(product_id):
         return {"ok": False, "error": "Product not found"}, 404
 
     from utils.license_api import LicenseAPI
-    token = Config.LICENSE_API_TOKEN
-    base = Config.LICENSE_API_URL
+    from config import get_license_api_config
+    lcfg = get_license_api_config()
+    token = lcfg["api_token"]
+    base = lcfg["api_url"]
+    configured_scheme = lcfg["auth_scheme"]
     app_id = product.license_api_app_id
 
     report = {
@@ -1017,6 +1025,7 @@ def test_license_api(product_id):
         "token_set": bool(token),
         "token_preview": (token[:10] + "...") if token else "",
         "base_url": base,
+        "configured_scheme": configured_scheme,
     }
 
     if not token:
@@ -1032,7 +1041,7 @@ def test_license_api(product_id):
     # If an app id is configured, try listing its licenses (read-only) to
     # confirm the app is reachable with the recommended scheme.
     if app_id:
-        recommended = (report.get("auth_diagnosis") or {}).get("recommended") or "bearer"
+        recommended = (report.get("auth_diagnosis") or {}).get("recommended") or configured_scheme
         api = LicenseAPI(api_token=token, base_url=base, auth_scheme=recommended)
         try:
             licenses = api.get_licenses(app_id)
@@ -1165,6 +1174,9 @@ def settings():
             "loader_private_url": "Private Loader Download URL",
             "discord_public_url": "Public Discord URL",
             "discord_private_url": "Private Discord URL",
+            "license_api_token": "License API Token",
+            "license_api_url": "License API URL",
+            "license_api_auth_scheme": "License API Auth Scheme",
         }
         for key, label in fields.items():
             val = request.form.get(key, "").strip()
@@ -1211,6 +1223,7 @@ def settings():
     loader_cfg = get_loader_config()
     discord_cfg = get_discord_config()
     ivno_cfg = get_ivno_config()
+    license_cfg = get_license_api_config()
     return render_template("admin/settings.html",
         site_url=Config.SITE_URL,
         chairfbi_api_token=cf_cfg["api_token"],
@@ -1226,7 +1239,10 @@ def settings():
         loader_public_url=loader_cfg.get("loader_public_url", ""),
         loader_private_url=loader_cfg.get("loader_private_url", ""),
         discord_public_url=discord_cfg.get("public_url", ""),
-        discord_private_url=discord_cfg.get("private_url", ""))
+        discord_private_url=discord_cfg.get("private_url", ""),
+        license_api_token=license_cfg["api_token"],
+        license_api_url=license_cfg["api_url"],
+        license_api_auth_scheme=license_cfg["auth_scheme"])
 
 
 @admin_bp.route("/chairfbi")

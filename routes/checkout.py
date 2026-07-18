@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, url_for
 from flask_login import current_user, login_required
 from models import db, PricingTier, Order, Key, Product, Setting
-from config import Config, get_ivno_config
+from config import get_ivno_config, get_license_api_config
 from utils.license_api import LicenseAPI
 
 checkout_bp = Blueprint("checkout", __name__)
@@ -250,7 +250,8 @@ def try_license_api(order, product, tier):
     duration_days = tier.duration_days if tier else 30
     total_keys = (getattr(tier, "bundle_count", 1) or 1) * (getattr(order, "quantity", 1) or 1)
 
-    api = LicenseAPI(api_token=Config.LICENSE_API_TOKEN, base_url=Config.LICENSE_API_URL)
+    cfg = get_license_api_config()
+    api = LicenseAPI(api_token=cfg["api_token"], base_url=cfg["api_url"], auth_scheme=cfg["auth_scheme"])
     try:
         keys_data = api.create_keys(
             app_id=product.license_api_app_id,

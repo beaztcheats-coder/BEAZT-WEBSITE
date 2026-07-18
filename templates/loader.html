@@ -12,21 +12,24 @@
 
     <div class="loader-steps" style="max-width:640px;margin:0 auto;">
 
-      {% if loader_public_url %}
       <div class="loader-step reveal">
         <div class="loader-step-num">1</div>
         <div>
-          <h3 style="font-size:1rem;margin-bottom:0.3rem;">Download the Loader</h3>
-          <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">Grab the latest version of the public loader from the link below.</p>
-          <a href="{{ loader_public_url }}" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
-            <span class="icon icon-sm" data-lucide="download"></span> Download Loader
-          </a>
+          <h3 style="font-size:1rem;margin-bottom:0.3rem;">Get Your Loader</h3>
+          <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">
+            Loaders are attached to each product. After purchasing, download the loader for your product from the
+            <a href="{{ url_for('main.my_keys') }}" style="color:var(--accent);">My Keys</a>
+            page &mdash; it appears on your key card.
+          </p>
+          <a href="{{ url_for('main.my_keys') }}" class="btn btn-primary" style="text-decoration:none;">Go to My Keys</a>
+          {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-ghost" style="text-decoration:none;margin-left:0.5rem;">Sign in</a>
+          {% endif %}
         </div>
       </div>
-      {% endif %}
 
       <div class="loader-step reveal">
-        <div class="loader-step-num">{{ '2' if loader_public_url else '1' }}</div>
+        <div class="loader-step-num">2</div>
         <div>
           <h3 style="font-size:1rem;margin-bottom:0.3rem;">Download RivaTuner Statistics Server</h3>
           <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">
@@ -39,7 +42,7 @@
       </div>
 
       <div class="loader-step reveal">
-        <div class="loader-step-num">{{ '3' if loader_public_url else '2' }}</div>
+        <div class="loader-step-num">3</div>
         <div>
           <h3 style="font-size:1rem;margin-bottom:0.3rem;">Disable Antivirus Real-Time Protection</h3>
           <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">
@@ -52,12 +55,13 @@
       </div>
 
       <div class="loader-step reveal">
-        <div class="loader-step-num">{{ '4' if loader_public_url else '3' }}</div>
+        <div class="loader-step-num">4</div>
         <div>
           <h3 style="font-size:1rem;margin-bottom:0.3rem;">Enter Your License Key</h3>
           <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:0.8rem;">
             After purchasing a license, find your key on the
-            <a href="{{ url_for('main.my_keys') }}" style="color:var(--accent);">My Keys</a> page.
+            <a href="{{ url_for('main.my_keys') }}" style="color:var(--accent);">My Keys</a>
+            page.
             Copy it and paste it into the loader to activate.
           </p>
           <a href="{{ url_for('main.my_keys') }}" class="btn btn-ghost" style="text-decoration:none;">Go to My Keys</a>
