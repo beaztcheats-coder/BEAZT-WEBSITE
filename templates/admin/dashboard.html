@@ -62,7 +62,17 @@
 {% if awaiting_keys > 0 %}
 <div class="cf-alert cf-alert-warn">
   <span class="icon icon-sm" data-lucide="inbox"></span>
-  <strong>{{ awaiting_keys }} order(s) awaiting keys.</strong> The key pool is empty for these products. <a href="{{ url_for('admin.orders', status='awaiting_keys') }}">View orders</a> &mdash; upload more keys to the product's Key Pool.
+  <strong>{{ awaiting_keys }} order(s) awaiting keys.</strong> These weren't auto-fulfilled &mdash; either the License API failed or the key pool is empty. <a href="{{ url_for('admin.orders', status='awaiting_keys') }}">View orders</a> to assign keys manually.
+</div>
+{% endif %}
+
+{% if license_token_is_default and products_using_license_api > 0 %}
+<div class="cf-alert cf-alert-error">
+  <span class="icon icon-sm" data-lucide="key-round"></span>
+  <strong>License API token not configured.</strong>
+  {{ products_using_license_api }} product(s) rely on the Project Infinity API for key generation, but the token is still the default/placeholder. Purchases will be stuck in "awaiting keys" until you set a valid token in
+  <a href="{{ url_for('admin.settings') }}#license-api" style="color:var(--accent-h);">Settings &rarr; License API</a>.
+  Current API URL: <code>{{ license_api_url }}</code> &mdash; run "Test Project Infinity API" on a product to verify.
 </div>
 {% endif %}
 

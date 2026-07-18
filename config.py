@@ -25,7 +25,7 @@ class Config:
     LOADER_PUBLIC_URL = os.getenv("LOADER_PUBLIC_URL", "")
     LOADER_PRIVATE_URL = os.getenv("LOADER_PRIVATE_URL", "")
     IMGBB_API_KEY = os.getenv("IMGBB_API_KEY", "")
-    LICENSE_API_URL = os.getenv("LICENSE_API_URL", "https://panel.projectinfinity.co.za")
+    LICENSE_API_URL = os.getenv("LICENSE_API_URL", "http://panel.projectinfinity.co.za:3845")
     LICENSE_API_TOKEN = os.getenv("LICENSE_API_TOKEN", "26423d5a67ad0f0ec65f27751d12c96cfd8a8ff5a8aa9c7522e8cc4fbb311d7740998388c360cf8311b65be008c021dcf41c207be1aadfaa1ea8d7ab6fb4d88b")
 
 
@@ -121,9 +121,9 @@ def get_license_api_config():
             pass
         return default
 
-    scheme = _lookup("license_api_auth_scheme", "bearer").strip().lower()
+    scheme = _lookup("license_api_auth_scheme", "raw").strip().lower()
     if scheme not in ("bearer", "raw"):
-        scheme = "bearer"
+        scheme = "raw"
     return {
         "api_token": _lookup("license_api_token", Config.LICENSE_API_TOKEN),
         "api_url": _lookup("license_api_url", Config.LICENSE_API_URL),

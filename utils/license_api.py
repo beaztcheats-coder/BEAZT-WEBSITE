@@ -5,17 +5,22 @@ logger = logging.getLogger(__name__)
 
 
 class LicenseAPI:
-    """Client for the Project Infinity license panel API.
+    """Client for the Project Infinity (CatNip) license panel API.
 
-    Auth: the panel accepts the token as ``Bearer <token>`` (default, matching
-    the ChairFBI client convention). Use ``auth_scheme="raw"`` if the panel
-    expects the bare token in the ``Authorization`` header.
+    Auth: the panel expects the token as a bare value in the ``Authorization``
+    header (``Authorization: <token>``), so the default ``auth_scheme`` is
+    ``"raw"``. Pass ``auth_scheme="bearer"`` if the panel is ever changed to
+    expect ``Authorization: Bearer <token>``.
+
+    The API backend runs over HTTP on port 3845
+    (``http://panel.projectinfinity.co.za:3845``); the port-443 host is the web
+    panel frontend and does not accept token auth.
     """
 
-    BASE = "https://panel.projectinfinity.co.za"
+    BASE = "http://panel.projectinfinity.co.za:3845"
     TIMEOUT = 15
 
-    def __init__(self, api_token=None, base_url=None, auth_scheme="bearer"):
+    def __init__(self, api_token=None, base_url=None, auth_scheme="raw"):
         self.token = api_token
         self.base = base_url or self.BASE
         self.auth_scheme = auth_scheme
@@ -50,7 +55,7 @@ class LicenseAPI:
         return resp.json()
 
     def get_licenses(self, app_id):
-        resp = self._request("GET", f"/backend/dashboard/api/v1/apps/{app_id}/licenses")
+        resp = self._request("GET", f"/backend/dashboard/api/v1/apps/{app_id}/licenses?limit=1000")
         resp.raise_for_status()
         return resp.json()
 
@@ -81,8 +86,19 @@ class LicenseAPI:
         resp.raise_for_status()
         return resp.json()
 
-    def reset_hwid(self, app_id, license_key):
-        resp = self._request("POST", f"/backend/dashboard/api/v1/apps/{app_id}/licenses/{license_key}/reset-hwid")
+    def reset_hwid(self, license_key, app_id=None):
+        """Reset the HWID binding for a license key.
+
+        Uses the panel's ``PUT /licenses/reset-by-license`` endpoint with a
+        ``{"license": <key>}`` body (as used by the panel's own dashboard).
+        ``app_id`` is accepted for backward compatibility but unused — the
+        endpoint is not app-scoped.
+        """
+        resp = self._request(
+            "PUT",
+            "/backend/dashboard/api/v1/licenses/reset-by-license",
+            json={"license": license_key},
+        )
         resp.raise_for_status()
         return resp.json()
 
@@ -108,10 +124,10 @@ class LicenseAPI:
                 results[scheme] = {"status": None, "body": str(exc)[:1500]}
 
         recommended = None
-        for scheme in ("bearer", "raw"):
+        for scheme in ("raw", "bearer"):
             if results[scheme]["status"] == 200:
                 recommended = scheme
                 break
         # Restore headers to the recommended (or default) scheme.
-        self.headers = self._build_headers(recommended or "bearer")
+        self.headers = self._build_headers(recommended or "raw")
         return {"schemes": results, "recommended": recommended}

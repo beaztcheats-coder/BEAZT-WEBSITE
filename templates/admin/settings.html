@@ -183,7 +183,7 @@
       </div>
 
       <!-- ===== LICENSE API SECTION ===== -->
-      <div>
+      <div id="license-api">
         <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
           <span class="icon icon-sm" data-lucide="key-round"></span> License API (Project Infinity)
         </h3>
@@ -201,17 +201,17 @@
 
           <div style="display:flex;flex-direction:column;gap:0.35rem;">
             <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">API URL</label>
-            <input type="text" name="license_api_url" value="{{ license_api_url }}" placeholder="https://panel.projectinfinity.co.za" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-            <span style="font-size:0.68rem;color:var(--text-mut);">Base URL of the CatNip / Project Infinity panel.</span>
+            <input type="text" name="license_api_url" value="{{ license_api_url }}" placeholder="http://panel.projectinfinity.co.za:3845" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
+            <span style="font-size:0.68rem;color:var(--text-mut);">Backend API URL (HTTP, port 3845). The https://...:443 host is the web panel and will reject tokens.</span>
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.35rem;">
             <label style="font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;">Auth Scheme</label>
             <select name="license_api_auth_scheme" style="padding:0.6rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;">
-              <option value="bearer" {% if license_api_auth_scheme == 'bearer' %}selected{% endif %}>Bearer token (Authorization: Bearer ...)</option>
               <option value="raw" {% if license_api_auth_scheme == 'raw' %}selected{% endif %}>Raw token (Authorization: ...)</option>
+              <option value="bearer" {% if license_api_auth_scheme == 'bearer' %}selected{% endif %}>Bearer token (Authorization: Bearer ...)</option>
             </select>
-            <span style="font-size:0.68rem;color:var(--text-mut);">If key creation returns HTTP 403/401, run "Test Project Infinity API" on the product and switch scheme. Default: Bearer.</span>
+            <span style="font-size:0.68rem;color:var(--text-mut);">The CatNip panel uses <strong>Raw</strong>. Run "Test Project Infinity API" on the product to verify.</span>
           </div>
 
         </div>

@@ -187,6 +187,15 @@ def dashboard():
             else:
                 cf_balance_error = err_str
 
+    # Warn if the License API token is still the hardcoded default or unset —
+    # key generation via the Project Infinity API will fail silently in that case.
+    license_cfg = get_license_api_config()
+    license_token_is_default = (
+        not license_cfg["api_token"]
+        or license_cfg["api_token"] == Config.LICENSE_API_TOKEN
+    )
+    products_using_license_api = Product.query.filter(Product.license_api_app_id.isnot(None)).count()
+
     return render_template(
         "admin/dashboard.html",
         total_users=total_users,
@@ -201,6 +210,9 @@ def dashboard():
         recent_keys=recent_keys,
         cf_balance=cf_balance,
         cf_balance_error=cf_balance_error,
+        license_token_is_default=license_token_is_default,
+        license_api_url=license_cfg["api_url"],
+        products_using_license_api=products_using_license_api,
     )
 
 
