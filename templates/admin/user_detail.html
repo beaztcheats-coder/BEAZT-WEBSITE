@@ -4,6 +4,15 @@
   <a href="{{ url_for('admin.users') }}" style="font-size:0.8rem;color:var(--accent-h);">&larr; Back to Users</a>
   <h1>{{ target_user.username }}</h1>
   <p>{{ target_user.email }} &middot; {{ 'Admin' if target_user.is_admin else 'User' }} &middot; {{ 'Active' if target_user.is_active else 'Disabled' }}</p>
+  {% if not target_user.is_admin and target_user.is_active %}
+  <form method="POST" action="{{ url_for('admin.impersonate_user', user_id=target_user.id) }}" style="margin-top:0.6rem;" onsubmit="return confirm('Log in as {{ target_user.username }} to see their keys/dashboard?')">
+    <button type="submit" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-l);border:1px solid rgba(30,58,95,0.25);">
+      <span class="icon icon-sm" data-lucide="user-round"></span> Login as this user
+    </button>
+  </form>
+  {% elif not target_user.is_admin and not target_user.is_active %}
+  <p style="font-size:0.7rem;color:var(--warn);margin-top:0.4rem;">Enable this user to log in as them.</p>
+  {% endif %}
 </div>
 
 <h3 style="font-size:0.85rem;font-weight:600;margin-bottom:0.75rem;">Keys ({{ keys|length }})</h3>

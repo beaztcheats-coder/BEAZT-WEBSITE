@@ -28,6 +28,9 @@
           </button>
         </form>
         {% if not u.is_admin %}
+          <form method="POST" action="{{ url_for('admin.impersonate_user', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Log in as {{ u.username }} to see their keys/dashboard?')">
+            <button type="submit" class="btn-xs" style="background:var(--accent-g3);color:var(--accent-l);border:1px solid rgba(30,58,95,0.25);">Login as</button>
+          </form>
           <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Delete this user permanently?')">
             <button type="submit" class="btn-xs btn-danger">Delete</button>
           </form>

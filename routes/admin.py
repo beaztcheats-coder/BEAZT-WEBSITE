@@ -7,9 +7,9 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user, logout_user
 from models import db, User, Product, PricingTier, Order, Key, Setting
-from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_license_api_config
+from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_license_api_config, get_mailer_config
 
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
@@ -236,6 +236,51 @@ def user_detail(user_id):
     keys = Key.query.filter_by(user_id=user.id).order_by(Key.created_at.desc()).all()
     orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).all()
     return render_template("admin/user_detail.html", target_user=user, keys=keys, orders=orders)
+
+
+@admin_bp.route("/users/<int:user_id>/impersonate", methods=["POST"])
+@admin_required
+def impersonate_user(user_id):
+    """Log in as another user to see exactly what they see (My Keys, etc.).
+
+    Stores the admin's id in the session so they can return with one click.
+    Blocked for admin targets and disabled users for safety.
+    """
+    target = db.session.get(User, user_id)
+    if not target:
+        abort(404)
+    if target.is_admin:
+        flash("Can't log in as another admin.", "error")
+        return redirect(url_for("admin.users"))
+    if not target.is_active:
+        flash("Can't log in as a disabled user — enable the account first.", "error")
+        return redirect(url_for("admin.users"))
+
+    from flask import session
+    session["_impersonator_id"] = current_user.id
+    admin_name = current_user.username
+    login_user(target)
+    logger.info("Admin %s (id=%s) is now impersonating user %s (id=%s)",
+                admin_name, session.get("_impersonator_id"), target.username, target.id)
+    flash(f"You are now viewing the site as {target.username}.", "info")
+    return redirect(url_for("main.my_keys"))
+
+
+@admin_bp.route("/stop-impersonating")
+def stop_impersonating():
+    """Return to the admin account after impersonating a user."""
+    from flask import session
+    impersonator_id = session.pop("_impersonator_id", None)
+    if not impersonator_id:
+        return redirect(url_for("main.index"))
+    admin_user = db.session.get(User, impersonator_id)
+    if not admin_user or not admin_user.is_admin:
+        logout_user()
+        return redirect(url_for("auth.login"))
+    login_user(admin_user)
+    logger.info("Returned to admin account %s", admin_user.username)
+    flash("Returned to your admin account.", "info")
+    return redirect(url_for("admin.users"))
 
 
 @admin_bp.route("/users/<int:user_id>/toggle", methods=["POST"])
@@ -815,17 +860,20 @@ def fulfill_order(order_id):
 
     # 1) Try License API (panel) first — especially for private products
     if product and product.license_api_app_id:
-        from routes.checkout import try_license_api
+        from routes.checkout import try_license_api, _notify_buyer
         key_values, err = try_license_api(order, product, tier)
         if key_values:
+            created = []
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
                           tier_id=tier_id, key_value=kv, expires_at=expires_at, is_active=True,
                           is_subscription=is_sub)
                 db.session.add(key)
+                created.append(key)
             order.status = "completed"
             db.session.commit()
-            flash(f"Order #{order.id} fulfilled via License API ({len(key_values)} key(s)).", "success")
+            _notify_buyer(order, product, tier, created)
+            flash(f"Order #{order.id} fulfilled via License API ({len(key_values)} key(s)). Buyer emailed.", "success")
             return redirect(url_for("admin.orders"))
         flash(f"License API failed: {err}", "error")
 
@@ -849,7 +897,9 @@ def fulfill_order(order_id):
     pool_key.is_subscription = is_sub
     order.status = "completed"
     db.session.commit()
-    flash(f"Order #{order.id} fulfilled with key {pool_key.key_value[:20]}...", "success")
+    from routes.checkout import _notify_buyer
+    _notify_buyer(order, product, tier, [pool_key])
+    flash(f"Order #{order.id} fulfilled with key {pool_key.key_value[:20]}... Buyer emailed.", "success")
     return redirect(url_for("admin.orders"))
 
 
@@ -928,17 +978,21 @@ def assign_custom_key(order_id):
         flash("This order already has a key assigned. Delete the existing key first if you want to replace it.", "error")
         return redirect(url_for("admin.order_detail", order_id=order.id))
 
+    created = []
     for kv in key_values:
         key = Key(user_id=order.user_id, order_id=order.id,
                   product_id=ctx["product_id"], tier_id=ctx["tier_id"],
                   key_value=kv, expires_at=ctx["expires_at"], is_active=True,
                   is_subscription=ctx["is_sub"])
         db.session.add(key)
+        created.append(key)
     order.status = "completed"
     db.session.commit()
     logger.info("Admin %s manually assigned %d custom key(s) to order %s",
                 current_user.username, len(key_values), order.id)
-    flash(f"Order #{order.id}: {len(key_values)} key(s) assigned manually.", "success")
+    from routes.checkout import _notify_buyer
+    _notify_buyer(order, ctx["product"], ctx["tier"], created)
+    flash(f"Order #{order.id}: {len(key_values)} key(s) assigned manually. Buyer emailed.", "success")
     return redirect(url_for("admin.order_detail", order_id=order.id))
 
 
@@ -976,7 +1030,9 @@ def assign_pool_key(order_id):
     db.session.commit()
     logger.info("Admin %s assigned pool key %s to order %s",
                 current_user.username, pool_key.id, order.id)
-    flash(f"Order #{order.id}: pool key {pool_key.key_value[:20]}... assigned.", "success")
+    from routes.checkout import _notify_buyer
+    _notify_buyer(order, ctx["product"], ctx["tier"], [pool_key])
+    flash(f"Order #{order.id}: pool key {pool_key.key_value[:20]}... assigned. Buyer emailed.", "success")
     return redirect(url_for("admin.order_detail", order_id=order.id))
 
 
@@ -1000,20 +1056,23 @@ def retry_license(order_id):
         flash("This order already has a key assigned. Delete the existing key first if you want to replace it.", "error")
         return redirect(url_for("admin.order_detail", order_id=order.id))
 
-    from routes.checkout import try_license_api
+    from routes.checkout import try_license_api, _notify_buyer
     key_values, err = try_license_api(order, product, tier)
     if key_values:
+        created = []
         for kv in key_values:
             key = Key(user_id=order.user_id, order_id=order.id,
                       product_id=ctx["product_id"], tier_id=ctx["tier_id"],
                       key_value=kv, expires_at=ctx["expires_at"], is_active=True,
                       is_subscription=ctx["is_sub"])
             db.session.add(key)
+            created.append(key)
         order.status = "completed"
         db.session.commit()
         logger.info("Admin %s retried License API for order %s — %d key(s) generated",
                     current_user.username, order.id, len(key_values))
-        flash(f"Order #{order.id}: {len(key_values)} key(s) generated via Project Infinity API.", "success")
+        _notify_buyer(order, product, tier, created)
+        flash(f"Order #{order.id}: {len(key_values)} key(s) generated via Project Infinity API. Buyer emailed.", "success")
     else:
         flash(f"License API retry failed: {err}", "error")
     return redirect(url_for("admin.order_detail", order_id=order.id))
@@ -1200,6 +1259,13 @@ def settings():
             "license_api_token": "License API Token",
             "license_api_url": "License API URL",
             "license_api_auth_scheme": "License API Auth Scheme",
+            "smtp_host": "SMTP Host",
+            "smtp_port": "SMTP Port",
+            "smtp_user": "SMTP Username",
+            "smtp_pass": "SMTP Password",
+            "smtp_use_tls": "SMTP Use TLS",
+            "smtp_from_email": "From Email",
+            "smtp_from_name": "From Name",
         }
         for key, label in fields.items():
             val = request.form.get(key, "").strip()
@@ -1247,6 +1313,7 @@ def settings():
     discord_cfg = get_discord_config()
     ivno_cfg = get_ivno_config()
     license_cfg = get_license_api_config()
+    mailer_cfg = get_mailer_config()
     return render_template("admin/settings.html",
         site_url=Config.SITE_URL,
         chairfbi_api_token=cf_cfg["api_token"],
@@ -1265,7 +1332,14 @@ def settings():
         discord_private_url=discord_cfg.get("private_url", ""),
         license_api_token=license_cfg["api_token"],
         license_api_url=license_cfg["api_url"],
-        license_api_auth_scheme=license_cfg["auth_scheme"])
+        license_api_auth_scheme=license_cfg["auth_scheme"],
+        smtp_host=mailer_cfg["smtp_host"],
+        smtp_port=mailer_cfg["smtp_port"],
+        smtp_user=mailer_cfg["smtp_user"],
+        smtp_pass=mailer_cfg["smtp_pass"],
+        smtp_use_tls=mailer_cfg["use_tls"],
+        smtp_from_email=mailer_cfg["from_email"],
+        smtp_from_name=mailer_cfg["from_name"])
 
 
 @admin_bp.route("/chairfbi")

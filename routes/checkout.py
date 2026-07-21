@@ -228,6 +228,20 @@ def _extract_key_strings(keys_data):
     return result
 
 
+def _notify_buyer(order, product, tier, keys):
+    """Email the buyer their assigned key(s). Best-effort; never raises."""
+    try:
+        from utils.mailer import notify_key_assigned
+        from models import User
+        from config import Config
+        user = User.query.get(order.user_id) if order.user_id else None
+        if not user:
+            return
+        notify_key_assigned(user, order, product, tier, keys, site_url=Config.SITE_URL)
+    except Exception:
+        logger.exception("notify_key_assigned failed for order %s", order.id)
+
+
 def try_license_api(order, product, tier):
     """Attempt to generate keys via the Project Infinity License API.
 
@@ -297,13 +311,16 @@ def handle_fulfillment(order):
         key_values, err = try_license_api(order, product, tier)
         if key_values:
             order.status = "completed"
+            created = []
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
                           tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
                           is_subscription=is_sub)
                 db.session.add(key)
+                created.append(key)
             db.session.commit()
             logger.info("License API generated %d key(s) for order %s", len(key_values), order.id)
+            _notify_buyer(order, product, tier, created)
             return
         logger.warning("License API path failed for order %s — falling back. Reason: %s", order.id, err)
 
@@ -320,6 +337,7 @@ def handle_fulfillment(order):
         order.status = "completed"
         db.session.commit()
         logger.info("Pool key assigned for order %s", order.id)
+        _notify_buyer(order, product, tier, [pool_key])
         return
 
     # 3) ChairFBI — for resold/catalog products with a cheat_id
@@ -344,14 +362,17 @@ def handle_fulfillment(order):
 
         if key_values:
             order.status = "completed"
+            created = []
             for kv in key_values:
                 key = Key(user_id=order.user_id, order_id=order.id, product_id=product_id,
                           tier_id=tier.id, key_value=kv, expires_at=expires_at, is_active=True,
                           is_subscription=is_sub,
                           chairfbi_key_id=kv, chairfbi_cheat_id=cheat_id)
                 db.session.add(key)
+                created.append(key)
             db.session.commit()
             logger.info("ChairFBI generated %d key(s) for order %s", len(key_values), order.id)
+            _notify_buyer(order, product, tier, created)
             return
 
     # 4) No key source available — NEVER generate fake keys

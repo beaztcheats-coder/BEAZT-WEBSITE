@@ -217,6 +217,64 @@
         </div>
       </div>
 
+      <!-- ===== EMAIL / SMTP SECTION ===== -->
+      <div id="email">
+        <h3 style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:1rem;letter-spacing:0.04em;text-transform:uppercase;display:flex;align-items:center;gap:0.5rem;">
+          <span class="icon icon-sm" data-lucide="mail"></span> Email (Key Delivery)
+        </h3>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+          <div class="cf-alert" style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);">
+            <span style="font-size:0.72rem;color:var(--text-dim);">When a key is assigned (auto on purchase or manually via the order page), the buyer is emailed their key, expiry, loader link and Discord. If SMTP is not configured, emails are skipped silently — key assignment still succeeds.</span>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">SMTP Host</label>
+              <input type="text" name="smtp_host" value="{{ smtp_host }}" placeholder="smtp.yourhost.com or localhost" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+            </div>
+            <div style="flex:0 0 100px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Port</label>
+              <input type="number" name="smtp_port" value="{{ smtp_port }}" placeholder="587" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+            </div>
+            <div style="flex:0 0 120px;display:flex;flex-direction:column;justify-content:flex-end;">
+              <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:0.6rem 0;">
+                <input type="checkbox" name="smtp_use_tls" value="1" {% if smtp_use_tls %}checked{% endif %}>
+                <input type="hidden" name="smtp_use_tls" value="0">
+                Use TLS
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">SMTP Username</label>
+              <input type="text" name="smtp_user" value="{{ smtp_user }}" placeholder="you@yourhost.com" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+            </div>
+            <div style="flex:1;min-width:180px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">SMTP Password</label>
+              <div style="display:flex;gap:0.3rem;">
+                <input :type="reveal.smtp_pass ? 'text' : 'password'" name="smtp_pass" value="{{ smtp_pass }}" placeholder="••••••••" style="flex:1;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+                <button type="button" @click="reveal.smtp_pass = !reveal.smtp_pass" style="padding:0 0.85rem;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text-dim);cursor:pointer;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;" x-text="reveal.smtp_pass ? 'HIDE' : 'SHOW'"></button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">From Email</label>
+              <input type="text" name="smtp_from_email" value="{{ smtp_from_email }}" placeholder="no-reply@beazt.com" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+            </div>
+            <div style="flex:1;min-width:180px;">
+              <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">From Name</label>
+              <input type="text" name="smtp_from_name" value="{{ smtp_from_name }}" placeholder="BEAZT" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary" style="align-self:flex-start;">
         <span class="icon" data-lucide="save"></span>
         Save settings

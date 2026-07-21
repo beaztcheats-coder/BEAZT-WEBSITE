@@ -21,6 +21,13 @@
   {% block head %}{% endblock %}
 </head>
 <body>
+  {% if session.get('_impersonator_id') %}
+  <div style="position:sticky;top:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#06b6d4);color:#fff;font-family:var(--font);font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:0.6rem;padding:0.5rem 1rem;flex-wrap:wrap;">
+    <span class="icon icon-sm" data-lucide="eye" style="width:16px;height:16px;"></span>
+    <strong>Viewing as {{ current_user.username }}</strong> — you are impersonating this user.
+    <a href="{{ url_for('admin.stop_impersonating') }}" style="color:#fff;text-decoration:none;background:rgba(0,0,0,0.25);padding:0.25rem 0.7rem;border-radius:6px;font-weight:700;border:1px solid rgba(255,255,255,0.3);">Return to admin</a>
+  </div>
+  {% endif %}
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="bg-grid" aria-hidden="true"></div>
   <div class="bg-noise" aria-hidden="true"></div>
