@@ -117,6 +117,36 @@
           </a>
         </div>
     {% endif %}
+
+    <!-- Skeleton Loading State (for async loading) -->
+    <div class="keys-grid" x-data="{ loading: false }" x-show="loading">
+      <template x-for="i in 3" :key="i">
+        <div class="skeleton-key-card">
+          <div class="skeleton-key-header">
+            <div class="skeleton-key-icon skeleton"></div>
+            <div class="skeleton-key-info">
+              <div class="skeleton-key-title skeleton"></div>
+              <div class="skeleton-key-badge skeleton"></div>
+            </div>
+          </div>
+          <div class="skeleton-key-value skeleton"></div>
+          <div class="skeleton-key-meta">
+            <div class="skeleton-key-meta-item">
+              <div class="skeleton-key-meta-label skeleton"></div>
+              <div class="skeleton-key-meta-value skeleton"></div>
+            </div>
+            <div class="skeleton-key-meta-item">
+              <div class="skeleton-key-meta-label skeleton"></div>
+              <div class="skeleton-key-meta-value skeleton"></div>
+            </div>
+            <div class="skeleton-key-meta-item">
+              <div class="skeleton-key-meta-label skeleton"></div>
+              <div class="skeleton-key-meta-value skeleton"></div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </section>
 {% endblock %}
