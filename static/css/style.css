@@ -3061,6 +3061,391 @@ img {
   box-shadow: var(--shadow-2xl), 0 0 50px var(--accent-glow);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM CHEAT CARD (STORE PRODUCT CARDS)
+   Features: Hover lift, smooth image zoom, status indicators,
+   source badges, refined pricing display, arrow CTA
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Cheats Grid ─────────────────────────────────────────── */
+/* Responsive grid layout for product cards */
+.cheats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.cheats-grid--private {
+  /* Slightly tighter grid for private section */
+  gap: var(--space-5);
+}
+
+/* ── Premium Cheat Card ──────────────────────────────────── */
+/* Base card with premium hover effects */
+.cheat-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--gradient-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+/* Top accent border with gradient shine */
+.cheat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--border-subtle) 20%, 
+    var(--accent-line) 50%, 
+    var(--border-subtle) 80%, 
+    transparent 100%
+  );
+  opacity: 0.5;
+  transition: opacity var(--duration-normal);
+  z-index: 5;
+}
+
+/* Premium hover lift with accent glow */
+.cheat-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-2xl), 0 0 40px var(--accent-glow-subtle);
+  color: inherit;
+}
+
+.cheat-card:hover::before {
+  opacity: 1;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--accent-primary) 20%, 
+    var(--accent-primary) 50%, 
+    var(--accent-primary) 80%, 
+    transparent 100%
+  );
+}
+
+.cheat-card:active {
+  transform: translateY(-3px);
+  transition-duration: var(--duration-fast);
+}
+
+/* ── Banner Image ────────────────────────────────────────── */
+/* Image container with gradient overlay and zoom effect */
+.cheat-card-banner {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+/* Gradient overlay for text readability */
+.cheat-card-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg, 
+    rgba(22, 139, 255, 0.05) 0%, 
+    transparent 30%,
+    transparent 60%,
+    rgba(5, 7, 11, 0.7) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+  transition: background var(--duration-normal);
+}
+
+.cheat-card:hover .cheat-card-banner::before {
+  background: linear-gradient(
+    180deg, 
+    rgba(22, 139, 255, 0.1) 0%, 
+    transparent 30%,
+    transparent 60%,
+    rgba(5, 7, 11, 0.85) 100%
+  );
+}
+
+.cheat-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-smooth);
+}
+
+/* Smooth zoom on hover */
+.cheat-card:hover .cheat-card-banner img {
+  transform: scale(1.08);
+}
+
+/* ── Top Badge Area ──────────────────────────────────────── */
+/* Positioned badges for status and source */
+.cheat-card-top {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  z-index: 3;
+  gap: var(--space-2);
+}
+
+/* ── Status Indicator ────────────────────────────────────── */
+/* Colored dot with glow effect */
+.cheat-card-status {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-card);
+  flex-shrink: 0;
+  transition: all var(--duration-fast);
+}
+
+/* Status colors with glow effects */
+.cheat-card-status.status-online,
+.cheat-card-status.status-undetected {
+  background: var(--status-online);
+  box-shadow: 0 0 8px var(--status-online-glow), 0 0 16px var(--status-online-bg);
+}
+
+.cheat-card-status.status-maintenance {
+  background: var(--status-warning);
+  box-shadow: 0 0 8px var(--status-warning-glow), 0 0 16px var(--status-warning-bg);
+  animation: status-pulse-warning 2s ease-in-out infinite;
+}
+
+.cheat-card-status.status-offline,
+.cheat-card-status.status-updating {
+  background: var(--status-error);
+  box-shadow: 0 0 8px var(--status-error-glow), 0 0 16px var(--status-error-bg);
+  animation: status-pulse-error 1.5s ease-in-out infinite;
+}
+
+@keyframes status-pulse-warning {
+  0%, 100% { box-shadow: 0 0 8px var(--status-warning-glow); }
+  50% { box-shadow: 0 0 16px var(--status-warning-glow), 0 0 24px var(--status-warning-bg); }
+}
+
+@keyframes status-pulse-error {
+  0%, 100% { box-shadow: 0 0 8px var(--status-error-glow); }
+  50% { box-shadow: 0 0 16px var(--status-error-glow), 0 0 24px var(--status-error-bg); }
+}
+
+/* ── Source Badge ────────────────────────────────────────── */
+/* "BeaZt Private" source indicator */
+.cheat-source-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  background: rgba(5, 7, 11, 0.85);
+  border: 1px solid var(--border-accent-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all var(--duration-fast);
+}
+
+.cheat-source-badge--private {
+  background: var(--gradient-accent-soft);
+  border-color: var(--border-accent);
+  color: var(--accent-primary);
+  box-shadow: 0 0 12px var(--accent-glow-subtle);
+}
+
+.cheat-card:hover .cheat-source-badge--private {
+  background: var(--accent-soft);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* ── Card Body ───────────────────────────────────────────── */
+/* Content area with name and pricing */
+.cheat-card-name {
+  padding: var(--space-4) var(--space-5) 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  transition: color var(--duration-fast);
+}
+
+.cheat-card:hover .cheat-card-name {
+  color: var(--accent-primary);
+}
+
+/* ── Pricing Display ─────────────────────────────────────── */
+/* Refined pricing with tier information */
+.cheat-card-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5);
+  margin-top: auto;
+}
+
+.cheat-card-tier {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.cheat-card-days {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.cheat-card-noprice {
+  padding: var(--space-3) var(--space-5);
+  margin-top: auto;
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* ── Arrow CTA ───────────────────────────────────────────── */
+/* Animated arrow button */
+.cheat-card-arrow {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.cheat-card:hover .cheat-card-arrow {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+  transform: translateX(3px);
+  box-shadow: var(--glow-accent);
+}
+
+.cheat-card:hover .cheat-card-arrow:hover {
+  transform: translateX(5px);
+}
+
+/* ── Private Card Variant ────────────────────────────────── */
+/* Enhanced styling for private products */
+.cheat-card--private {
+  border-color: var(--border-accent-subtle);
+}
+
+.cheat-card--private::before {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--accent-line) 20%, 
+    var(--accent-primary) 50%, 
+    var(--accent-line) 80%, 
+    transparent 100%
+  );
+  opacity: 0.7;
+}
+
+.cheat-card--private:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-2xl), 0 0 50px var(--accent-glow);
+}
+
+.cheat-card--private:hover::before {
+  opacity: 1;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cheats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+  
+  .cheat-card-name {
+    font-size: 1rem;
+  }
+  
+  .cheat-card-tier {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cheats-grid {
+    gap: var(--space-4);
+  }
+  
+  .cheat-card-name {
+    padding: var(--space-3) var(--space-4) 0;
+    font-size: 0.9375rem;
+  }
+  
+  .cheat-card-pricing {
+    padding: var(--space-2) var(--space-4);
+  }
+  
+  .cheat-card-noprice {
+    padding: var(--space-2) var(--space-4);
+  }
+  
+  .cheat-card-arrow {
+    width: 32px;
+    height: 32px;
+    bottom: var(--space-3);
+    right: var(--space-3);
+  }
+}
+
+/* ── Reduced Motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .cheat-card {
+    transition: none;
+  }
+  
+  .cheat-card:hover {
+    transform: none;
+  }
+  
+  .cheat-card:hover .cheat-card-banner img {
+    transform: none;
+  }
+  
+  .cheat-card:hover .cheat-card-arrow {
+    transform: none;
+  }
+  
+  .cheat-card-status.status-maintenance,
+  .cheat-card-status.status-offline,
+  .cheat-card-status.status-updating {
+    animation: none;
+  }
+}
+
 /* ── STATUS BOARD ─────────────────────────────────────────── */
 .status-board {
   background: var(--gradient-card);
