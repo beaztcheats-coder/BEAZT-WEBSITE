@@ -3311,6 +3311,70 @@ img {
   color: var(--text-primary);
 }
 
+/* ── KEY STATUS & TIER BADGES ────────────────────────────── */
+.key-status {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.key-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--space-2);
+  background: var(--gradient-accent-soft);
+  border: 1px solid var(--border-accent-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: var(--status-online-bg);
+  border: 1px solid var(--status-online-border);
+  color: var(--status-online);
+  box-shadow: 0 0 8px var(--status-online-glow);
+}
+
+.status-active::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-online);
+  box-shadow: 0 0 6px var(--status-online);
+  margin-right: var(--space-2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-expired {
+  background: var(--status-error-bg);
+  border: 1px solid var(--status-error-border);
+  color: var(--status-error);
+  box-shadow: 0 0 8px var(--status-error-glow);
+}
+
+.status-expired::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-error);
+  box-shadow: 0 0 6px var(--status-error);
+  margin-right: var(--space-2);
+}
+
 /* ── LOADERS ──────────────────────────────────────────────── */
 .loader-steps {
   display: flex;
