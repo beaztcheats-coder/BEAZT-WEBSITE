@@ -246,6 +246,27 @@
     document.body.classList.add("has-mobile-buy-bar");
   }
 
+  function setupFooterReveal() {
+    var footer = document.querySelector(".footer");
+    if (!footer || reducedMotion) { return; }
+    
+    if (!("IntersectionObserver" in window)) {
+      footer.classList.add("footer-visible");
+      return;
+    }
+    
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          footer.classList.add("footer-visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    io.observe(footer);
+  }
+
   function hydrateIcons() {
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       try { window.lucide.createIcons(); } catch (error) { console.error("Lucide render failed", error); }
@@ -260,5 +281,6 @@
   setupFlashDismiss();
   setupCounters();
   setupMobileBuyBar();
+  setupFooterReveal();
   hydrateIcons();
 })();
