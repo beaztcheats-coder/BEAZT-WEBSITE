@@ -3447,14 +3447,70 @@ img {
 }
 
 /* ── STATUS BOARD ─────────────────────────────────────────── */
+/* Premium detection & uptime board with sophisticated visual hierarchy */
 .status-board {
   background: var(--gradient-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg), var(--glow-inset);
+  position: relative;
 }
 
+/* Top accent border with gradient shine */
+.status-board::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--accent-line) 20%,
+    var(--accent-primary) 50%,
+    var(--accent-line) 80%,
+    transparent 100%
+  );
+  opacity: 0.6;
+}
+
+/* Ambient glow behind the board */
+.status-board::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(ellipse at center, var(--accent-glow-subtle) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Board header row */
+.status-board-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--space-6);
+  padding: var(--space-3) var(--space-6);
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.status-board-header span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Status row with premium hover effects */
 .status-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -3462,78 +3518,272 @@ img {
   gap: var(--space-6);
   padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--border-subtle);
-  transition: background var(--duration-fast);
+  transition: all var(--duration-fast) var(--ease-smooth);
+  position: relative;
+  z-index: 1;
+  cursor: default;
 }
 
 .status-row:last-child {
   border-bottom: none;
 }
 
-.status-row:hover {
-  background: var(--gradient-surface);
+/* Premium hover state with accent glow */
+.status-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+  pointer-events: none;
 }
 
+.status-row:hover {
+  background: var(--gradient-surface);
+  transform: translateX(4px);
+}
+
+.status-row:hover::before {
+  opacity: 1;
+}
+
+/* Left accent border on hover */
+.status-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 3px;
+  background: var(--accent-primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all var(--duration-fast) var(--ease-spring);
+  box-shadow: var(--glow-accent);
+}
+
+.status-row:hover::after {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* Product name styling - clear and prominent */
 .status-row-name {
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  position: relative;
 }
 
-.status-row-meta {
+.status-row-name::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-default);
+  transition: all var(--duration-fast);
+}
+
+.status-row:hover .status-row-name {
+  color: #fff;
+}
+
+.status-row:hover .status-row-name::before {
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Uptime display */
+.status-row-uptime {
   font-size: 0.8125rem;
   color: var(--text-muted);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-/* Status Pill Enhancement */
+.status-row-uptime::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.status-row:hover .status-row-uptime {
+  color: var(--text-secondary);
+}
+
+/* Status Pill Enhancement - Premium with glow and pulse */
 .status-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.6875rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease-smooth);
+  position: relative;
 }
 
+/* Subtle inner glow on pill */
+.status-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Status pill dot indicator */
 .status-pill-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
+/* Undetected / Online pill */
+.status-pill-ok,
 .status-pill.online {
   background: var(--status-online-bg);
   color: var(--status-online);
   border: 1px solid var(--status-online-border);
+  box-shadow: 0 0 12px var(--status-online-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.status-pill-ok .status-pill-dot,
 .status-pill.online .status-pill-dot {
   background: var(--status-online);
   box-shadow: var(--glow-status-online);
+  animation: status-pulse 2s ease-in-out infinite;
 }
 
+/* Maintenance pill */
+.status-pill-warn,
 .status-pill.maintenance {
   background: var(--status-warning-bg);
   color: var(--status-warning);
   border: 1px solid var(--status-warning-border);
+  box-shadow: 0 0 12px var(--status-warning-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.status-pill-warn .status-pill-dot,
 .status-pill.maintenance .status-pill-dot {
   background: var(--status-warning);
   box-shadow: var(--glow-status-warning);
+  animation: status-pulse 1.5s ease-in-out infinite;
 }
 
+/* Updating / Offline pill */
+.status-pill-down,
 .status-pill.updating {
   background: var(--status-error-bg);
   color: var(--status-error);
   border: 1px solid var(--status-error-border);
+  box-shadow: 0 0 12px var(--status-error-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.status-pill-down .status-pill-dot,
 .status-pill.updating .status-pill-dot {
   background: var(--status-error);
   box-shadow: var(--glow-status-error);
-  animation: pulse 1s ease-in-out infinite;
+  animation: status-pulse 0.8s ease-in-out infinite;
+}
+
+/* Status pulse animation */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+/* Enhanced hover states for pills */
+.status-row:hover .status-pill-ok,
+.status-row:hover .status-pill.online {
+  box-shadow: 0 0 20px var(--status-online-glow), 0 0 40px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+.status-row:hover .status-pill-warn,
+.status-row:hover .status-pill.maintenance {
+  box-shadow: 0 0 20px var(--status-warning-glow), 0 0 40px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+.status-row:hover .status-pill-down,
+.status-row:hover .status-pill.updating {
+  box-shadow: 0 0 20px var(--status-error-glow), 0 0 40px rgba(239, 68, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateX(-2px);
+}
+
+/* Responsive status board */
+@media (max-width: 640px) {
+  .status-board-header {
+    display: none;
+  }
+  
+  .status-row {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+  
+  .status-row-uptime {
+    display: none;
+  }
+  
+  .status-row-name {
+    font-size: 0.875rem;
+  }
+  
+  .status-pill {
+    font-size: 0.625rem;
+    padding: 2px var(--space-2);
+  }
+  
+  .status-pill-dot {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .status-pill-ok .status-pill-dot,
+  .status-pill.online .status-pill-dot,
+  .status-pill-warn .status-pill-dot,
+  .status-pill.maintenance .status-pill-dot,
+  .status-pill-down .status-pill-dot,
+  .status-pill.updating .status-pill-dot {
+    animation: none;
+  }
+  
+  .status-row {
+    transition: none;
+  }
+  
+  .status-row:hover {
+    transform: none;
+  }
 }
 
 /* ── BENTO GRID ──────────────────────────────────────────── */

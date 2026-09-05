@@ -282,19 +282,24 @@
       <p class="section-sub" style="max-width:560px;color:var(--text-muted);font-size:0.92rem;">Real-time per-product status, updated continuously.</p>
     </div>
     <div class="status-board reveal">
+      <div class="status-board-header">
+        <span>Product</span>
+        <span>Uptime</span>
+        <span>Status</span>
+      </div>
       {% for p in all_products[:6] %}
         {% set st = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
         <div class="status-row">
           <span class="status-row-name">{{ p.name }}</span>
-          <span class="status-row-uptime">99.9% uptime</span>
+          <span class="status-row-uptime">99.9%</span>
           {% if st in ('online', 'undetected') %}
-            <span class="status-pill status-pill-ok">Undetected</span>
+            <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
           {% elif st == 'maintenance' %}
-            <span class="status-pill status-pill-warn">Maintenance</span>
+            <span class="status-pill status-pill-warn"><span class="status-pill-dot"></span>Maintenance</span>
           {% elif st == 'offline' %}
-            <span class="status-pill status-pill-down">Updating</span>
+            <span class="status-pill status-pill-down"><span class="status-pill-dot"></span>Updating</span>
           {% else %}
-            <span class="status-pill status-pill-ok">Undetected</span>
+            <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
           {% endif %}
         </div>
       {% endfor %}
