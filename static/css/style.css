@@ -3855,34 +3855,123 @@ img {
   }
 }
 
-/* ── HOW IT WORKS ────────────────────────────────────────── */
+/* ── HOW IT WORKS — PREMIUM ─────────────────────────────── */
 .how-track {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
+  gap: var(--space-10);
   position: relative;
+  padding: var(--space-8) 0;
 }
 
+/* Premium connecting line with animated gradient */
 .how-track::before {
   content: "";
   position: absolute;
-  top: 40px;
-  left: calc(16.67% + 40px);
-  right: calc(16.67% + 40px);
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent-line), var(--accent-primary), var(--accent-line));
+  top: 50%;
+  left: calc(16.67% + 60px);
+  right: calc(16.67% + 60px);
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(22, 139, 255, 0.2) 10%,
+    rgba(22, 139, 255, 0.6) 30%,
+    rgba(22, 139, 255, 0.8) 50%,
+    rgba(22, 139, 255, 0.6) 70%,
+    rgba(22, 139, 255, 0.2) 90%,
+    transparent 100%
+  );
+  transform: translateY(-50%);
   z-index: 0;
+  border-radius: var(--radius-full);
+  box-shadow: 
+    0 0 20px rgba(22, 139, 255, 0.15),
+    0 0 40px rgba(22, 139, 255, 0.08);
+  animation: line-glow 3s ease-in-out infinite;
 }
 
-.how-step {
+@keyframes line-glow {
+  0%, 100% {
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+}
+
+/* Animated dots along the connecting line */
+.how-track::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(16.67% + 60px);
+  right: calc(16.67% + 60px);
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(22, 139, 255, 0.4) 20%,
+    rgba(22, 139, 255, 0.4) 80%,
+    transparent 100%
+  );
+  transform: translateY(-50%);
+  z-index: 0;
+  border-radius: var(--radius-full);
+  background-size: 200% 100%;
+  animation: line-flow 2s linear infinite;
+  mask-image: linear-gradient(90deg, 
+    transparent 0%, 
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(90deg, 
+    transparent 0%, 
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+}
+
+@keyframes line-flow {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* How It Works node/step */
+.how-node {
   position: relative;
   z-index: 1;
   text-align: center;
+  padding: var(--space-6);
+  background: var(--gradient-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 
-.how-step-number {
-  width: 80px;
-  height: 80px;
+.how-node:hover {
+  border-color: var(--border-accent-subtle);
+  transform: translateY(-4px);
+  box-shadow: 
+    var(--shadow-lg),
+    0 0 30px rgba(22, 139, 255, 0.1);
+}
+
+.how-node:hover .how-node-num {
+  transform: scale(1.05);
+  box-shadow: var(--glow-button-hover), var(--shadow-xl);
+}
+
+/* Premium step number styling */
+.how-node-num {
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3893,30 +3982,132 @@ img {
   font-family: var(--font-display);
   border-radius: 50%;
   margin: 0 auto var(--space-5);
-  box-shadow: var(--glow-button), var(--shadow-lg);
+  box-shadow: 
+    var(--glow-button),
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
+  transition: all var(--duration-normal) var(--ease-spring);
 }
 
-.how-step-number::before {
+/* Outer glow ring */
+.how-node-num::before {
   content: "";
   position: absolute;
-  inset: -4px;
+  inset: -6px;
   border-radius: 50%;
-  background: var(--gradient-accent);
-  opacity: 0.3;
-  filter: blur(8px);
-  z-index: -1;
+  background: transparent;
+  border: 2px solid rgba(22, 139, 255, 0.3);
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 
-.how-step h3 {
-  margin-bottom: var(--space-2);
+.how-node:hover .how-node-num::before {
+  inset: -10px;
+  border-color: rgba(22, 139, 255, 0.5);
+  box-shadow: 0 0 20px rgba(22, 139, 255, 0.2);
 }
 
-.how-step p {
+/* Inner highlight */
+.how-node-num::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 20%;
+  width: 60%;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Step title */
+.how-node h3 {
+  margin-bottom: var(--space-3);
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* Step description */
+.how-node p {
   font-size: 0.9375rem;
   color: var(--text-muted);
-  max-width: 280px;
+  line-height: 1.6;
+  max-width: 260px;
   margin: 0 auto;
+}
+
+/* Premium icon inside step number (optional enhancement) */
+.how-node-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.how-node-icon .icon {
+  width: 32px;
+  height: 32px;
+  stroke-width: 2;
+}
+
+/* Responsive: tablet */
+@media (max-width: 900px) {
+  .how-track {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    padding: var(--space-6) 0;
+  }
+
+  .how-track::before,
+  .how-track::after {
+    display: none;
+  }
+
+  .how-node {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-5);
+    text-align: left;
+    align-items: start;
+  }
+
+  .how-node-num {
+    margin: 0;
+    width: 64px;
+    height: 64px;
+    font-size: 1.5rem;
+  }
+
+  .how-node-content {
+    padding-top: var(--space-2);
+  }
+
+  .how-node h3 {
+    margin-bottom: var(--space-2);
+  }
+
+  .how-node p {
+    max-width: none;
+    margin: 0;
+  }
+}
+
+/* Responsive: mobile */
+@media (max-width: 480px) {
+  .how-node {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: var(--space-5);
+  }
+
+  .how-node-num {
+    margin: 0 auto var(--space-4);
+  }
+
+  .how-node p {
+    max-width: 280px;
+    margin: 0 auto;
+  }
 }
 
 /* ── TESTIMONIALS ───────────────────────────────────────── */
@@ -5441,15 +5632,6 @@ img {
   
   .hero-stats {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .how-track {
-    grid-template-columns: 1fr;
-    gap: var(--space-10);
-  }
-  
-  .how-track::before {
-    display: none;
   }
 }
 
