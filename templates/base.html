@@ -34,7 +34,7 @@
   <canvas id="ambient-canvas" aria-hidden="true"></canvas>
 
   <div class="main-content" id="main-content">
-    <header class="navbar" x-data="{ mobileOpen: false }" :class="{ 'scrolled': scrollY > 20 }" @scroll.window="scrollY = window.scrollY">
+    <header class="navbar" x-data="{ mobileOpen: false, scrollY: window.scrollY }" :class="{ 'scrolled': scrollY > 20 }" @scroll.window="scrollY = window.scrollY" x-init="scrollY = window.scrollY">
       <div class="container nav-inner">
         <a href="/" class="nav-logo" aria-label="BEAZT home">
           <picture>
