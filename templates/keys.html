@@ -32,77 +32,80 @@
     {% if keys %}
       <div class="keys-grid">
         {% for key in keys %}
-          <div class="key-card reveal">
-            <div class="key-header">
-              <span class="icon key-icon" data-lucide="key-round"></span>
-              <div>
-                <strong>{{ key.product.name if key.product else 'License' }}</strong>
-                {% if key.tier %}
-                  <span class="key-tier-badge">{{ key.tier.label }}</span>
-                {% endif %}
-                {% if key.is_subscription %}
-                  <span class="key-tier-badge" style="border-color:rgba(52,211,153,0.35);background:rgba(52,211,153,0.1);color:var(--success);">Subscription</span>
-                {% endif %}
-                <span class="key-created">Received {{ key.assigned_at.strftime('%d %b %Y') if key.assigned_at else key.created_at.strftime('%d %b %Y') }}</span>
+          <div class="license-card reveal">
+            <div class="license-card-header">
+              <div class="license-card-icon">
+                <span class="icon" data-lucide="key-round"></span>
               </div>
-              <span class="key-status {{ 'status-active' if key.is_active else 'status-expired' }}">
+              <div style="flex:1;">
+                <div class="license-card-title">{{ key.product.name if key.product else 'License' }}</div>
+                <div class="license-card-badges">
+                  {% if key.tier %}
+                    <span class="badge badge-primary">{{ key.tier.label }}</span>
+                  {% endif %}
+                  {% if key.is_subscription %}
+                    <span class="badge badge-success">Subscription</span>
+                  {% endif %}
+                  <span class="text-muted" style="font-size:0.75rem;margin-left:auto;">Received {{ key.assigned_at.strftime('%d %b %Y') if key.assigned_at else key.created_at.strftime('%d %b %Y') }}</span>
+                </div>
+              </div>
+              <span class="license-card-status {{ 'license-card-status--active' if key.is_active else 'license-card-status--expired' }}">
                 {{ 'Active' if key.is_active else 'Expired' }}
               </span>
             </div>
-            <div>
-              <div class="key-value-group">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem;">
-                  <span class="key-label">License Key</span>
-                  <button type="button" class="key-copy-btn" onclick="navigator.clipboard.writeText('{{ key.key_value }}').then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy';},1400)})">
-                    <span class="icon icon-sm" data-lucide="copy"></span> Copy
-                  </button>
-                </div>
-                <code class="key-value">{{ key.key_value }}</code>
+            <div class="license-card-key-section">
+              <div class="license-card-key-header">
+                <span class="license-card-key-label">License Key</span>
+                <button type="button" class="license-card-copy-btn" onclick="navigator.clipboard.writeText('{{ key.key_value }}').then(()=>{this.querySelector('span').textContent='Copied';setTimeout(()=>{this.querySelector('span').textContent='Copy';},1400)})">
+                  <span class="icon icon-sm" data-lucide="copy"></span>
+                  <span>Copy</span>
+                </button>
               </div>
-              {% if key.product and key.product.loader_url %}
-              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.8rem;">
-                <a href="{{ key.product.loader_url }}" class="btn btn-primary btn-compact" style="text-decoration:none;">
-                  <span class="icon icon-sm" data-lucide="download"></span> Download Loader
-                </a>
-                {% if key.product.visibility == 'private' and discord_private_url %}
-                <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
-                  <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
-                </a>
-                {% elif key.product.visibility == 'public' and discord_public_url %}
-                <a href="{{ discord_public_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
-                  <span class="icon icon-sm" data-lucide="message-circle"></span> Join Discord
-                </a>
-                {% endif %}
-              </div>
-              {% elif key.is_active %}
-              <div style="margin-bottom:0.8rem;padding:0.5rem 0.7rem;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:0.74rem;color:var(--warn);">
-                <span class="icon icon-sm" data-lucide="alert-triangle"></span>
-                No loader attached to this product. Contact support.
-              </div>
+              <code class="license-card-key-value">{{ key.key_value }}</code>
+            </div>
+            {% if key.product and key.product.loader_url %}
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:1.25rem;">
+              <a href="{{ key.product.loader_url }}" class="btn btn-primary btn-compact" style="text-decoration:none;">
+                <span class="icon icon-sm" data-lucide="download"></span> Download Loader
+              </a>
+              {% if key.product.visibility == 'private' and discord_private_url %}
+              <a href="{{ discord_private_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
+                <span class="icon icon-sm" data-lucide="message-circle"></span> Join Private Discord
+              </a>
+              {% elif key.product.visibility == 'public' and discord_public_url %}
+              <a href="{{ discord_public_url }}" target="_blank" rel="noopener" class="btn btn-ghost btn-compact" style="text-decoration:none;">
+                <span class="icon icon-sm" data-lucide="message-circle"></span> Join Discord
+              </a>
               {% endif %}
-              <div class="key-meta">
-                <div>
-                  <span class="key-label">Created</span>
-                  <span>{{ key.created_at.strftime('%d %b %Y, %H:%M') }}</span>
-                </div>
-                <div>
-                  <span class="key-label">Expires</span>
-                  <span>{{ key.expires_at.strftime('%d %b %Y, %H:%M') if key.expires_at else 'Lifetime' }}</span>
-                </div>
-                {% if key.chairfbi_key_id %}
-                <div>
-                  <span class="key-label">Ref</span>
-                  <span>{{ key.chairfbi_key_id }}</span>
-                </div>
-                {% endif %}
+            </div>
+            {% elif key.is_active %}
+            <div style="margin-bottom:1.25rem;padding:0.75rem 1rem;background:var(--status-warning-bg);border:1px solid var(--status-warning-border);border-radius:var(--radius-md);font-size:0.875rem;color:var(--status-warning);">
+              <span class="icon icon-sm" data-lucide="alert-triangle"></span>
+              No loader attached to this product. Contact support.
+            </div>
+            {% endif %}
+            <div class="license-card-meta">
+              <div class="license-card-meta-item">
+                <span class="license-card-meta-label">Created</span>
+                <span class="license-card-meta-value">{{ key.created_at.strftime('%d %b %Y, %H:%M') }}</span>
               </div>
-              {% if key.product and key.product.buyer_notes %}
-              <div style="margin-top:0.8rem;padding-top:0.65rem;border-top:1px solid rgba(255,255,255,0.08);">
-                <span class="key-label">Instructions</span>
-                <p style="color:var(--text-soft);font-size:0.78rem;margin-top:0.2rem;white-space:pre-line;">{{ key.product.buyer_notes }}</p>
+              <div class="license-card-meta-item">
+                <span class="license-card-meta-label">Expires</span>
+                <span class="license-card-meta-value">{{ key.expires_at.strftime('%d %b %Y, %H:%M') if key.expires_at else 'Lifetime' }}</span>
+              </div>
+              {% if key.chairfbi_key_id %}
+              <div class="license-card-meta-item">
+                <span class="license-card-meta-label">Ref</span>
+                <span class="license-card-meta-value">{{ key.chairfbi_key_id }}</span>
               </div>
               {% endif %}
             </div>
+            {% if key.product and key.product.buyer_notes %}
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-subtle);">
+              <span class="license-card-key-label">Instructions</span>
+              <p style="color:var(--text-secondary);font-size:0.875rem;margin-top:0.5rem;white-space:pre-line;">{{ key.product.buyer_notes }}</p>
+            </div>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
@@ -121,27 +124,27 @@
     <!-- Skeleton Loading State (for async loading) -->
     <div class="keys-grid" x-data="{ loading: false }" x-show="loading">
       <template x-for="i in 3" :key="i">
-        <div class="skeleton-key-card">
-          <div class="skeleton-key-header">
-            <div class="skeleton-key-icon skeleton"></div>
-            <div class="skeleton-key-info">
-              <div class="skeleton-key-title skeleton"></div>
-              <div class="skeleton-key-badge skeleton"></div>
+        <div class="skeleton-license-card">
+          <div class="skeleton-license-header">
+            <div class="skeleton-license-icon"></div>
+            <div class="skeleton-license-info">
+              <div class="skeleton-license-title"></div>
+              <div class="skeleton-license-badge"></div>
             </div>
           </div>
-          <div class="skeleton-key-value skeleton"></div>
-          <div class="skeleton-key-meta">
-            <div class="skeleton-key-meta-item">
-              <div class="skeleton-key-meta-label skeleton"></div>
-              <div class="skeleton-key-meta-value skeleton"></div>
+          <div class="skeleton-license-key"></div>
+          <div class="skeleton-license-meta">
+            <div class="skeleton-license-meta-item">
+              <div class="skeleton-license-meta-label"></div>
+              <div class="skeleton-license-meta-value"></div>
             </div>
-            <div class="skeleton-key-meta-item">
-              <div class="skeleton-key-meta-label skeleton"></div>
-              <div class="skeleton-key-meta-value skeleton"></div>
+            <div class="skeleton-license-meta-item">
+              <div class="skeleton-license-meta-label"></div>
+              <div class="skeleton-license-meta-value"></div>
             </div>
-            <div class="skeleton-key-meta-item">
-              <div class="skeleton-key-meta-label skeleton"></div>
-              <div class="skeleton-key-meta-value skeleton"></div>
+            <div class="skeleton-license-meta-item">
+              <div class="skeleton-license-meta-label"></div>
+              <div class="skeleton-license-meta-value"></div>
             </div>
           </div>
         </div>
