@@ -190,6 +190,176 @@
     });
   }
 
+  function setupFormValidation() {
+    var forms = document.querySelectorAll("form[novalidate]");
+    if (!forms.length) { return; }
+
+    var validationRules = {
+      email: function(value) {
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(value) ? "" : "Please enter a valid email address";
+      },
+      password: function(value) {
+        if (!value) return "Password is required";
+        if (value.length < 8) return "Password must be at least 8 characters";
+        return "";
+      },
+      username: function(value) {
+        if (!value) return "Username is required";
+        if (value.length < 3) return "Username must be at least 3 characters";
+        return "";
+      },
+      confirm_password: function(value) {
+        var passwordInput = document.querySelector('input[name="password"]');
+        if (!passwordInput) return "";
+        if (value !== passwordInput.value) return "Passwords do not match";
+        return "";
+      }
+    };
+
+    function showError(input, message) {
+      var group = input.closest(".form-group");
+      if (!group) return;
+      
+      group.classList.add("has-error");
+      group.classList.remove("has-success");
+      input.classList.add("is-error");
+      input.classList.remove("is-success");
+      input.setAttribute("aria-invalid", "true");
+      
+      var existingError = group.querySelector(".form-error");
+      if (existingError) { existingError.remove(); }
+      
+      if (message) {
+        var errorDiv = document.createElement("div");
+        errorDiv.className = "form-error";
+        errorDiv.setAttribute("role", "alert");
+        errorDiv.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+        errorDiv.appendChild(document.createTextNode(message));
+        group.appendChild(errorDiv);
+      }
+    }
+
+    function showSuccess(input) {
+      var group = input.closest(".form-group");
+      if (!group) return;
+      
+      group.classList.remove("has-error");
+      group.classList.add("has-success");
+      input.classList.remove("is-error");
+      input.classList.add("is-success");
+      input.setAttribute("aria-invalid", "false");
+      
+      var existingError = group.querySelector(".form-error");
+      if (existingError) { existingError.remove(); }
+    }
+
+    function clearValidation(input) {
+      var group = input.closest(".form-group");
+      if (!group) return;
+      
+      group.classList.remove("has-error", "has-success");
+      input.classList.remove("is-error", "is-success");
+      input.removeAttribute("aria-invalid");
+      
+      var existingError = group.querySelector(".form-error");
+      if (existingError) { existingError.remove(); }
+    }
+
+    function validateField(input) {
+      var value = input.value.trim();
+      var type = input.type;
+      var name = input.name;
+      var required = input.hasAttribute("required");
+      var minlength = parseInt(input.getAttribute("minlength"), 10);
+
+      if (required && !value) {
+        var label = input.closest(".form-group").querySelector(".form-label");
+        var fieldName = label ? label.textContent.trim().replace(/[^\w\s]/gi, "").trim() : name;
+        showError(input, fieldName + " is required");
+        return false;
+      }
+
+      if (type === "email" && value) {
+        var error = validationRules.email(value);
+        if (error) { showError(input, error); return false; }
+      }
+
+      if (name === "password" && value) {
+        var error = validationRules.password(value);
+        if (error) { showError(input, error); return false; }
+      }
+
+      if (name === "confirm_password" && value) {
+        var error = validationRules.confirm_password(value);
+        if (error) { showError(input, error); return false; }
+      }
+
+      if (minlength && value && value.length < minlength) {
+        showError(input, "Must be at least " + minlength + " characters");
+        return false;
+      }
+
+      if (value) {
+        showSuccess(input);
+      } else {
+        clearValidation(input);
+      }
+      
+      return true;
+    }
+
+    forms.forEach(function(form) {
+      var inputs = form.querySelectorAll("input:not([type='submit']):not([type='button']):not([type='checkbox']):not([type='radio'])");
+      
+      inputs.forEach(function(input) {
+        input.addEventListener("blur", function() {
+          if (input.value.trim() || input.hasAttribute("required")) {
+            validateField(input);
+          }
+        });
+        
+        input.addEventListener("input", function() {
+          if (input.classList.contains("is-error") || input.classList.contains("is-success")) {
+            if (input.classList.contains("is-error")) {
+              validateField(input);
+            }
+          }
+        });
+      });
+
+      form.addEventListener("submit", function(e) {
+        var isValid = true;
+        var firstError = null;
+        
+        inputs.forEach(function(input) {
+          if (!validateField(input)) {
+            isValid = false;
+            if (!firstError) {
+              firstError = input;
+            }
+          }
+        });
+
+        var checkboxRequired = form.querySelector("input[type='checkbox'][required]");
+        if (checkboxRequired && !checkboxRequired.checked) {
+          isValid = false;
+          var checkboxGroup = checkboxRequired.closest(".form-group") || checkboxRequired.closest(".form-checkbox");
+          if (checkboxGroup) {
+            checkboxGroup.classList.add("has-error");
+          }
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          if (firstError) {
+            firstError.focus();
+          }
+        }
+      });
+    });
+  }
+
   function setupFlashDismiss() {
     document.querySelectorAll(".flash-message").forEach(function (message) {
       window.setTimeout(function () {
@@ -278,6 +448,7 @@
   setupCanvas();
   setupReveal();
   setupFaqAccordion();
+  setupFormValidation();
   setupFlashDismiss();
   setupCounters();
   setupMobileBuyBar();
