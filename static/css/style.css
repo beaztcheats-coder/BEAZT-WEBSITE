@@ -918,6 +918,13 @@ img {
 
 /* ── BUTTON SIZES ────────────────────────────────────────── */
 /* Consistent sizing with touch-friendly minimums */
+.btn-compact {
+  padding: var(--space-1) var(--space-3);
+  min-height: 32px;
+  font-size: 0.75rem;
+  gap: var(--space-1);
+}
+
 .btn-sm {
   padding: var(--space-2) var(--space-3);
   min-height: 36px;
