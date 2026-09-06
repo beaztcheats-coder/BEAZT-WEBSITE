@@ -2254,6 +2254,239 @@ img {
   background: var(--bg-deep);
 }
 
+/* ── DISCORD CTA SECTION ─────────────────────────────────── */
+/* Premium community section with ambient glow and Discord branding */
+.discord-cta-section {
+  position: relative;
+  padding: var(--space-24) 0;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+/* Background glow effect - ambient blue radiance */
+.discord-cta-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(88, 101, 242, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 30% 50%, rgba(22, 139, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(22, 139, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Top border with gradient shine */
+.discord-cta-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(88, 101, 242, 0.3) 20%,
+    rgba(88, 101, 242, 0.5) 50%, 
+    rgba(88, 101, 242, 0.3) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(88, 101, 242, 0.3), 0 0 40px rgba(88, 101, 242, 0.15);
+}
+
+/* Inner content container */
+.discord-cta-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Override section eyebrow for Discord section - use Discord brand color */
+.discord-cta-inner .section-eyebrow {
+  background: rgba(88, 101, 242, 0.15);
+  color: #5865F2;
+  border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+/* Discord section heading */
+.discord-cta-inner h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  letter-spacing: -0.02em;
+}
+
+/* Discord section description */
+.discord-cta-inner > p {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-8);
+  max-width: 560px;
+}
+
+/* Premium Discord button styling */
+.btn-discord {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-8);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #5865F2 0%, #4752C4 50%, #3C45A5 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  box-shadow: 
+    0 4px 16px rgba(88, 101, 242, 0.35),
+    0 0 0 1px rgba(88, 101, 242, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle shine effect on button */
+.btn-discord::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-discord:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #6875F5 0%, #5865F2 50%, #4752C4 100%);
+  box-shadow: 
+    0 8px 24px rgba(88, 101, 242, 0.45),
+    0 0 0 1px rgba(88, 101, 242, 0.3),
+    0 0 30px rgba(88, 101, 242, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.btn-discord:hover::before {
+  left: 100%;
+}
+
+.btn-discord:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(88, 101, 242, 0.3),
+    0 0 0 1px rgba(88, 101, 242, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Large button variant */
+.btn-discord--lg {
+  padding: var(--space-5) var(--space-10);
+  font-size: 1.0625rem;
+  border-radius: var(--radius-xl);
+}
+
+/* Button icon styling */
+.btn-discord .icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Meta info row below button */
+.discord-cta-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.discord-cta-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Online indicator dot */
+.discord-cta-meta .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-online);
+  box-shadow: 0 0 8px var(--status-online-glow);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .discord-cta-section {
+    padding: var(--space-16) 0;
+  }
+  
+  .discord-cta-inner h2 {
+    font-size: clamp(1.5rem, 5vw, 1.75rem);
+  }
+  
+  .discord-cta-inner > p {
+    font-size: 0.9375rem;
+  }
+  
+  .btn-discord--lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .discord-cta-meta {
+    gap: var(--space-4);
+  }
+  
+  .discord-cta-meta span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .discord-cta-meta {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+}
+
+/* ── FINAL STRIP ──────────────────────────────────────────── */
+.final-strip {
+  padding: var(--space-16) 0;
+  background: var(--bg-base);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.final-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
 .section-header {
   text-align: center;
   margin-bottom: var(--space-12);
