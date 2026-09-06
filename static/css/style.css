@@ -4821,6 +4821,228 @@ img {
   }
 }
 
+/* ── STATUS STRIP ──────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM STATUS STRIP
+   Live operational status strip with pulsing indicators
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Status strip container - full width bar */
+.status-strip {
+  background: linear-gradient(180deg, rgba(8, 16, 28, 0.9) 0%, rgba(5, 7, 11, 0.95) 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-4) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle ambient glow effect on strip */
+.status-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 100% at 50% 50%, rgba(22, 139, 255, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Premium hairline accent */
+.status-strip::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1280px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-line) 50%, transparent 100%);
+  opacity: 0.3;
+}
+
+.status-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  position: relative;
+  z-index: 1;
+}
+
+/* Main operational status */
+.status-strip-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Pulsing dot for main status */
+.status-strip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-online);
+  box-shadow: 0 0 8px var(--status-online-glow);
+  animation: status-strip-pulse 2s ease-in-out infinite;
+}
+
+@keyframes status-strip-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 8px var(--status-online-glow), 0 0 16px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px var(--status-online-glow), 0 0 24px rgba(16, 185, 129, 0.4);
+  }
+}
+
+/* SYSTEMS OPERATIONAL label */
+.status-strip-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-online);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Status indicators container */
+.status-strip-indicators {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* Individual status item */
+.status-strip-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.status-strip-item:hover {
+  border-color: var(--border-accent-subtle);
+  background: var(--bg-surface);
+}
+
+/* Status indicator dot */
+.status-strip-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-strip-indicator--online {
+  background: var(--status-online);
+  box-shadow: 0 0 6px var(--status-online-glow);
+  animation: status-strip-pulse 2s ease-in-out infinite;
+}
+
+.status-strip-indicator--warning {
+  background: var(--status-warning);
+  box-shadow: 0 0 6px var(--status-warning-glow);
+  animation: status-strip-pulse 1.5s ease-in-out infinite;
+}
+
+.status-strip-indicator--error {
+  background: var(--status-error);
+  box-shadow: 0 0 6px var(--status-error-glow);
+  animation: status-strip-pulse 0.8s ease-in-out infinite;
+}
+
+/* Status text label */
+.status-strip-text {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Divider between indicators */
+.status-strip-divider {
+  width: 1px;
+  height: 24px;
+  background: linear-gradient(180deg, transparent, var(--border-default), transparent);
+}
+
+/* Responsive status strip */
+@media (max-width: 768px) {
+  .status-strip-inner {
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+  }
+  
+  .status-strip-indicators {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  
+  .status-strip-divider {
+    display: none;
+  }
+  
+  .status-strip-label {
+    font-size: 0.6875rem;
+  }
+  
+  .status-strip-text {
+    font-size: 0.625rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-strip {
+    padding: var(--space-3) 0;
+  }
+  
+  .status-strip-main {
+    padding: var(--space-2) var(--space-4);
+  }
+  
+  .status-strip-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .status-strip-indicator {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .status-strip-item {
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .status-strip-dot,
+  .status-strip-indicator--online,
+  .status-strip-indicator--warning,
+  .status-strip-indicator--error {
+    animation: none;
+    box-shadow: 0 0 4px currentColor;
+  }
+}
+
 /* ── BENTO GRID ──────────────────────────────────────────── */
 /* ═══════════════════════════════════════════════════════════════════════════
    PREMIUM BENTO GRID
