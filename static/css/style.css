@@ -5933,7 +5933,9 @@ img {
   color: var(--text-muted);
 }
 
-/* ── FAQ ─────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   FAQ ACCORDION — Smooth expand/collapse with animations
+   ═══════════════════════════════════════════════════════════════ */
 .faq-list {
   max-width: 800px;
   margin: 0 auto;
@@ -5947,8 +5949,12 @@ img {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all var(--duration-normal);
+  transition: all var(--duration-normal) var(--ease-smooth);
   box-shadow: var(--shadow-sm);
+}
+
+.faq-item:hover {
+  border-color: var(--border-default);
 }
 
 .faq-item.open {
@@ -5970,14 +5976,39 @@ img {
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  transition: color var(--duration-fast);
+  transition: all var(--duration-fast) var(--ease-smooth);
+  position: relative;
+}
+
+.faq-question::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent-soft);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-smooth);
 }
 
 .faq-question:hover {
   color: var(--accent-primary);
 }
 
+.faq-question:hover::before {
+  opacity: 1;
+}
+
+.faq-question:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent-primary);
+}
+
+.faq-question:focus-visible::before {
+  opacity: 1;
+}
+
 .faq-question-icon {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   width: 24px;
   height: 24px;
@@ -5985,7 +6016,7 @@ img {
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  transition: transform var(--duration-normal);
+  transition: transform var(--duration-normal) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth);
 }
 
 .faq-item.open .faq-question-icon {
@@ -5993,16 +6024,109 @@ img {
   color: var(--accent-primary);
 }
 
+.faq-question-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.faq-question-text .icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
 .faq-answer {
-  display: none;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-normal) var(--ease-smooth);
+}
+
+.faq-answer > * {
+  overflow: hidden;
+}
+
+.faq-item.open .faq-answer {
+  grid-template-rows: 1fr;
+}
+
+.faq-answer-inner {
   padding: 0 var(--space-6) var(--space-5);
   color: var(--text-secondary);
   font-size: 0.9375rem;
   line-height: 1.7;
 }
 
-.faq-item.open .faq-answer {
-  display: block;
+.faq-answer-inner p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.faq-answer-inner a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--duration-fast);
+}
+
+.faq-answer-inner a:hover {
+  color: var(--accent-hover);
+}
+
+/* FAQ item count indicator */
+.faq-item-number {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.faq-item:hover .faq-item-number {
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+}
+
+.faq-item.open .faq-item-number {
+  background: var(--accent-primary);
+  color: #fff;
+  box-shadow: var(--glow-accent-subtle);
+}
+
+/* Responsive FAQ */
+@media (max-width: 640px) {
+  .faq-question {
+    padding: var(--space-4) var(--space-4);
+  }
+  
+  .faq-question-text {
+    font-size: 0.9375rem;
+  }
+  
+  .faq-answer-inner {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .faq-item,
+  .faq-question,
+  .faq-question-icon,
+  .faq-answer {
+    transition: none;
+  }
 }
 
 /* ── PRODUCT DETAIL ──────────────────────────────────────── */
@@ -6245,11 +6369,14 @@ img {
 }
 
 /* ── TABS ────────────────────────────────────────────────── */
+/* Premium tab system with smooth transitions and accent underline */
 .tabs {
   display: flex;
   gap: var(--space-1);
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: var(--space-6);
+  position: relative;
+  z-index: 1;
 }
 
 .tab {
@@ -6261,18 +6388,47 @@ img {
   font-weight: 600;
   cursor: pointer;
   position: relative;
-  transition: color var(--duration-fast);
+  transition: all var(--duration-fast) var(--ease-smooth);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent-soft);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-smooth);
+  border-radius: inherit;
 }
 
 .tab:hover {
   color: var(--text-primary);
 }
 
-.tab.active {
+.tab:hover::before {
+  opacity: 1;
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+.tab.is-active {
   color: var(--accent-primary);
 }
 
-.tab.active::after {
+.tab.is-active::before {
+  opacity: 1;
+  background: var(--accent-soft);
+}
+
+.tab.is-active::after {
   content: "";
   position: absolute;
   bottom: -1px;
@@ -6283,12 +6439,40 @@ img {
   box-shadow: var(--glow-accent);
 }
 
-.tab-panel {
-  display: none;
+/* Animated underline for active tab */
+.tab.is-active {
+  background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 100%);
 }
 
+/* Tab panel with smooth content switching */
+.tab-panel {
+  display: none;
+  animation: tab-fade-in var(--duration-normal) var(--ease-smooth);
+}
+
+.tab-panel.is-active,
 .tab-panel.active {
   display: block;
+}
+
+@keyframes tab-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion for tabs */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .tab-panel {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* ── AUTH ────────────────────────────────────────────────── */

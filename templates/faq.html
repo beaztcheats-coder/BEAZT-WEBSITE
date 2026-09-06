@@ -12,102 +12,102 @@
 
     <div class="faq-list reveal">
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-1">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="help-circle"></span>How does BEAZT run?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>BEAZT runs as a read-only external stack. Launch the loader, paste your key, and start Rust—no injection or file edits.</p>
+        <div class="faq-answer" id="faq-answer-1">
+          <div class="faq-answer-inner"><p>BEAZT runs as a read-only external stack. Launch the loader, paste your key, and start Rust—no injection or file edits.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-2">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="gamepad-2"></span>Which games are live?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Right now the stack targets Rust. We announce new titles and betas inside Discord first.</p>
+        <div class="faq-answer" id="faq-answer-2">
+          <div class="faq-answer-inner"><p>Right now the stack targets Rust. We announce new titles and betas inside Discord first.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-3">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="download"></span>How do I install?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Grab the loader from your dashboard, paste the key, and press launch. Setup averages under two minutes with Discord walkthroughs.</p>
+        <div class="faq-answer" id="faq-answer-3">
+          <div class="faq-answer-inner"><p>Grab the loader from your dashboard, paste the key, and press launch. Setup averages under two minutes with Discord walkthroughs.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-4">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="credit-card"></span>What payments work?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Stripe handles every card — Visa, Mastercard, Amex — with full encryption. We never see or store your card data.</p>
+        <div class="faq-answer" id="faq-answer-4">
+          <div class="faq-answer-inner"><p>Stripe handles every card — Visa, Mastercard, Amex — with full encryption. We never see or store your card data.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-5">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="timer"></span>When do keys arrive?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Keys hit your dashboard in under 15 seconds after payment. Track them anytime on the <a href="{{ url_for('main.my_keys') if current_user.is_authenticated else url_for('auth.login') }}">My Keys</a> page.</p>
+        <div class="faq-answer" id="faq-answer-5">
+          <div class="faq-answer-inner"><p>Keys hit your dashboard in under 15 seconds after payment. Track them anytime on the <a href="{{ url_for('main.my_keys') if current_user.is_authenticated else url_for('auth.login') }}">My Keys</a> page.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-6">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="monitor"></span>Can I move devices?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Yes. Message support on Discord to reset HWID or move your license — transfers are included.</p>
+        <div class="faq-answer" id="faq-answer-6">
+          <div class="faq-answer-inner"><p>Yes. Message support on Discord to reset HWID or move your license — transfers are included.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-7">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="history"></span>How fast are updates?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Patches drop within hours. Discord sends the alert and you pull the fresh loader from your dashboard.</p>
+        <div class="faq-answer" id="faq-answer-7">
+          <div class="faq-answer-inner"><p>Patches drop within hours. Discord sends the alert and you pull the fresh loader from your dashboard.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-8">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="activity"></span>What if there's downtime?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Maintenance time never burns your license. We pause timers and post live status threads in Discord.</p>
+        <div class="faq-answer" id="faq-answer-8">
+          <div class="faq-answer-inner"><p>Maintenance time never burns your license. We pause timers and post live status threads in Discord.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-9">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="info"></span>Do you refund?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Keys are digital goods, so sales are final once generated. DM the team before purchasing if you need clarity.</p>
+        <div class="faq-answer" id="faq-answer-9">
+          <div class="faq-answer-inner"><p>Keys are digital goods, so sales are final once generated. DM the team before purchasing if you need clarity.</p></div>
         </div>
       </div>
 
       <div class="faq-item">
-        <button class="faq-question" aria-expanded="false">
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-10">
           <span class="faq-question-text"><span class="icon icon-sm" data-lucide="headset"></span>How do I reach support?</span>
-          <span class="icon icon-sm" data-lucide="chevron-down"></span>
+          <span class="faq-question-icon icon icon-sm" data-lucide="chevron-down"></span>
         </button>
-        <div class="faq-answer">
-          <p>Hop in Discord and create a ticket. Operators staff the channel around the clock for setup, HWID, and legit tuning.</p>
+        <div class="faq-answer" id="faq-answer-10">
+          <div class="faq-answer-inner"><p>Hop in Discord and create a ticket. Operators staff the channel around the clock for setup, HWID, and legit tuning.</p></div>
         </div>
       </div>
     </div>

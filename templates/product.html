@@ -310,13 +310,13 @@
 
   <!-- Tabs -->
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-description" aria-controls="panel-description" :aria-selected="activeTab === 'description'.toString()" :class="{ 'is-active': activeTab === 'description' }" @click="activeTab = 'description'">Features</button>
-    <button class="tab" role="tab" id="tab-architecture" aria-controls="panel-architecture" :aria-selected="(activeTab === 'architecture').toString()" :class="{ 'is-active': activeTab === 'architecture' }" @click="activeTab = 'architecture'">Architecture</button>
-    <button class="tab" role="tab" id="tab-reviews" aria-controls="panel-reviews" :aria-selected="(activeTab === 'reviews').toString()" :class="{ 'is-active': activeTab === 'reviews' }" @click="activeTab = 'reviews'">Buyer Info</button>
+    <button class="tab" role="tab" id="tab-description" aria-controls="panel-description" :aria-selected="activeTab === 'description'" :class="{ 'is-active': activeTab === 'description' }" @click="activeTab = 'description'">Features</button>
+    <button class="tab" role="tab" id="tab-architecture" aria-controls="panel-architecture" :aria-selected="activeTab === 'architecture'" :class="{ 'is-active': activeTab === 'architecture' }" @click="activeTab = 'architecture'">Architecture</button>
+    <button class="tab" role="tab" id="tab-reviews" aria-controls="panel-reviews" :aria-selected="activeTab === 'reviews'" :class="{ 'is-active': activeTab === 'reviews' }" @click="activeTab = 'reviews'">Buyer Info</button>
   </div>
 
   <!-- Features tab -->
-  <div id="panel-description" role="tabpanel" aria-labelledby="tab-description" x-show="activeTab === 'description'">
+  <div id="panel-description" role="tabpanel" aria-labelledby="tab-description" x-show="activeTab === 'description'" :class="{ 'is-active': activeTab === 'description' }">
     {% if product.description %}
     <div class="card" style="margin-bottom:1.5rem;">
       <p class="t-body">{{ product.description }}</p>
@@ -348,7 +348,7 @@
   </div>
 
   <!-- Architecture tab -->
-  <div id="panel-architecture" role="tabpanel" aria-labelledby="tab-architecture" x-show="activeTab === 'architecture'" x-cloak>
+  <div id="panel-architecture" role="tabpanel" aria-labelledby="tab-architecture" x-show="activeTab === 'architecture'" x-cloak :class="{ 'is-active': activeTab === 'architecture' }">
     {% if vc_system_features %}
     <div class="card" style="margin-bottom:1.5rem;">
       <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.8rem;">System Architecture</h3>
@@ -373,7 +373,7 @@
   </div>
 
   <!-- Buyer Info tab -->
-  <div id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" x-show="activeTab === 'reviews'" x-cloak>
+  <div id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" x-show="activeTab === 'reviews'" x-cloak :class="{ 'is-active': activeTab === 'reviews' }">
     <div class="card" style="margin-bottom:1.5rem;">
       <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem;">Setup Instructions</h3>
       {% if product.buyer_notes %}
