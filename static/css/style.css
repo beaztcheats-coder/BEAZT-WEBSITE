@@ -6555,15 +6555,28 @@ img {
 }
 
 .faq-answer-inner {
-  padding: 0 var(--space-6) var(--space-5);
+  padding: 0 var(--space-6);
   color: var(--text-secondary);
   font-size: 0.9375rem;
   line-height: 1.7;
 }
 
+/* Vertical spacing lives on the content, not on the clipped grid child:
+   padding on .faq-answer-inner itself would leak ~20px (one text line) of
+   the answer below the collapsed question. */
+.faq-answer-inner > :last-child {
+  padding-bottom: var(--space-5);
+}
+
 .faq-answer-inner p {
   margin: 0;
   color: var(--text-secondary);
+}
+
+.faq-answer-inner p.faq-answer-more {
+  margin-top: var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 .faq-answer-inner a {
