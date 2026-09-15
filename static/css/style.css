@@ -4393,6 +4393,16 @@ img {
   color: inherit;
 }
 
+/* Visible keyboard focus: same lift + blue ring (a11y, VAL-HOME-011) */
+.cheat-card:focus-visible {
+  outline: none;
+  border-color: var(--border-accent);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-2xl), 0 0 40px var(--accent-glow-subtle),
+    0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-primary);
+  color: inherit;
+}
+
 .cheat-card:hover::before {
   opacity: 1;
   background: linear-gradient(90deg, 
@@ -4643,6 +4653,13 @@ img {
   box-shadow: var(--shadow-2xl), 0 0 50px var(--accent-glow);
 }
 
+.cheat-card--private:focus-visible {
+  outline: none;
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-2xl), 0 0 50px var(--accent-glow),
+    0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-primary);
+}
+
 .cheat-card--private:hover::before {
   opacity: 1;
 }
@@ -4694,8 +4711,9 @@ img {
   .cheat-card {
     transition: none;
   }
-  
-  .cheat-card:hover {
+
+  .cheat-card:hover,
+  .cheat-card:focus-visible {
     transform: none;
   }
   

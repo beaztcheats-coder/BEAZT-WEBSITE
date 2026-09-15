@@ -142,11 +142,11 @@
 
 <!-- ═══ PRIVATE SOFTWARE ═══ -->
 {% if private_products %}
-<section class="section" style="padding-bottom:0.5rem;">
+<section class="section store-preview" aria-labelledby="store-preview-heading" style="padding-bottom:0.5rem;">
   <div class="container">
     <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
       <span class="section-eyebrow">BeaZt Private</span>
-      <h2 class="t-h2">Private Software</h2>
+      <h2 class="t-h2" id="store-preview-heading">Private Software</h2>
       <p style="color:var(--text-muted);font-size:0.82rem;max-width:560px;margin-inline:auto;">Externally hosted, private builds. Key pool operated by BeaZt.</p>
     </div>
     <div class="cheats-grid cheats-grid--private reveal" x-data="{ loading: false }">
@@ -168,13 +168,14 @@
       </template>
       <!-- Actual Product Cards -->
       <template x-if="!loading">
-        {% for p in private_products %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private">
+        {% for p in private_products[:3] %}
+        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private" aria-label="View {{ p.name }} details">
           <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy" decoding="async">
+            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-' ~ (cheat_statuses_home.get(p.id, p.status) or 'undetected') }}"></span>
+            {% set eff_status = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
+            <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
             <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
@@ -188,7 +189,7 @@
           {% else %}
           <p class="cheat-card-noprice">Coming soon</p>
           {% endif %}
-          <span class="cheat-card-arrow">&rarr;</span>
+          <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
         </a>
         {% endfor %}
       </template>
@@ -199,21 +200,22 @@
 
 <!-- ═══ STORE ═══ -->
 {% if resold_products %}
-<section class="section" style="padding-bottom:0.5rem;">
+<section class="section store-preview" aria-labelledby="store-preview-catalog-heading" style="padding-bottom:0.5rem;">
   <div class="container">
     <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
       <span class="section-eyebrow">Catalog</span>
-      <h2 class="t-h2">Store</h2>
+      <h2 class="t-h2" id="store-preview-catalog-heading">Store</h2>
       <a href="{{ url_for('main.cheats') }}" style="font-size:0.78rem;color:var(--accent);">View all &rarr;</a>
     </div>
     <div class="cheats-grid reveal">
-      {% for p in resold_products %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
+      {% for p in resold_products[:3] %}
+        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card" aria-label="View {{ p.name }} details">
           <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy" decoding="async">
+            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
           </div>
           <div class="cheat-card-top">
-            <span class="cheat-card-status {{ 'status-' ~ (cheat_statuses_home.get(p.id, p.status) or 'undetected') }}"></span>
+            {% set eff_status = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
+            <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
           </div>
           <h3 class="cheat-card-name">{{ p.name }}</h3>
           {% if p.updated_at %}
@@ -226,7 +228,7 @@
           {% else %}
           <p class="cheat-card-noprice">Coming soon</p>
           {% endif %}
-          <span class="cheat-card-arrow">&rarr;</span>
+          <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
         </a>
       {% endfor %}
     </div>
