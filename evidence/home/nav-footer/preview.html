@@ -1,33 +1,21 @@
 <!DOCTYPE html>
+<!-- Jinja-substituted snapshot of templates/base.html for VAL-HOME-009 /
+     page-navigation-and-footer verification (guest session, homepage endpoint).
+     Rendered with the real /static/css/style.css and /static/js/script.js via
+     the local static server in verify.js. Do not deploy. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050507">
-  <meta name="description" content="BEAZT — premium private Rust external. Instant key delivery, live operator support, stream-proof legit stack.">
-  <meta property="og:title" content="BEAZT — Premium Private External">
-  <meta property="og:description" content="Acid-grade private Rust access. Instant Stripe key delivery, 24/7 operator desk, stream-proof builds.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
-  <title>{% block title %}BEAZT Private Access{% endblock %}</title>
+  <title>BEAZT Private Access</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="dns-prefetch" href="https://unpkg.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
-  <script defer src="https://unpkg.com/scrollreveal@4/dist/scrollreveal.min.js"></script>
   <link rel="stylesheet" href="/static/css/style.css?v=6">
-  {% block head %}{% endblock %}
 </head>
 <body>
-  {% if session.get('_impersonator_id') %}
-  <div style="position:sticky;top:0;z-index:9999;background:linear-gradient(90deg,#7c3aed,#06b6d4);color:#fff;font-family:var(--font);font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:0.6rem;padding:0.5rem 1rem;flex-wrap:wrap;">
-    <span class="icon icon-sm" data-lucide="eye" style="width:16px;height:16px;"></span>
-    <strong>Viewing as {{ current_user.username }}</strong> — you are impersonating this user.
-    <a href="{{ url_for('admin.stop_impersonating') }}" style="color:#fff;text-decoration:none;background:rgba(0,0,0,0.25);padding:0.25rem 0.7rem;border-radius:6px;font-weight:700;border:1px solid rgba(255,255,255,0.3);">Return to admin</a>
-  </div>
-  {% endif %}
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="bg-grid" aria-hidden="true"></div>
   <div class="bg-noise" aria-hidden="true"></div>
@@ -50,26 +38,17 @@
           <span class="nav-status-label">Systems Online</span>
         </span>
         <nav class="nav-links" aria-label="Main navigation">
-          <a href="/" class="nav-link {{ 'active' if request.endpoint == 'main.index' else '' }}">Home</a>
-          <a href="{{ url_for('main.cheats') }}" class="nav-link {{ 'active' if request.endpoint == 'main.cheats' else '' }}">Store</a>
-          <a href="{{ url_for('main.feedback') }}" class="nav-link {{ 'active' if request.endpoint == 'main.feedback' else '' }}">Proof</a>
-          <a href="{{ url_for('main.faq') }}" class="nav-link {{ 'active' if request.endpoint == 'main.faq' else '' }}">FAQ</a>
-          <a href="{{ url_for('main.loader') }}" class="nav-link {{ 'active' if request.endpoint == 'main.loader' else '' }}">Loader</a>
-          <a href="{{ discord_public_url }}" target="_blank" rel="noopener noreferrer" class="btn-discord">
+          <a href="/" class="nav-link active">Home</a>
+          <a href="/cheats" class="nav-link">Store</a>
+          <a href="/feedback" class="nav-link">Proof</a>
+          <a href="/faq" class="nav-link">FAQ</a>
+          <a href="/loader" class="nav-link">Loader</a>
+          <a href="https://discord.gg/bU4tFA43KK" target="_blank" rel="noopener noreferrer" class="btn-discord">
             <span class="icon icon-sm" data-lucide="message-circle"></span>
             Discord
           </a>
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.my_keys') }}" class="nav-link">My Keys</a>
-            <a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a>
-            {% if current_user.is_admin %}
-              <a href="{{ url_for('admin.dashboard') }}" class="nav-link" style="color:var(--accent-primary)">Admin</a>
-            {% endif %}
-            <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
-          {% else %}
-            <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
-            <a href="{{ url_for('auth.signup') }}" class="nav-cta">Sign Up</a>
-          {% endif %}
+          <a href="/auth/login" class="nav-link">Login</a>
+          <a href="/auth/signup" class="nav-cta">Sign Up</a>
         </nav>
         <button type="button" class="nav-burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -82,43 +61,29 @@
       </div>
       <div class="mobile-menu-overlay"></div>
       <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
-        <a href="/" class="nav-link {{ 'active' if request.endpoint == 'main.index' else '' }}">Home</a>
-        <a href="{{ url_for('main.cheats') }}" class="nav-link {{ 'active' if request.endpoint == 'main.cheats' else '' }}">Store</a>
-        <a href="{{ url_for('main.feedback') }}" class="nav-link {{ 'active' if request.endpoint == 'main.feedback' else '' }}">Proof</a>
-        <a href="{{ url_for('main.faq') }}" class="nav-link {{ 'active' if request.endpoint == 'main.faq' else '' }}">FAQ</a>
-        <a href="{{ url_for('main.loader') }}" class="nav-link {{ 'active' if request.endpoint == 'main.loader' else '' }}">Loader</a>
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/cheats" class="nav-link">Store</a>
+        <a href="/feedback" class="nav-link">Proof</a>
+        <a href="/faq" class="nav-link">FAQ</a>
+        <a href="/loader" class="nav-link">Loader</a>
         <div class="mobile-menu-divider"></div>
-        <a href="{{ discord_public_url }}" target="_blank" rel="noopener noreferrer" class="btn-discord">
+        <a href="https://discord.gg/bU4tFA43KK" target="_blank" rel="noopener noreferrer" class="btn-discord">
           <span class="icon icon-sm" data-lucide="message-circle"></span>
           Join Discord
         </a>
-        {% if current_user.is_authenticated %}
-          <div class="mobile-menu-divider"></div>
-          <a href="{{ url_for('main.my_keys') }}" class="nav-link">My Keys</a>
-          <a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a>
-          {% if current_user.is_admin %}
-            <a href="{{ url_for('admin.dashboard') }}" class="nav-link" style="color:var(--accent-primary)">Admin</a>
-          {% endif %}
-          <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
-        {% else %}
-          <div class="mobile-menu-divider"></div>
-          <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
-          <a href="{{ url_for('auth.signup') }}" class="nav-link">Sign Up</a>
-        {% endif %}
+        <div class="mobile-menu-divider"></div>
+        <a href="/auth/login" class="nav-link">Login</a>
+        <a href="/auth/signup" class="nav-link">Sign Up</a>
       </nav>
     </header>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-container" role="alert">
-          {% for category, message in messages %}
-            <div class="flash-message flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <main>{% block content %}{% endblock %}</main>
+    <main>
+      <!-- Scroll spacer: gives the page enough height to exercise the
+           sticky/scrolled header states during verification -->
+      <section style="height: 240vh; display: flex; align-items: center; justify-content: center;">
+        <h1 class="section-title" style="opacity: 0.2;">Page content placeholder</h1>
+      </section>
+    </main>
 
     <footer class="footer">
       <div class="footer-glow" aria-hidden="true"></div>
@@ -133,23 +98,23 @@
           </a>
           <span class="footer-tagline">Premium Gaming Enhancement</span>
         </div>
-        
+
         <nav class="footer-nav" aria-label="Footer navigation">
           <div class="footer-nav-group">
             <span class="footer-nav-label">Legal</span>
-            <a href="{{ url_for('main.terms') }}" class="footer-link">Terms of Service</a>
-            <a href="{{ url_for('main.privacy') }}" class="footer-link">Privacy Policy</a>
+            <a href="/terms" class="footer-link">Terms of Service</a>
+            <a href="/privacy" class="footer-link">Privacy Policy</a>
           </div>
           <div class="footer-nav-group">
             <span class="footer-nav-label">Support</span>
-            <a href="{{ url_for('main.faq') }}" class="footer-link">FAQ</a>
-            <a href="{{ url_for('main.feedback') }}" class="footer-link">Reviews</a>
-            <a href="{{ url_for('main.loader') }}" class="footer-link">Setup Guide</a>
+            <a href="/faq" class="footer-link">FAQ</a>
+            <a href="/feedback" class="footer-link">Reviews</a>
+            <a href="/loader" class="footer-link">Setup Guide</a>
           </div>
           <div class="footer-nav-group">
             <span class="footer-nav-label">Community</span>
             <a href="https://www.elitepvpers.com/" target="_blank" rel="noopener noreferrer" class="footer-link">Elitepvpers</a>
-            <a href="{{ discord_public_url }}" target="_blank" rel="noopener noreferrer" class="footer-link footer-link-discord">
+            <a href="https://discord.gg/bU4tFA43KK" target="_blank" rel="noopener noreferrer" class="footer-link footer-link-discord">
               <svg class="footer-link-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
               </svg>
@@ -157,7 +122,7 @@
             </a>
           </div>
         </nav>
-        
+
         <div class="footer-bottom">
           <span class="footer-copyright">&copy; 2026 BEAZT. All rights reserved.</span>
           <span class="footer-status">
@@ -169,8 +134,6 @@
     </footer>
   </div>
 
-  <script defer src="https://unpkg.com/lucide@latest"></script>
   <script src="/static/js/script.js"></script>
-  {% block scripts %}{% endblock %}
 </body>
 </html>

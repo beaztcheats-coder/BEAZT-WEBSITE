@@ -36,7 +36,7 @@
     var burger = document.querySelector(".nav-burger");
     var overlay = document.querySelector(".mobile-menu-overlay");
     var menu = document.querySelector(".mobile-menu");
-    
+
     if (!burger || !menu) { return; }
     
     function openMenu() {
@@ -79,7 +79,7 @@
       }
     });
     
-    var menuLinks = menu.querySelectorAll(".nav-link");
+    var menuLinks = menu.querySelectorAll("a");
     menuLinks.forEach(function (link) {
       link.addEventListener("click", function () {
         closeMenu();

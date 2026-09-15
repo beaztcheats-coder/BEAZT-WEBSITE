@@ -240,9 +240,34 @@ body {
   color: var(--text-primary);
   background: var(--bg-base);
   min-height: 100vh;
+  /* overflow-x: clip preserves position:sticky for the navbar (hidden creates a
+     scroll container in some engines and breaks sticky positioning) */
   overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Alpine.js x-cloak: hide elements until Alpine initializes */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Ambient background canvas is a fixed decoration: it must never take layout
+   space (which pushes the sticky header down the page) or catch pointer events */
+#ambient-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Keep page content stacked above the ambient canvas */
+.main-content {
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -628,18 +653,22 @@ img {
   transition: transform var(--duration-normal) var(--ease-spring);
 }
 
-.nav-burger.is-active svg:first-child {
-  transform: rotate(90deg) scale(0.8);
-  opacity: 0;
+/* Icon swap driven by script.js's .is-active class (no Alpine dependency) */
+.nav-burger svg:last-of-type {
+  display: none;
 }
 
-.nav-burger.is-active svg:last-child {
-  transform: rotate(0deg) scale(1);
+.nav-burger.is-active svg:first-of-type {
+  display: none;
+}
+
+.nav-burger.is-active svg:last-of-type {
+  display: block;
 }
 
 /* Mobile Menu Overlay - Premium blur backdrop */
 .mobile-menu-overlay {
-  display: none;
+  display: block;
   position: fixed;
   inset: 0;
   background: rgba(3, 4, 6, 0.85);
@@ -647,16 +676,21 @@ img {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-smooth);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-smooth), visibility 0s linear var(--duration-normal);
 }
 
 .mobile-menu-overlay.is-visible {
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--duration-normal) var(--ease-smooth), visibility 0s;
 }
 
 /* Premium mobile menu panel */
 .mobile-menu {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4);
@@ -672,7 +706,12 @@ img {
   transform: translateY(-10px);
   opacity: 0;
   visibility: hidden;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  pointer-events: none;
+  /* visibility is delayed on close so the exit transition plays out */
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    opacity var(--duration-normal) var(--ease-smooth),
+    visibility 0s linear var(--duration-normal);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 1px 0 var(--accent-glow-subtle);
 }
 
@@ -681,7 +720,11 @@ img {
   transform: translateY(0);
   opacity: 1;
   visibility: visible;
-  display: flex;
+  pointer-events: auto;
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    opacity var(--duration-normal) var(--ease-smooth),
+    visibility 0s;
 }
 
 /* Mobile menu items with staggered animation */
@@ -738,13 +781,21 @@ img {
   .nav-links {
     display: none;
   }
-  
+
   .nav-burger {
     display: flex;
   }
-  
-  .mobile-menu-overlay {
-    display: block;
+}
+
+/* Status pill collapses to a pulsing dot on narrow phones so the
+   indicator stays visible without crowding the logo/burger */
+@media (max-width: 640px) {
+  .nav-status {
+    padding: var(--space-2);
+  }
+
+  .nav-status-label {
+    display: none;
   }
 }
 
@@ -1097,72 +1148,6 @@ img {
 
 /* Focus state for keyboard navigation */
 .btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--bg-base), 0 0 0 5px var(--accent-primary);
-}
-
-/* ── NAV CTA SPECIAL BUTTON ──────────────────────────────── */
-.nav-cta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  min-height: 44px;
-  background: var(--gradient-accent);
-  color: #fff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  transition: all var(--duration-fast) var(--ease-smooth);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  box-shadow: var(--glow-button);
-  border: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-cta::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity var(--duration-fast);
-}
-
-.nav-cta::after {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: var(--accent-primary);
-  opacity: 0;
-  filter: blur(10px);
-  z-index: -1;
-  transition: opacity var(--duration-normal);
-}
-
-.nav-cta:hover {
-  background: linear-gradient(135deg, #2590FF 0%, #168BFF 100%);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: var(--glow-button-hover);
-}
-
-.nav-cta:hover::before {
-  opacity: 1;
-}
-
-.nav-cta:hover::after {
-  opacity: 0.4;
-}
-
-.nav-cta:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.nav-cta:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--bg-base), 0 0 0 5px var(--accent-primary);
 }
@@ -7759,7 +7744,11 @@ img {
   }
   
   .footer-tagline {
-    display: none;
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding-left: 0;
+    border-left: none;
   }
   
   .footer-nav {
