@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920" height="768" viewBox="0 0 1920 768" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="768" fill="#0a0a12"/>
+  <rect x="100" y="100" width="1720" height="568" fill="#0d111a" rx="16" stroke="#1e3a8a" stroke-width="2"/>
+  
+  <!-- Status bar -->
+  <rect x="110" y="110" width="1700" height="40" fill="#0d111a" rx="8" stroke="#1e3a8a" stroke-width="1"/>
+  
+  <!-- Menu items -->
+  <rect x="120" y="120" width="120" height="20" fill="#1e40af" rx="4"/>
+  <rect x="250" y="120" width="120" height="20" fill="#1e40af" rx="4"/>
+  <rect x="380" y="120" width="120" height="20" fill="#1e40af" rx="4"/>
+  <rect x="510" y="120" width="120" height="20" fill="#1e40af" rx="4"/>
+  <rect x="640" y="120" width="120" height="20" fill="#1e40af" rx="4"/>
+  
+  <!-- Main content area -->
+  <rect x="110" y="160" width="1700" height="400" fill="#111827" rx="8"/>
+  
+  <!-- ESP features -->
+  <rect x="130" y="180" width="200" height="30" fill="#1e3a8a" rx="4"/>
+  <rect x="130" y="220" width="200" height="30" fill="#1e3a8a" rx="4"/>
+  <rect x="130" y="260" width="200" height="30" fill="#1e3a8a" rx="4"/>
+  <rect x="130" y="300" width="200" height="30" fill="#1e3a8a" rx="4"/>
+  
+  <!-- Stream proof box -->
+  <rect x="130" y="350" width="200" height="30" fill="#16a34a" rx="4"/>
+  
+  <!-- Operator status -->
+  <rect x="130" y="390" width="200" height="30" fill="#3b82f6" rx="4"/>
+  
+  <!-- Status indicators -->
+  <circle cx="200" cy="195" r="6" fill="#86efac"/>
+  
+  <!-- Product name -->
+  <text x="800" y="220" font-family="Arial, sans-serif" font-weight="bold" font-size="20" fill="#93c5fd">BEAZT</text>
+  
+  <!-- Features -->
+  <text x="800" y="260" font-family="Arial, sans-serif" font-size="16" fill="#93c5fd">Legit ESP Suite</text>
+  <text x="800" y="290" font-family="Arial, sans-serif" font-size="16" fill="#93c5fd">Stream Proof</text>
+  <text x="800" y="320" font-family="Arial, sans-serif" font-size="16" fill="#93c5fd">Zero FPS Cost</text>
+  <text x="800" y="350" font-family="Arial, sans-serif" font-size="16" fill="#93c5fd">Fast Patch Cycle</text>
+  
+  <!-- Stats -->
+  <text x="1400" y="180" font-family="Arial, sans-serif" font-size="14" fill="#93c5fd">2400+ Orders Fulfilled</text>
+  <text x="1400" y="210" font-family="Arial, sans-serif" font-size="14" fill="#93c5fd">99.9% Uptime</text>
+  <text x="1400" y="240" font-family="Arial, sans-serif" font-size="14" fill="#93c5fd">&lt;15s Key Delivery</text>
+  <text x="1400" y="270" font-family="Arial, sans-serif" font-size="14" fill="#93c5fd">24/7 Operator Desk</text>
+
+  <!-- Accent decoration -->
+  <rect x="1840" y="200" width="40" height="40" fill="#3b82f6" rx="8"/>
+</svg>
