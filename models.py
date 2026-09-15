@@ -211,7 +211,11 @@ def seed_products():
             image_url="/static/icons/rust_placeholder.jpg",
             is_private=False,
             key_source="pool",
-            visibility="public",
+            # Pool-key products are BeaZt-operated: app.py's one-time migration
+            # marks key_source='pool' rows visibility='private'. Mirror that
+            # here so fresh databases seed one private product and the
+            # store/homepage Private Software sections have data to render.
+            visibility="private",
         )
         db.session.add(product)
         db.session.flush()

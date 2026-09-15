@@ -245,7 +245,9 @@ def cheats():
         product_tiers[p.id] = (
             PricingTier.query
             .filter_by(product_id=p.id)
-            .order_by(PricingTier.duration_days)
+            # Cheapest first: tier order is otherwise unspecified, and the store
+            # card's "From £X" price must reflect the cheapest tier (tiers[0]).
+            .order_by(PricingTier.price_pence)
             .all()
         )
     return render_template("cheats.html", products=products, cheat_statuses=cheat_statuses, product_tiers=product_tiers, private_products=private_products, resold_products=resold_products)

@@ -32,35 +32,37 @@
           </div>
         </div>
       </template>
-      <!-- Actual Products -->
-      <template x-if="!loading">
-        {% for p in private_products %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private">
-          <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
-          </div>
-          <div class="cheat-card-top">
-            <span class="cheat-card-status status-{{ p.status or 'undetected' }}"></span>
-            <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
-          </div>
-          <h3 class="cheat-card-name">{{ p.name }}</h3>
-          {% if p.updated_at %}
-          <p style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
-          {% endif %}
-          {% set tiers = product_tiers.get(p.id, []) %}
-          {% if tiers %}
-          <div class="cheat-card-pricing">
-            {% for t in tiers[:3] %}
-              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <p class="cheat-card-noprice">No pricing yet</p>
-          {% endif %}
-          <span class="cheat-card-arrow">&rarr;</span>
-        </a>
-        {% endfor %}
-      </template>
+      <!-- Actual Product Cards
+           NOTE: rendered directly (not inside a single <template x-if>) because
+           Alpine x-if requires a SINGLE root element — multiple sibling card
+           anchors in one template would render only the first card. -->
+      {% for p in private_products %}
+      <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private" aria-label="View {{ p.name }} details">
+        <div class="cheat-card-banner">
+          <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
+        </div>
+        <div class="cheat-card-top">
+          {% set eff_status = cheat_statuses.get(p.id, p.status) or 'undetected' %}
+          <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
+          <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
+        </div>
+        <h3 class="cheat-card-name">{{ p.name }}</h3>
+        {% if p.updated_at %}
+        <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+        {% endif %}
+        {% set tiers = product_tiers.get(p.id, []) %}
+        {% if tiers %}
+        <div class="cheat-card-pricing">
+          {% for t in tiers[:3] %}
+          <span class="cheat-card-tier">{% if loop.first %}From {% endif %}&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="cheat-card-noprice">No pricing yet</p>
+        {% endif %}
+        <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+      {% endfor %}
     </div>
     {% endif %}
 
@@ -70,53 +72,69 @@
       <h2 class="t-h2">All Cheats</h2>
     </div>
     <div class="cheats-grid reveal" x-data="{ loading: false }">
-      <!-- Skeleton Loading -->
+      <!-- Skeleton Loading
+           NOTE: the four skeleton cards are wrapped in a single display:contents
+           container because Alpine x-if requires a SINGLE root element — the
+           bare card loop emitted four siblings and only the first rendered. -->
       <template x-if="loading">
-        {% for i in range(4) %}
-        <div class="skeleton-card">
-          <div class="skeleton-card-banner skeleton"></div>
-          <div class="skeleton-card-body">
-            <div class="skeleton-card-badge skeleton"></div>
-            <div class="skeleton-card-title skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-footer">
-              <div class="skeleton-card-price skeleton"></div>
-              <div class="skeleton-card-btn skeleton"></div>
+        <div style="display:contents;">
+          {% for i in range(4) %}
+          <div class="skeleton-card">
+            <div class="skeleton-card-banner skeleton"></div>
+            <div class="skeleton-card-body">
+              <div class="skeleton-card-badge skeleton"></div>
+              <div class="skeleton-card-title skeleton"></div>
+              <div class="skeleton-card-text skeleton"></div>
+              <div class="skeleton-card-text skeleton"></div>
+              <div class="skeleton-card-footer">
+                <div class="skeleton-card-price skeleton"></div>
+                <div class="skeleton-card-btn skeleton"></div>
+              </div>
             </div>
           </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </template>
-      <!-- Actual Products -->
-      <template x-if="!loading">
-        {% for p in resold_products %}
-        {% set status = p.status or 'undetected' %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card">
-          <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
-          </div>
-          <div class="cheat-card-top">
-            <span class="cheat-card-status status-{{ status }}"></span>
-          </div>
-          <h3 class="cheat-card-name">{{ p.name }}</h3>
-          {% if p.updated_at %}
-          <p style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
-          {% endif %}
-          {% set tiers = product_tiers.get(p.id, []) %}
-          {% if tiers %}
-          <div class="cheat-card-pricing">
-            {% for t in tiers[:3] %}
-              <span class="cheat-card-tier">&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <p class="cheat-card-noprice">No pricing yet</p>
-          {% endif %}
-          <span class="cheat-card-arrow">&rarr;</span>
-        </a>
-        {% endfor %}
-      </template>
+      <!-- Actual Product Cards
+           NOTE: rendered directly (not inside a single <template x-if>) because
+           Alpine x-if requires a SINGLE root element — multiple sibling card
+           anchors in one template would render only the first card. -->
+      {% for p in resold_products %}
+      <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card" aria-label="View {{ p.name }} details">
+        <div class="cheat-card-banner">
+          <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
+        </div>
+        <div class="cheat-card-top">
+          {% set eff_status = cheat_statuses.get(p.id, p.status) or 'undetected' %}
+          <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
+        </div>
+        <h3 class="cheat-card-name">{{ p.name }}</h3>
+        {% if p.updated_at %}
+        <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
+        {% endif %}
+        {% set tiers = product_tiers.get(p.id, []) %}
+        {% if tiers %}
+        <div class="cheat-card-pricing">
+          {% for t in tiers[:3] %}
+          <span class="cheat-card-tier">{% if loop.first %}From {% endif %}&pound;{{ "%.2f"|format(t.price_pounds) }} <span class="cheat-card-days">/ {{ t.duration_days }}d{% if t.is_subscription %} &#x21bb;{% endif %}</span></span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="cheat-card-noprice">No pricing yet</p>
+        {% endif %}
+        <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not private_products and not resold_products %}
+    <div class="empty-state reveal" role="status" aria-label="No products available">
+      <div class="empty-icon" aria-hidden="true">
+        <span class="icon" data-lucide="box"></span>
+      </div>
+      <h3 class="empty-title">No products available</h3>
+      <p class="empty-text">The catalog is being restocked. Check back soon, or join the Discord for restock updates.</p>
     </div>
     {% endif %}
   </div>
