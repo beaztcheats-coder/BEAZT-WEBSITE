@@ -47,6 +47,12 @@
         Join Discord
       </a>
     </div>
+    <!-- STAT SOURCING (resolved by homepage-stat-bar, see stat bar comment
+         below): all four values are STATIC marketing claims from the
+         pre-redesign site (git d9c8abf 2026-06-08 shipped 100% / <15s / 24-7 /
+         99.9%; git 00912f8 2026-07-01 swapped 100% for 2,400+ Orders). The
+         orders table is empty, so nothing here is backend-derived; kept
+         consistent with the stat bar per NO-FABRICATED-STATS. -->
     <div class="hero-stats">
       <div class="hero-stat">
         <span class="hero-stat-val" data-count="2400" data-suffix="+">2,400+</span>
@@ -119,7 +125,21 @@
 </section>
 
 <!-- ═══ STAT BAR ═══ -->
-<section class="stat-bar">
+<!-- STAT SOURCING DECISION — owned by feature homepage-stat-bar per
+     NO-FABRICATED-STATS (see AGENTS.md known issues):
+     None of these four metrics can be derived from the backend. The orders
+     table in instance/beazt.db has zero rows (documented in the
+     homepage-hero-section handoff cca6e389), and no rating, uptime, or
+     setup-time metric is tracked anywhere in the app. Every value below is
+     therefore a STATIC marketing claim carried over from the pre-redesign
+     site (git 00912f8, 2026-07-01 — same figures the site showed before the
+     2026 redesign), not a live measurement. Validation contract VAL-HOME-006
+     accepts this: "stat numbers verified against database or explicitly
+     marked as static" — this comment is that marking. Do not present these
+     numbers as live data anywhere; if a real backend metric is ever wired up
+     (e.g. an order count passed from routes/main.py), replace data-count
+     values here and in .hero-stats above with the derived numbers. -->
+<section class="stat-bar" aria-label="Key store metrics">
   <div class="container stat-bar-inner reveal">
     <div class="stat-bar-item">
       <span class="stat-bar-num" data-count="2400" data-suffix="+">2,400+</span>
@@ -364,18 +384,17 @@
 <!-- ═══ TESTIMONIALS ═══ -->
 <!-- No Review model/table exists in models.py and index() passes no review
      data, so this section shows an honest empty state instead of fabricated
-     testimonials. Rating-summary figures below are owned by homepage-stat-bar
-     (see AGENTS.md known issues) and are left untouched here. -->
+     testimonials. STAT-SOURCING NOTE (homepage-stat-bar ownership decision):
+     the former "4.9 / based on 2,400+ verified orders" rating summary was
+     removed from this section — with zero reviews in the database it was a
+     fabricated statistic that contradicted the empty state directly below it
+     (VAL-HOME-005 requires star ratings to match review data). The 4.9 and
+     2,400+ figures remain, explicitly marked static, in the stat bar above. -->
 <section class="section" aria-labelledby="testimonials-heading">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-eyebrow">Proof</span>
       <h2 class="t-h2" id="testimonials-heading">Verified buyer feedback</h2>
-    </div>
-    <div class="rating-summary reveal">
-      <span class="rating-score">4.9</span>
-      <span class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-      <span class="rating-count">based on 2,400+ verified orders</span>
     </div>
     <div class="empty-state reveal" role="status" aria-label="No verified reviews yet">
       <div class="empty-icon" aria-hidden="true">
