@@ -362,44 +362,36 @@
 {% endif %}
 
 <!-- ═══ TESTIMONIALS ═══ -->
-<section class="section">
+<!-- No Review model/table exists in models.py and index() passes no review
+     data, so this section shows an honest empty state instead of fabricated
+     testimonials. Rating-summary figures below are owned by homepage-stat-bar
+     (see AGENTS.md known issues) and are left untouched here. -->
+<section class="section" aria-labelledby="testimonials-heading">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-eyebrow">Proof</span>
-      <h2 class="t-h2">Verified buyer feedback</h2>
+      <h2 class="t-h2" id="testimonials-heading">Verified buyer feedback</h2>
     </div>
     <div class="rating-summary reveal">
       <span class="rating-score">4.9</span>
       <span class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
       <span class="rating-count">based on 2,400+ verified orders</span>
     </div>
-    <div class="testimonials-grid reveal">
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">4 months on BEAZT. Privacy cloak is flawless with OBS and Discord.</p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">K</span>
-          <div><span class="testimonial-name">Kai</span><span class="testimonial-role">Verified buyer</span></div>
-          <span class="verified-badge"><span class="icon icon-sm" data-lucide="badge-check"></span></span>
-        </div>
+    <div class="empty-state reveal" role="status" aria-label="No verified reviews yet">
+      <div class="empty-icon" aria-hidden="true">
+        <span class="icon" data-lucide="message-square-quote"></span>
       </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">Patches hit within hours. Discord actually replies, which is rare here.</p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">R</span>
-          <div><span class="testimonial-name">VeteranRust</span><span class="testimonial-role">Verified buyer</span></div>
-          <span class="verified-badge"><span class="icon icon-sm" data-lucide="badge-check"></span></span>
-        </div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        <p class="testimonial-text">Five months of zero drops. Visual toolkit stays sharp even on long raids.</p>
-        <div class="testimonial-author">
-          <span class="testimonial-avatar">M</span>
-          <div><span class="testimonial-name">Mason</span><span class="testimonial-role">Verified buyer</span></div>
-          <span class="verified-badge"><span class="icon icon-sm" data-lucide="badge-check"></span></span>
-        </div>
+      <h3 class="empty-title">No verified reviews yet</h3>
+      <p class="empty-text">Buyer reviews will appear here once verified purchases are submitted. Read operator proof and support quality on the proof page.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ url_for('main.feedback') }}" class="btn btn-primary">
+          <span class="icon icon-sm" data-lucide="receipt-text"></span>
+          Read buyer proof
+        </a>
+        <a href="{{ discord_public_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+          <span class="icon icon-sm" data-lucide="message-circle"></span>
+          Ask buyers in Discord
+        </a>
       </div>
     </div>
   </div>
