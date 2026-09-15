@@ -69,20 +69,49 @@
 </section>
 
 <!-- ═══ STATUS STRIP ═══ -->
-<section class="status-strip">
+{% set status_ns = namespace(online=0, total=0, last_updated=None) %}
+{% if all_products is defined and all_products %}
+  {% for p in all_products %}
+    {% set status_ns.total = status_ns.total + 1 %}
+    {% set eff_status = cheat_statuses_home.get(p.id, p.status) if cheat_statuses_home is defined else p.status %}
+    {% if not eff_status %}{% set eff_status = 'undetected' %}{% endif %}
+    {% if eff_status in ('online', 'undetected') %}{% set status_ns.online = status_ns.online + 1 %}{% endif %}
+    {% set ts = p.updated_at or p.created_at %}
+    {% if ts and (status_ns.last_updated is none or ts > status_ns.last_updated) %}{% set status_ns.last_updated = ts %}{% endif %}
+  {% endfor %}
+{% endif %}
+<section class="status-strip" aria-label="Live system status">
   <div class="container status-strip-inner">
-    <div class="status-strip-main">
-      <span class="status-strip-dot"></span>
+    <div class="status-strip-main" role="status" aria-label="Systems operational">
+      <span class="status-strip-dot" aria-hidden="true"></span>
       <span class="status-strip-label">SYSTEMS OPERATIONAL</span>
     </div>
-    <div class="status-strip-indicators">
-      <div class="status-strip-item">
-        <span class="status-strip-indicator status-strip-indicator--online"></span>
+    <div class="status-strip-indicators" role="list" aria-label="Service indicators">
+      <div class="status-strip-item" role="listitem" aria-label="{{ status_ns.online }} of {{ status_ns.total }} products online">
+        {% if status_ns.total > 0 and status_ns.online == 0 %}
+        <span class="status-strip-indicator status-strip-indicator--warning" aria-hidden="true"></span>
+        {% else %}
+        <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
+        {% endif %}
+        <span class="status-strip-text">{{ status_ns.online }} PRODUCT{{ '' if status_ns.online == 1 else 'S' }} ONLINE</span>
+      </div>
+      <div class="status-strip-divider" aria-hidden="true"></div>
+      <div class="status-strip-item" role="listitem">
+        <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
+        {% if status_ns.last_updated %}
+        <span class="status-strip-text" title="{{ status_ns.last_updated.strftime('%b %d, %Y %H:%M UTC') }}">LAST UPDATED {{ status_ns.last_updated.strftime('%b %d, %Y') }}</span>
+        {% else %}
+        <span class="status-strip-text">LAST UPDATED —</span>
+        {% endif %}
+      </div>
+      <div class="status-strip-divider" aria-hidden="true"></div>
+      <div class="status-strip-item" role="listitem" aria-label="Delivery system online">
+        <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
         <span class="status-strip-text">DELIVERY SYSTEM ONLINE</span>
       </div>
       <div class="status-strip-divider" aria-hidden="true"></div>
-      <div class="status-strip-item">
-        <span class="status-strip-indicator status-strip-indicator--online"></span>
+      <div class="status-strip-item" role="listitem" aria-label="Support online">
+        <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
         <span class="status-strip-text">SUPPORT ONLINE</span>
       </div>
     </div>
