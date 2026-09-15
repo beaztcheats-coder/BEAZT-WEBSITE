@@ -237,59 +237,63 @@
 {% endif %}
 
 <!-- ═══ FEATURES BENTO ═══ -->
-<section class="section section-alt">
+<!-- Capability copy is sourced from existing site surfaces: FAQ (read-only
+     external stack, patch speed, timer-pause policy, Discord support), the
+     store preview (externally hosted private builds, BeaZt key pool), and
+     product features (ESP suite). No invented claims. -->
+<section class="section section-alt section-bento" aria-labelledby="bento-heading">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-eyebrow">Capabilities</span>
-      <h2 class="t-h2">Built for legit play</h2>
+      <h2 class="t-h2" id="bento-heading">Built for legit play</h2>
       <p class="section-sub" style="max-width:620px;color:var(--text-muted);font-size:1rem;line-height:1.65;">A complete external toolkit engineered for stability, privacy, and zero on-screen footprint.</p>
     </div>
     <div class="bento-grid reveal">
-      <div class="bento-card large">
+      <a href="{{ url_for('main.cheats') }}" class="bento-card large" aria-label="Legit ESP Suite — browse private software">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="eye"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="eye"></span></div>
           <h4>Legit ESP Suite</h4>
           <p>Players, resources, distance and visibility overlays tuned for legit look. Fully configurable, no clutter, zero guesswork.</p>
           <div class="bento-card-tags">
             <span>Players</span><span>Resources</span><span>Distance</span><span>Visibility</span>
           </div>
         </div>
-      </div>
-      <div class="bento-card">
+      </a>
+      <a href="{{ url_for('main.faq') }}" class="bento-card" aria-label="Stream-Proof — read the FAQ">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="video-off"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="video-off"></span></div>
           <h4>Stream-Proof</h4>
           <p>Invisible to OBS, Discord and capture. Play on stream without a trace.</p>
         </div>
-      </div>
-      <div class="bento-card">
+      </a>
+      <a href="{{ url_for('main.faq') }}#faq-answer-1" class="bento-card" aria-label="Zero FPS cost — how BEAZT runs">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="gauge"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="gauge"></span></div>
           <h4>Zero FPS Cost</h4>
           <p>Lightweight read-only stack. No injection, no measurable frame drop.</p>
         </div>
-      </div>
-      <div class="bento-card wide">
+      </a>
+      <a href="{{ url_for('main.faq') }}#faq-answer-7" class="bento-card wide" aria-label="Fast patch cycle — update policy">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="refresh-cw"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="refresh-cw"></span></div>
           <h4>Fast Patch Cycle</h4>
           <p>Updates drop within hours of game patches. Discord alerts the moment a fresh loader is live, and your timer pauses during maintenance.</p>
         </div>
-      </div>
-      <div class="bento-card">
+      </a>
+      <a href="{{ url_for('main.faq') }}#faq-answer-10" class="bento-card" aria-label="24/7 operator desk — reach support">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="headset"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="headset"></span></div>
           <h4>24/7 Operator Desk</h4>
           <p>Real humans, real fixes. Tickets answered around the clock.</p>
         </div>
-      </div>
-      <div class="bento-card">
+      </a>
+      <a href="{{ url_for('main.cheats') }}" class="bento-card" aria-label="Private builds — browse private software">
         <div class="bento-card-inner">
-          <div class="bento-icon"><span class="icon" data-lucide="shield-check"></span></div>
+          <div class="bento-icon" aria-hidden="true"><span class="icon" data-lucide="shield-check"></span></div>
           <h4>Private Builds</h4>
-          <p>Key-pool operated, invite-tier access. Low exposure, high control.</p>
+          <p>Key-pool operated private builds, externally hosted by BeaZt. Low exposure, high control.</p>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 </section>

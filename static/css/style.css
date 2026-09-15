@@ -5349,12 +5349,41 @@ img {
   z-index: 0;
 }
 
+/* Bento section: subtle blue ambient gradient over the deep surface */
+.section-bento {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-bento::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(22, 139, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 85% 100%, rgba(22, 139, 255, 0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.section-bento .container {
+  position: relative;
+  z-index: 1;
+}
+
 /* Premium hover lift with accent glow */
-.bento-card:hover {
+.bento-card:hover,
+.bento-card:focus-visible {
   border-color: var(--border-accent);
   transform: translateY(-6px);
   box-shadow: var(--shadow-xl), 0 0 40px var(--accent-glow-subtle);
   background: var(--gradient-card-hover);
+}
+
+/* Visible keyboard focus ring (a11y): same lift + blue ring */
+.bento-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-xl), 0 0 40px var(--accent-glow-subtle),
+    0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-primary);
 }
 
 .bento-card:hover::before {
@@ -5603,11 +5632,12 @@ img {
   .bento-card {
     transition: none;
   }
-  
-  .bento-card:hover {
+
+  .bento-card:hover,
+  .bento-card:focus-visible {
     transform: none;
   }
-  
+
   .bento-card:hover .bento-icon {
     transform: none;
   }
@@ -8005,12 +8035,12 @@ img {
   }
   
   .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
-  
-  .bento-card.large {
-    grid-column: span 2;
-    grid-row: span 1;
+
+  .bento-card.large,
+  .bento-card.wide {
+    grid-column: span 1;
   }
 }
 
