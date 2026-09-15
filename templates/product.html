@@ -1,7 +1,245 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }} | BEAZT{% endblock %}
 
+{% block head %}
+<meta name="description" content="{{ ((product.description or 'Private ' ~ product.name ~ ' access with instant key delivery, live status and 24/7 operator support.') | replace('\n', ' ') | truncate(155)) }}">
+<meta property="og:title" content="{{ product.name }} | BEAZT">
+<meta property="og:description" content="{{ (product.description or 'Private access. Instant delivery. Stream-proof builds.') | replace('\n', ' ') | truncate(155) }}">
+<meta property="og:type" content="product">
+<meta property="og:image" content="{{ gallery_images[0] if gallery_images else url_for('main.cheat_image', slug=product.slug, _external=True) }}">
+<link rel="canonical" href="{{ url_for('main.product_detail', slug=product.slug, _external=True) }}">
+<style>
+  /* ── Product detail page styles (page-scoped) ────────────── */
+  /* Sticky purchase panel spans every grid row (gallery, specs, tabs,
+     panels) so it stays visible while scrolling the whole product body.
+     Column-1 children: gallery, tabs, panel-overview, panel-visualization,
+     panel-buyer — hence the explicit 5-row span (negative line numbers
+     degenerate with implicit rows). */
+  .product-detail-page .product-detail-grid .purchase-panel { grid-column: 2; grid-row: 1 / span 5; }
+  .product-detail-page .product-detail-grid > .tabs,
+  .product-detail-page .product-detail-grid > [id^="panel-"] { grid-column: 1; }
+  @media (max-width: 1024px) {
+    .product-detail-page .product-detail-grid .purchase-panel { grid-column: 1; grid-row: auto; }
+  }
+
+  .product-detail-page .icon { width: 18px; height: 18px; flex-shrink: 0; }
+  .product-detail-page .icon-sm { width: 14px; height: 14px; }
+
+  .pd-header { margin-bottom: var(--space-8); }
+  .pd-back {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);
+    text-decoration: none; margin-bottom: var(--space-5);
+    transition: color var(--duration-fast) var(--ease-smooth);
+  }
+  .pd-back:hover { color: var(--accent-primary); }
+  .pd-back:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+  .pd-title-row { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+  .pd-artwork {
+    width: 96px; height: 96px; flex-shrink: 0;
+    border-radius: var(--radius-lg); overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-lg), var(--glow-accent-subtle);
+    background: var(--gradient-card);
+  }
+  .pd-artwork img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pd-meta-row {
+    display: flex; align-items: center; gap: var(--space-3);
+    flex-wrap: wrap; margin-top: var(--space-4);
+  }
+  .pd-meta-item {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    font-size: 0.8125rem; color: var(--text-muted); font-weight: 500;
+  }
+  .pd-meta-item .icon { width: 14px; height: 14px; }
+  .plat-badge {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+    border-radius: var(--radius-full);
+    background: rgba(0, 120, 212, 0.16);
+    color: #4da3ff;
+    border: 1px solid rgba(0, 120, 212, 0.35);
+  }
+  .plat-badge .icon { width: 13px; height: 13px; }
+
+  .pd-selected {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-3); flex-wrap: wrap;
+  }
+  .pd-selected-name { font-size: 1.0625rem; font-weight: 700; color: var(--text-primary); }
+  .pd-selected-sub { font-size: 0.8125rem; color: var(--text-muted); margin-top: var(--space-1); }
+
+  .variant-option { position: relative; }
+  .variant-option:focus-within {
+    outline: none; border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .variant-flag {
+    position: absolute; top: var(--space-2); right: var(--space-2);
+    font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--status-info);
+    background: var(--status-info-bg); border: 1px solid var(--status-info-border);
+    padding: 1px var(--space-2); border-radius: var(--radius-full);
+  }
+
+  .pd-quantity {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-5);
+  }
+  .pd-qty-controls { display: flex; align-items: center; gap: var(--space-2); }
+  .pd-qty-btn {
+    min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-default);
+    color: var(--text-primary); border-radius: var(--radius-md);
+    font-size: 1rem; cursor: pointer; font-family: var(--mono, monospace);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+  .pd-qty-btn:hover { border-color: var(--border-accent-subtle); color: var(--accent-primary); }
+  .pd-qty-btn:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+  .pd-qty-input {
+    width: 54px; min-height: 36px; text-align: center;
+    background: var(--bg-deep); border: 1px solid var(--border-default);
+    border-radius: var(--radius-md); color: var(--text-primary);
+    font-family: var(--mono, monospace); font-size: 0.875rem;
+  }
+  .pd-qty-total { font-size: 0.8125rem; color: var(--text-muted); text-align: right; }
+  .pd-qty-total strong { color: var(--text-primary); }
+  .pd-qty-min { display: block; color: var(--status-warning); margin-top: 2px; font-size: 0.75rem; }
+
+  .pd-gateways { display: flex; gap: var(--space-3); margin-bottom: var(--space-5); }
+  .pd-gateway { flex: 1; cursor: pointer; }
+  .pd-gateway input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .pd-gateway-card {
+    padding: var(--space-3); text-align: center;
+    background: var(--gradient-surface); border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+  .pd-gateway:hover .pd-gateway-card { border-color: var(--border-accent-subtle); }
+  .pd-gateway input:focus-visible + .pd-gateway-card {
+    outline: none; border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .pd-gateway.selected .pd-gateway-card {
+    border-color: var(--accent-primary); background: var(--accent-soft);
+    box-shadow: var(--glow-accent-subtle);
+  }
+  .pd-gateway-name { display: block; font-weight: 600; font-size: 0.9375rem; color: var(--text-primary); }
+  .pd-gateway-note { display: block; font-size: 0.6875rem; margin-top: 2px; }
+  .pd-gateway-note--ok { color: var(--status-online); }
+  .pd-gateway-note--warn { color: var(--status-warning); }
+
+  .pd-error { color: var(--status-error); font-size: 0.8125rem; margin-top: var(--space-3); text-align: center; }
+  .pd-empty-plans {
+    padding: var(--space-5); text-align: center;
+    border: 1px dashed var(--border-default); border-radius: var(--radius-md);
+    color: var(--text-muted); font-size: 0.875rem; margin-bottom: var(--space-5);
+  }
+  .pd-empty-plans a { color: var(--accent-primary); font-weight: 600; }
+
+  .pd-benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin: var(--space-6) 0; }
+  .pd-benefit {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: var(--space-2); padding: var(--space-5) var(--space-3);
+    background: var(--gradient-card); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+  }
+  .pd-benefit .icon { width: 20px; height: 20px; color: var(--accent-primary); }
+  .pd-benefit strong { font-size: 0.875rem; color: var(--text-primary); }
+  .pd-benefit span { font-size: 0.75rem; color: var(--text-muted); }
+
+  .feature-list { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2) var(--space-5); }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: var(--space-2);
+    font-size: 0.9375rem; color: var(--text-secondary); padding: var(--space-1) 0;
+  }
+  .feature-list li .icon { color: var(--status-online); margin-top: 2px; }
+
+  /* ── Illustrative demo visualization (decorative, not functional) ── */
+  .demo-figure { margin: var(--space-6) 0 var(--space-2); }
+  .demo-frame {
+    aspect-ratio: 16 / 9; border-radius: var(--radius-lg); overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    background:
+      repeating-linear-gradient(0deg, rgba(22, 139, 255, 0.04) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(90deg, rgba(22, 139, 255, 0.04) 0 1px, transparent 1px 48px),
+      radial-gradient(ellipse at 50% 65%, #0d1b30 0%, #070d16 70%);
+    position: relative; box-shadow: var(--shadow-lg);
+  }
+  .demo-crosshair {
+    position: absolute; top: 50%; left: 50%; width: 26px; height: 26px;
+    transform: translate(-50%, -50%);
+  }
+  .demo-crosshair::before, .demo-crosshair::after {
+    content: ""; position: absolute; background: rgba(22, 139, 255, 0.85);
+  }
+  .demo-crosshair::before { left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); }
+  .demo-crosshair::after { top: 50%; left: 0; height: 2px; width: 100%; transform: translateY(-50%); }
+  .demo-box {
+    position: absolute; width: 56px; height: 84px;
+    border: 1.5px solid rgba(22, 139, 255, 0.75); border-radius: 4px;
+    box-shadow: 0 0 14px rgba(22, 139, 255, 0.25);
+  }
+  .demo-box span {
+    position: absolute; left: 0; bottom: -20px; font-size: 0.625rem;
+    font-family: var(--mono, monospace); color: rgba(22, 139, 255, 0.9); white-space: nowrap;
+  }
+  .demo-radar {
+    position: absolute; top: var(--space-4); right: var(--space-4);
+    width: 74px; height: 74px; border-radius: 50%;
+    border: 1px solid rgba(22, 139, 255, 0.4);
+    background: radial-gradient(circle, rgba(22, 139, 255, 0.08) 0%, transparent 70%);
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .demo-radar::before {
+    content: ""; position: absolute; top: 50%; left: 50%;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(22, 139, 255, 0.9); transform: translate(-50%, -50%);
+  }
+  .demo-radar span {
+    font-size: 0.5625rem; letter-spacing: 0.14em; color: rgba(22, 139, 255, 0.7);
+    padding-bottom: 4px; font-weight: 700;
+  }
+  .demo-watermark {
+    position: absolute; bottom: var(--space-3); left: 50%; transform: translateX(-50%);
+    font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.22em;
+    color: rgba(140, 160, 190, 0.55); white-space: nowrap;
+  }
+  .demo-caption {
+    display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+    margin-top: var(--space-3); font-size: 0.8125rem; color: var(--text-muted);
+  }
+
+  .arch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+  .arch-card { padding: var(--space-5); background: var(--gradient-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+  .arch-card-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent-primary); margin-bottom: var(--space-3); }
+  .arch-card-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); }
+  .arch-card-desc { font-size: 0.8125rem; color: var(--text-muted); margin-top: var(--space-1); }
+
+  .mobile-buy-bar-price { display: flex; flex-direction: column; line-height: 1.2; }
+  .mobile-buy-bar-price small { font-size: 0.6875rem; color: var(--text-muted); }
+  .mobile-buy-bar-price strong { font-size: 1.25rem; font-weight: 800; color: var(--accent-primary); font-family: var(--font-display, sans-serif); }
+  .mobile-buy-bar .btn { flex-shrink: 0; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  @media (max-width: 768px) {
+    .feature-list { grid-template-columns: 1fr; }
+    .pd-benefits { grid-template-columns: 1fr; }
+    .pd-title-row { gap: var(--space-4); }
+    .pd-artwork { width: 72px; height: 72px; }
+    .pd-quantity { flex-direction: column; align-items: stretch; }
+    .pd-qty-total { text-align: center; }
+    .pd-gateways { flex-direction: row; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+{# ─────────────────────────────────────────────────────────────
+   Checkout state (Alpine). Bindings preserved from the original
+   template: variants, selectedVariantId, isAuthenticated and the
+   create_session checkout flow (PayFast auto-form / payment_url).
+   ───────────────────────────────────────────────────────────── #}
 <script>
   window.BEAZT_PRODUCT = {
     variants: {{ variants | tojson }},
@@ -13,7 +251,7 @@
     return {
       selectedVariantId: d.selectedVariantId,
       variants: d.variants,
-      activeTab: 'description',
+      activeTab: 'overview',
       checkingOut: false,
       checkoutError: '',
       quantity: 1,
@@ -95,314 +333,417 @@
           this.checkoutError = 'Network error. Please try again.';
         }
         this.checkingOut = false;
-      },
-      get checkoutAction() {
-        var v = this.currentVariant;
-        if (v && v.billing_type === 'subscription' && v.subscription_link) return v.subscription_link;
-        return "{{ url_for('checkout.create_session') }}";
       }
     };
   };
 </script>
-<div class="container section product-detail-page"
-     x-data="productState()">
-  <div class="page-header">
-    <span class="section-eyebrow">{{ 'BEAZT' if product.visibility == 'private' else 'Catalogue' }}</span>
-    <h1 class="t-h1">{{ product.name }}</h1>
-    {% if product.description %}<p class="text-muted">{{ product.description }}</p>{% endif %}
-  </div>
 
-  <div class="product-grid">
+{# Shared status derivation (preserved from original template) #}
+{% set status_ok = cheat_status in ('online', 'undetected') or product.key_source == 'pool' %}
+{% set status_pill_class = 'pill-success' if status_ok else ('pill-warn' if cheat_status == 'maintenance' else 'pill-danger') %}
+{% set status_label = 'In Stock' if status_ok else (cheat_status|capitalize if cheat_status else 'Undetected') %}
+{% set eyebrow = 'BeaZt Private' if product.visibility == 'private' else 'Catalogue' %}
+{% set platform_label = vc_specs.os if vc_specs and vc_specs.os else 'Windows 10 / 11' %}
 
-    <!-- Left column: gallery + specs -->
-    <div>
-      <div class="product-main-media" x-data="{ activeImage: '' }" x-init="activeImage = $el.querySelector('.product-hero-img').src">
-        {% if gallery_images and gallery_images|length > 0 %}
-          <img :src="activeImage" src="{{ gallery_images[0] }}" alt="{{ product.name }}" class="product-hero-img" fetchpriority="high">
-        {% if gallery_images|length > 1 %}
-        <div class="product-thumb-strip">
-          {% for img in gallery_images %}
-          <button type="button" class="product-thumb"
-                  :class="{ 'is-active': activeImage === '{{ img }}' }"
-                  @click="activeImage = '{{ img }}'">
-            <img src="{{ img }}" alt="{{ product.name }} thumbnail {{ loop.index }}" loading="lazy">
-          </button>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% else %}
-        <img src="{{ url_for('main.cheat_image', slug=product.slug) }}" alt="{{ product.name }}" class="product-hero-img">
-        {% endif %}
-      </div>
+<div class="product-detail-page section" x-data="productState()">
+  <div class="container">
 
-      <div class="specs-grid">
-        {% if vc_specs %}
-        <div class="spec">
-          <span class="spec-label">Anti-Cheat</span>
-          <span class="spec-value">{{ vc_specs.ac }}</span>
+    <!-- Product header: artwork, name, status, last updated, platforms -->
+    <div class="pd-header">
+      <a href="{{ url_for('main.cheats') }}" class="pd-back">
+        <span class="icon icon-sm" data-lucide="arrow-left" aria-hidden="true"></span>
+        Back to Store
+      </a>
+      <div class="pd-title-row">
+        <div class="pd-artwork">
+          <img src="{{ gallery_images[0] if gallery_images else url_for('main.cheat_image', slug=product.slug) }}"
+               alt="{{ product.name }} artwork" width="96" height="96" fetchpriority="high"
+               onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=product.slug) }}'">
         </div>
-        <div class="spec">
-          <span class="spec-label">Operating System</span>
-          <span class="spec-value">{{ vc_specs.os }}</span>
-        </div>
-        <div class="spec">
-          <span class="spec-label">Processor</span>
-          <span class="spec-value">{{ vc_specs.cpu }}</span>
-        </div>
-        <div class="spec">
-          <span class="spec-label">VC Status</span>
-          <span class="spec-value">
-            <span class="pill {{ 'pill-success' if vc_status == 'UNDETECTED' else 'pill-danger' }} pill-dot">{{ vc_status }}</span>
-          </span>
-        </div>
-        {% else %}
-        <div class="spec">
-          <span class="spec-label">Status</span>
-          <span class="spec-value">
-            <span class="pill {{ 'pill-success' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else 'pill-warn' if cheat_status == 'maintenance' else 'pill-danger' }} pill-dot">
-              {{ cheat_status|capitalize if cheat_status else 'Undetected' }}
+        <div>
+          <span class="section-eyebrow">{{ eyebrow }}</span>
+          <h1 class="pd-heading">{{ product.name }}</h1>
+          <div class="pd-meta-row">
+            <span class="pill {{ status_pill_class }} pill-dot" role="status">{{ status_label }}</span>
+            {% if product.updated_at %}
+            <span class="pd-meta-item">
+              <span class="icon" data-lucide="clock" aria-hidden="true"></span>
+              Updated {{ product.updated_at.strftime('%b %d, %Y') }}
             </span>
-          </span>
+            {% elif product.created_at %}
+            <span class="pd-meta-item">
+              <span class="icon" data-lucide="clock" aria-hidden="true"></span>
+              Added {{ product.created_at.strftime('%b %d, %Y') }}
+            </span>
+            {% endif %}
+            <span class="pd-meta-item">
+              <span class="icon" data-lucide="zap" aria-hidden="true"></span>
+              Instant delivery
+            </span>
+          </div>
         </div>
-        {% if product.updated_at %}
-        <div class="spec">
-          <span class="spec-label">Last Updated</span>
-          <span class="spec-value"><span class="pill">{{ product.updated_at.strftime('%b %d, %Y') }}</span></span>
-        </div>
-        {% endif %}
-        <div class="spec">
-          <span class="spec-label">Delivery</span>
-          <span class="spec-value"><span class="pill pill-success">Instant</span></span>
-        </div>
-        <div class="spec">
-          <span class="spec-label">Type</span>
-          <span class="spec-value"><span class="pill">{{ 'Private' if product.visibility == 'private' else 'License' }}</span></span>
-        </div>
-        <div class="spec">
-          <span class="spec-label">Support</span>
-          <span class="spec-value"><span class="pill pill-success">24/7</span></span>
-        </div>
-        {% endif %}
+      </div>
+      <!-- Platform badges (VAL-PRODUCT-007) -->
+      <div class="pd-meta-row" aria-label="Supported platforms">
+        <span class="plat-badge"><span class="icon" data-lucide="monitor" aria-hidden="true"></span>{{ platform_label }}</span>
+        <span class="plat-badge"><span class="icon" data-lucide="cpu" aria-hidden="true"></span>64-bit</span>
       </div>
     </div>
 
-    <!-- Right column: sticky purchase panel -->
-    <aside class="purchase-panel">
-      <div class="purchase-game">{{ 'BEAZT' if product.visibility == 'private' else 'Catalogue' }}</div>
-      <h2 class="purchase-title">{{ product.name }}</h2>
+    <div class="product-detail-grid">
 
-      <div class="price-row">
-        <div class="price">&pound;<span x-text="currentPrice.toFixed(2)">{{ "%.2f"|format(selected_tier.price_pounds) if selected_tier else '0.00' }}</span></div>
+      <!-- ── Left column: gallery + specs ─────────────────────── -->
+      <div class="product-gallery" x-data="{ activeImage: '' }"
+           x-init="activeImage = $el.querySelector('.product-main-image img').src">
+        {% if gallery_images and gallery_images|length > 0 %}
+        <div class="product-main-image">
+          <img :src="activeImage" src="{{ gallery_images[0] }}" alt="{{ product.name }}" fetchpriority="high">
+        </div>
+        {% if gallery_images|length > 1 %}
+        <div class="product-thumbnails" role="group" aria-label="Product image gallery">
+          {% for img in gallery_images %}
+          <button type="button" class="product-thumbnail"
+                  :class="{ 'active': activeImage === '{{ img }}' }"
+                  @click="activeImage = '{{ img }}'"
+                  aria-label="Show image {{ loop.index }} of {{ gallery_images|length }}">
+            <img src="{{ img }}" alt="{{ product.name }} screenshot {{ loop.index }}" loading="lazy" decoding="async">
+          </button>
+        {% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="product-main-image">
+          <img src="{{ url_for('main.cheat_image', slug=product.slug) }}" alt="{{ product.name }}">
+        </div>
+        {% endif %}
+
+        <div class="product-specs">
+          {% if vc_specs %}
+          <div class="product-spec">
+            <span class="product-spec-label">Anti-Cheat</span>
+            <span class="product-spec-value">{{ vc_specs.ac }}</span>
+          </div>
+          <div class="product-spec">
+            <span class="product-spec-label">Operating System</span>
+            <span class="product-spec-value">{{ vc_specs.os }}</span>
+          </div>
+          <div class="product-spec">
+            <span class="product-spec-label">Processor</span>
+            <span class="product-spec-value">{{ vc_specs.cpu }}</span>
+          </div>
+          <div class="product-spec">
+            <span class="product-spec-label">Status</span>
+            <span class="product-spec-value">
+              <span class="pill {{ 'pill-success' if vc_status == 'UNDETECTED' else 'pill-danger' }} pill-dot">{{ vc_status }}</span>
+            </span>
+          </div>
+          {% if product.updated_at %}
+          <div class="product-spec">
+            <span class="product-spec-label">Last Updated</span>
+            <span class="product-spec-value">{{ product.updated_at.strftime('%b %d, %Y') }}</span>
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="product-spec">
+            <span class="product-spec-label">Status</span>
+            <span class="product-spec-value">
+              <span class="pill {{ status_pill_class }} pill-dot">{{ status_label }}</span>
+            </span>
+          </div>
+          {% if product.updated_at %}
+          <div class="product-spec">
+            <span class="product-spec-label">Last Updated</span>
+            <span class="product-spec-value">{{ product.updated_at.strftime('%b %d, %Y') }}</span>
+          </div>
+          {% endif %}
+          <div class="product-spec">
+            <span class="product-spec-label">Delivery</span>
+            <span class="product-spec-value"><span class="pill pill-success">Instant</span></span>
+          </div>
+          <div class="product-spec">
+            <span class="product-spec-label">Type</span>
+            <span class="product-spec-value">{{ 'Private' if product.visibility == 'private' else 'License' }}</span>
+          </div>
+          <div class="product-spec">
+            <span class="product-spec-label">Support</span>
+            <span class="product-spec-value"><span class="pill pill-success">24/7</span></span>
+          </div>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="status-row">
-        <span class="pill {{ 'pill-success' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else 'pill-warn' if cheat_status == 'maintenance' else 'pill-danger' }} pill-dot">
-          {{ 'In Stock' if cheat_status in ('online', 'undetected') or product.key_source == 'pool' else cheat_status|capitalize if cheat_status else 'Undetected' }}
-        </span>
-        <span class="pill pill-success">Instant Delivery</span>
-      </div>
+      <!-- ── Right column: sticky purchase panel (desktop) ────── -->
+      <aside class="purchase-panel" aria-label="Purchase options">
+        <div class="purchase-header">
+          <span class="section-eyebrow">{{ eyebrow }}</span>
+          <h2 class="purchase-title">{{ product.name }}</h2>
 
-      <form @submit.prevent="handleCheckout()" autocomplete="off"
-            x-data="{ subTiers: variants.filter(function(v) { return v.billing_type === 'subscription'; }), oneTiers: variants.filter(function(v) { return v.billing_type !== 'subscription'; }) }">
-        <input type="hidden" name="tier_id" :value="selectedVariantId">
+          <!-- Selected plan (VAL-PRODUCT-004) -->
+          <div class="pd-selected" x-show="currentVariant">
+            <div>
+              <div class="pd-selected-name" x-text="currentVariant ? currentVariant.label : ''">{{ selected_tier.label if selected_tier else '—' }}</div>
+              <div class="pd-selected-sub"
+                   x-text="currentVariant ? ('Valid for ' + currentVariant.duration_days + ' days') : ''">{% if selected_tier %}Valid for {{ selected_tier.duration_days }} days{% endif %}</div>
+            </div>
+            <span class="badge badge-info" x-show="isSubscription">Subscription</span>
+          </div>
 
-        <template x-if="subTiers.length > 0">
-          <div class="field">
-            <span class="field-label">Subscribe</span>
-            <div class="variant-grid">
-              <template x-for="t in subTiers" :key="t.id">
-                <label class="variant-card variant-card--sub"
-                       :class="{ 'is-active': selectedVariantId === t.id }">
-                  <input type="radio" name="variant_picker" :value="t.id"
-                         x-model.number="selectedVariantId">
-                  <span class="v-name" x-text="t.label"></span>
-                  <span class="v-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span> / <span x-text="t.duration_days"></span>d</span>
+          <div class="purchase-price">
+            &pound;<span x-text="currentPrice.toFixed(2)">{{ "%.2f"|format(selected_tier.price_pounds) if selected_tier else '0.00' }}</span>
+          </div>
+
+          <div class="purchase-status">
+            <span class="pill {{ status_pill_class }} pill-dot">{{ status_label }}</span>
+            <span class="pill pill-success">Instant Delivery</span>
+          </div>
+        </div>
+
+        <form @submit.prevent="handleCheckout()" autocomplete="off">
+          <input type="hidden" name="tier_id" :value="selectedVariantId">
+
+          <!-- License selector: all tiers from pricing_tiers (VAL-PRODUCT-003) -->
+          <div class="purchase-variants">
+            <span class="purchase-variants-label" id="plan-picker-label">Select License</span>
+            <div class="variant-options" role="radiogroup" aria-labelledby="plan-picker-label" x-show="variants.length > 0">
+              <template x-for="t in variants" :key="t.id">
+                <label class="variant-option" :class="{ selected: selectedVariantId === t.id }">
+                  <input type="radio" name="variant_picker" class="sr-only"
+                         :value="t.id" x-model.number="selectedVariantId">
+                  <span class="variant-option-name" x-text="t.label"></span>
+                  <span class="variant-option-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span> / <span x-text="t.duration_days"></span>d</span>
+                  <span class="variant-flag" x-show="t.billing_type === 'subscription'">Sub</span>
                 </label>
               </template>
             </div>
-          </div>
-        </template>
-
-        <template x-if="oneTiers.length > 0">
-          <div class="field">
-            <span class="field-label" x-text="subTiers.length > 0 ? 'One-Time Purchase' : 'Select Duration'"></span>
-            <div class="variant-grid">
-              <template x-for="t in oneTiers" :key="t.id">
-                <label class="variant-card"
-                       :class="{ 'is-active': selectedVariantId === t.id }">
-                  <input type="radio" name="variant_picker" :value="t.id"
-                         x-model.number="selectedVariantId">
-                  <span class="v-name" x-text="t.label"></span>
-                  <span class="v-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span></span>
-                </label>
-              </template>
+            <div class="pd-empty-plans" x-show="variants.length === 0" x-cloak>
+              No license plans are available for this product yet.
+              Join our <a href="{{ discord_public_url }}" target="_blank" rel="noopener">Discord</a> for restock updates.
             </div>
           </div>
-        </template>
 
-        <template x-if="!isSubscription && currentPrice > 0">
-          <div class="field">
-            <div style="display:flex;align-items:center;gap:0.75rem;justify-content:space-between;flex-wrap:wrap;">
-              <span class="field-label" style="margin-bottom:0;">Quantity</span>
-              <div style="display:flex;align-items:center;gap:0.4rem;">
-                <button type="button" @click="if(quantity>1) quantity--" class="btn-xs" style="min-width:32px;padding:0.25rem 0.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;cursor:pointer;font-size:0.9rem;">−</button>
-                <input type="number" x-model.number="quantity" min="1" max="10" style="width:50px;text-align:center;padding:0.35rem 0.2rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:0.82rem;">
-                <button type="button" @click="if(quantity<10) quantity++" class="btn-xs" style="min-width:32px;padding:0.25rem 0.5rem;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;cursor:pointer;font-size:0.9rem;">+</button>
-              </div>
+          <!-- Quantity (one-time purchases only) -->
+          <div class="pd-quantity" x-show="currentVariant && !isSubscription" x-cloak>
+            <span class="purchase-variants-label" style="margin-bottom:0;">Quantity</span>
+            <div class="pd-qty-controls">
+              <button type="button" class="pd-qty-btn" @click="if (quantity > 1) quantity--"
+                      aria-label="Decrease quantity">&minus;</button>
+              <input type="number" class="pd-qty-input" x-model.number="quantity"
+                     min="1" max="10" aria-label="Quantity">
+              <button type="button" class="pd-qty-btn" @click="if (quantity < 10) quantity++"
+                      aria-label="Increase quantity">+</button>
             </div>
-            <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-dim);text-align:center;">
-              <span x-text="quantity"></span> × £<span x-text="currentPrice.toFixed(2)"></span> = <strong style="color:var(--text);" x-text="'£' + cartTotal.toFixed(2)"></strong>
-              <span x-show="!meetsMinimum" style="display:block;color:var(--warn);margin-top:0.25rem;">
-                +£<span x-text="(IVNO_MIN_GBP - cartTotal).toFixed(2)"></span> more for card payment
+            <div class="pd-qty-total">
+              <span x-text="quantity"></span> &times; &pound;<span x-text="currentPrice.toFixed(2)"></span>
+              = <strong x-text="'£' + cartTotal.toFixed(2)"></strong>
+              <span class="pd-qty-min" x-show="!meetsMinimum">
+                +&pound;<span x-text="(IVNO_MIN_GBP - cartTotal).toFixed(2)"></span> more for card payment
               </span>
             </div>
           </div>
-        </template>
 
-        <template x-if="hasExternalSub">
-          <a :href="subscriptionLink" target="_blank" rel="noopener"
-             class="btn btn-primary btn-block btn-lg" style="display:flex;text-decoration:none;">
-            <span class="icon" data-lucide="credit-card"></span>
-            <span x-text="buyLabel">Subscribe</span>
-          </a>
-        </template>
-        <template x-if="!hasExternalSub">
-          <div class="field">
-            <span class="field-label">Payment Method</span>
-            <div style="display:flex;gap:0.4rem;">
-              <label style="flex:1;cursor:pointer;">
-                <input type="radio" name="gateway" value="payfast" x-model="selectedGateway" style="display:none;">
-                <div :class="selectedGateway === 'payfast' ? 'variant-card is-active' : 'variant-card'" style="padding:0.5rem 0.7rem;text-align:center;">
-                  <span class="v-name">PayFast</span>
-                  <span class="v-price" style="font-size:0.62rem;color:var(--success);">No minimum</span>
-                </div>
+          <!-- Payment method -->
+          <div x-show="!hasExternalSub" x-cloak>
+            <span class="purchase-variants-label">Payment Method</span>
+            <div class="pd-gateways">
+              <label class="pd-gateway" :class="{ selected: selectedGateway === 'payfast' }">
+                <input type="radio" name="gateway" value="payfast" x-model="selectedGateway">
+                <span class="pd-gateway-card">
+                  <span class="pd-gateway-name">PayFast</span>
+                  <span class="pd-gateway-note pd-gateway-note--ok">No minimum</span>
+                </span>
               </label>
-              <label style="flex:1;cursor:pointer;">
-                <input type="radio" name="gateway" value="ivno" x-model="selectedGateway" style="display:none;">
-                <div :class="selectedGateway === 'ivno' ? 'variant-card is-active' : 'variant-card'" style="padding:0.5rem 0.7rem;text-align:center;">
-                  <span class="v-name">Card</span>
-                  <span class="v-price" style="font-size:0.62rem;color:var(--warn);">Min £20</span>
-                </div>
+              <label class="pd-gateway" :class="{ selected: selectedGateway === 'ivno' }">
+                <input type="radio" name="gateway" value="ivno" x-model="selectedGateway">
+                <span class="pd-gateway-card">
+                  <span class="pd-gateway-name">Card</span>
+                  <span class="pd-gateway-note pd-gateway-note--warn">Min &pound;20</span>
+                </span>
               </label>
             </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg"
+                    :disabled="!canBuy || checkingOut">
+              <span x-show="!checkingOut">
+                <span class="icon icon-sm" data-lucide="shopping-cart" aria-hidden="true"></span>
+                <span x-text="buyLabel">Buy Now</span>
+              </span>
+              <span x-show="checkingOut" x-cloak>Processing&hellip;</span>
+            </button>
           </div>
-        </template>
-        <template x-if="!hasExternalSub">
-          <button type="submit" class="btn btn-primary btn-block btn-lg"
-                  :disabled="!canBuy || checkingOut">
-            <span x-show="!checkingOut">
-              <span class="icon" data-lucide="shopping-cart"></span>
-              <span x-text="buyLabel">Buy Now</span>
-            </span>
-            <span x-show="checkingOut">Processing...</span>
-          </button>
-        </template>
-        <p x-show="checkoutError" x-text="checkoutError" style="color:var(--danger);font-size:0.78rem;margin-top:0.4rem;text-align:center;"></p>
-      </form>
 
-      <div class="trust-row">
-        <div class="trust-item"><span class="icon" data-lucide="lock"></span><span>Secure<br>Checkout</span></div>
-        <div class="trust-item"><span class="icon" data-lucide="zap"></span><span>Instant<br>Delivery</span></div>
-        <div class="trust-item"><span class="icon" data-lucide="shield-check"></span><span>Protected<br>Purchase</span></div>
-      </div>
-    </aside>
-  </div>
+          <!-- External subscription checkout -->
+          <a x-show="hasExternalSub" x-cloak
+             :href="subscriptionLink" target="_blank" rel="noopener"
+             class="btn btn-primary btn-block btn-lg" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;text-decoration:none;">
+            <span class="icon" data-lucide="credit-card" aria-hidden="true"></span>
+            <span x-text="buyLabel">Subscribe</span>
+          </a>
 
-  <!-- Tabs -->
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-description" aria-controls="panel-description" :aria-selected="activeTab === 'description'" :class="{ 'is-active': activeTab === 'description' }" @click="activeTab = 'description'">Features</button>
-    <button class="tab" role="tab" id="tab-architecture" aria-controls="panel-architecture" :aria-selected="activeTab === 'architecture'" :class="{ 'is-active': activeTab === 'architecture' }" @click="activeTab = 'architecture'">Architecture</button>
-    <button class="tab" role="tab" id="tab-reviews" aria-controls="panel-reviews" :aria-selected="activeTab === 'reviews'" :class="{ 'is-active': activeTab === 'reviews' }" @click="activeTab = 'reviews'">Buyer Info</button>
-  </div>
+          <p class="pd-error" x-show="checkoutError" x-text="checkoutError" x-cloak
+             role="alert" aria-live="assertive"></p>
+        </form>
 
-  <!-- Features tab -->
-  <div id="panel-description" role="tabpanel" aria-labelledby="tab-description" x-show="activeTab === 'description'" :class="{ 'is-active': activeTab === 'description' }">
-    {% if product.description %}
-    <div class="card" style="margin-bottom:1.5rem;">
-      <p class="t-body">{{ product.description }}</p>
+        <div class="purchase-trust">
+          <div class="purchase-trust-item"><span class="icon icon-sm" data-lucide="lock" aria-hidden="true"></span>Secure checkout</div>
+          <div class="purchase-trust-item"><span class="icon icon-sm" data-lucide="zap" aria-hidden="true"></span>Instant delivery</div>
+          <div class="purchase-trust-item"><span class="icon icon-sm" data-lucide="shield-check" aria-hidden="true"></span>Protected purchase</div>
+        </div>
+      </aside>
+
+      <!-- ── Tabs (grid column 1; panel spans all rows via grid-row: 1/-1) ── -->
+      <div class="tabs" role="tablist" aria-label="Product information" style="margin-top: var(--space-9);">
+      <button class="tab" role="tab" id="tab-overview" aria-controls="panel-overview"
+              :aria-selected="activeTab === 'overview'" :class="{ 'is-active': activeTab === 'overview' }"
+              @click="activeTab = 'overview'">Overview</button>
+      <button class="tab" role="tab" id="tab-visualization" aria-controls="panel-visualization"
+              :aria-selected="activeTab === 'visualization'" :class="{ 'is-active': activeTab === 'visualization' }"
+              @click="activeTab = 'visualization'">Features &amp; Demo</button>
+      <button class="tab" role="tab" id="tab-buyer" aria-controls="panel-buyer"
+              :aria-selected="activeTab === 'buyer'" :class="{ 'is-active': activeTab === 'buyer' }"
+              @click="activeTab = 'buyer'">Buyer Info</button>
     </div>
-    {% endif %}
 
-    <div class="detailed-feature">
-      <div class="feature-text">
-        <h3>{{ product.name }} Capabilities</h3>
-        <p>Everything included with your license.</p>
-        {% if vc_features %}
+    <!-- Overview tab: description, benefits, features (VAL-PRODUCT-002) -->
+    <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview"
+         x-show="activeTab === 'overview'">
+      {% if product.description %}
+      <div class="card">
+        <p>{{ product.description }}</p>
+      </div>
+      {% endif %}
+
+      <div class="pd-benefits">
+        <div class="pd-benefit">
+          <span class="icon" data-lucide="zap" aria-hidden="true"></span>
+          <strong>Instant Delivery</strong>
+          <span>License key delivered immediately after payment</span>
+        </div>
+        <div class="pd-benefit">
+          <span class="icon" data-lucide="refresh-cw" aria-hidden="true"></span>
+          <strong>Private Build Updates</strong>
+          <span>Regular maintenance and update releases</span>
+        </div>
+        <div class="pd-benefit">
+          <span class="icon" data-lucide="headphones" aria-hidden="true"></span>
+          <strong>24/7 Operator Support</strong>
+          <span>Private Discord support channel included</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">{{ product.name }} Features</h3>
+        <p class="text-muted" style="font-size:0.875rem;">Everything included with your license.</p>
+        {% if product_features and product_features['items'] %}
+        <ul class="feature-list">
+          {% for item in product_features['items'] %}
+          <li>
+            <span class="icon icon-sm" data-lucide="check-circle-2" aria-hidden="true"></span>
+            {{ item }}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted" style="font-size:0.875rem;margin-top:1rem;">Feature list coming soon — join the Discord for details.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Features & Demo tab: categories + illustrative demo UI (VAL-PRODUCT-006) -->
+    <div id="panel-visualization" role="tabpanel" aria-labelledby="tab-visualization"
+         x-show="activeTab === 'visualization'" x-cloak>
+      {% if vc_features %}
+      <div class="card" style="margin-bottom:1.5rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Capabilities</h3>
+        <p class="text-muted" style="font-size:0.875rem;">Feature categories included with this build.</p>
         <ul class="feature-list">
           {% for cap in vc_features %}
           <li>
-            <span class="icon icon-sm" data-lucide="check-circle-2" style="color:var(--success);"></span>
+            <span class="icon icon-sm" data-lucide="check-circle-2" aria-hidden="true"></span>
             {{ vc_cap_names.get(cap, cap|replace('_', ' ')|title) }}
           </li>
           {% endfor %}
         </ul>
-        {% elif product_features and product_features['items'] %}
+      </div>
+      {% endif %}
+
+      {% if vc_system_features %}
+      <div class="card" style="margin-bottom:1.5rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">System Architecture</h3>
+        <div class="arch-grid">
+          {% for feat in vc_system_features %}
+          <div class="arch-card">
+            <div class="arch-card-icon">
+              <span class="icon" data-lucide="{{ 'cpu' if 'Engine' in feat.title else 'monitor' if 'Stream' in feat.title else 'gauge' if 'FPS' in feat.title else 'shield' }}" aria-hidden="true"></span>
+            </div>
+            <strong class="arch-card-title">{{ feat.title }}</strong>
+            <p class="arch-card-desc">{{ feat.description }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ILLUSTRATIVE DEMO: the visualization below is a decorative layout
+           preview only. It is not actual gameplay footage and not a functional
+           product interface. Marked per AGENTS.md static-claim convention. -->
+      <div class="card">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Interface Preview</h3>
+        <p class="text-muted" style="font-size:0.875rem;">How the overlay layout is organised in-game.</p>
+        <div class="demo-figure">
+          <div class="demo-frame" aria-hidden="true">
+            <div class="demo-crosshair"></div>
+            <div class="demo-box" style="top:30%;left:16%;"><span>128m</span></div>
+            <div class="demo-box" style="top:52%;left:58%;"><span>64m</span></div>
+            <div class="demo-radar"><span>RADAR</span></div>
+            <div class="demo-watermark">BEAZT &middot; ILLUSTRATIVE DEMO</div>
+          </div>
+          <p class="demo-caption">
+            <span class="badge badge-warning">Illustrative</span>
+            Demo visualization for layout preview only — not actual gameplay footage or a functional product interface.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer Info tab: setup instructions + notice (no fabricated reviews) -->
+    <div id="panel-buyer" role="tabpanel" aria-labelledby="tab-buyer"
+         x-show="activeTab === 'buyer'" x-cloak>
+      <div class="card" style="margin-bottom:1.5rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.6rem;">Setup Instructions</h3>
+        {% if product.buyer_notes %}
         <ul class="feature-list">
-          {% for item in product_features['items'] %}
-          <li>{{ item }}</li>
+          {% for line in product.buyer_notes.splitlines() %}
+          {% if line.strip() %}
+          <li>{{ line.strip() }}</li>
+          {% endif %}
           {% endfor %}
         </ul>
+        {% else %}
+        <p class="text-muted" style="font-size:0.875rem;">
+          Join our <a href="{{ discord_public_url }}" target="_blank" rel="noopener" style="color:var(--accent-primary);font-weight:600;">Discord</a>
+          for setup walkthroughs and support. See the
+          <a href="{{ url_for('main.loader') }}" style="color:var(--accent-primary);font-weight:600;">Loader Guide</a> for setup steps.
+        </p>
         {% endif %}
       </div>
-    </div>
-  </div>
 
-  <!-- Architecture tab -->
-  <div id="panel-architecture" role="tabpanel" aria-labelledby="tab-architecture" x-show="activeTab === 'architecture'" x-cloak :class="{ 'is-active': activeTab === 'architecture' }">
-    {% if vc_system_features %}
-    <div class="card" style="margin-bottom:1.5rem;">
-      <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.8rem;">System Architecture</h3>
-      <div class="arch-grid">
-        {% for feat in vc_system_features %}
-        <div class="arch-card">
-          <div class="arch-card-icon">
-            <span class="icon" data-lucide="{{ 'cpu' if 'Engine' in feat.title else 'monitor' if 'Stream' in feat.title else 'gauge' if 'FPS' in feat.title else 'shield' }}"></span>
-          </div>
-          <strong class="arch-card-title">{{ feat.title }}</strong>
-          <p class="arch-card-desc">{{ feat.description }}</p>
-        </div>
-        {% endfor %}
+      <div class="card">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.6rem;">Important</h3>
+        <p class="text-muted" style="font-size:0.875rem;">No product guarantees zero enforcement risk. Use responsibly.</p>
       </div>
     </div>
-    {% endif %}
-
-    <div class="card">
-      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem;">Important</h3>
-      <p class="text-muted" style="font-size:0.84rem;">No product guarantees zero enforcement risk. Use responsibly.</p>
-    </div>
+    </div><!-- /.product-detail-grid -->
   </div>
 
-  <!-- Buyer Info tab -->
-  <div id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" x-show="activeTab === 'reviews'" x-cloak :class="{ 'is-active': activeTab === 'reviews' }">
-    <div class="card" style="margin-bottom:1.5rem;">
-      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem;">Setup Instructions</h3>
-      {% if product.buyer_notes %}
-      <ul class="feature-list">
-        {% for line in product.buyer_notes.splitlines() %}
-        {% if line.strip() %}
-        <li>{{ line.strip() }}</li>
-        {% endif %}
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="text-muted" style="font-size:0.84rem;">Join our <a href="{{ discord_public_url }}" target="_blank" rel="noopener" style="color:var(--accent);">Discord</a> for setup walkthroughs and support. See the <a href="{{ url_for('main.loader') }}" style="color:var(--accent);">Loader Guide</a> for setup steps.</p>
-      {% endif %}
-    </div>
-
-    <div class="card">
-      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem;">Important</h3>
-      <p class="text-muted" style="font-size:0.84rem;">No product guarantees zero enforcement risk. Use responsibly.</p>
-    </div>
-  </div>
-
-  <!-- Mobile sticky buy bar -->
+  <!-- Mobile sticky bottom purchase bar (VAL-PRODUCT-005) -->
   <div class="mobile-buy-bar">
     <div class="mobile-buy-bar-price">
       <small>From</small>
       <strong>&pound;<span x-text="currentPrice.toFixed(2)">{{ "%.2f"|format(selected_tier.price_pounds) if selected_tier else '0.00' }}</span></strong>
     </div>
-    <button type="button" class="btn btn-primary btn-lg" @click="$el.closest('.product-detail-page').querySelector('form')?.requestSubmit()">
-      <span class="icon icon-sm" data-lucide="shopping-cart"></span>
+    <button type="button" class="btn btn-primary btn-lg"
+            @click="$el.closest('.product-detail-page').querySelector('form')?.requestSubmit()">
+      <span class="icon icon-sm" data-lucide="shopping-cart" aria-hidden="true"></span>
       <span x-text="buyLabel">Buy Now</span>
     </button>
   </div>
