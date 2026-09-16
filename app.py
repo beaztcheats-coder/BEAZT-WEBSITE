@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from config import Config
 from models import db, User, seed_products
 from flask_login import LoginManager
@@ -65,8 +65,7 @@ def page_not_found(e):
 
 @app.route("/webhooks/sellix", methods=["POST"])
 def legacy_webhook():
-    from routes.checkout import webhook
-    return webhook()
+    return jsonify({"status": "deprecated", "error": "Sellix is no longer supported"}), 410
 
 
 @app.context_processor
