@@ -5,3 +5,8 @@ instance/
 .venv/
 venv/
 *.db
+
+# Cookie jars / session dumps must never be committed (secrets hygiene —
+# see AGENTS.md Security Conventions).
+cookies*.txt
+*.cookies

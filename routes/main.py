@@ -496,6 +496,16 @@ def profile():
             current_user.set_password(new_password)
 
         db.session.commit()
+        # Persist the change (notably an admin password change) to the KV
+        # backup immediately — restore_users_to_db() re-applies the backup's
+        # password_hash for admins on every boot, so without this the change
+        # would be reverted until the 120s periodic backup runs (or forever
+        # if the app restarts first). Same pattern as routes/auth.py signup.
+        try:
+            from utils.kv_store import backup_everything
+            backup_everything()
+        except Exception:
+            pass
         flash("Profile updated.", "success")
         return redirect(url_for("main.profile"))
 
