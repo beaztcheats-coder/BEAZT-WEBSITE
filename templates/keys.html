@@ -4,9 +4,12 @@
 {% block content %}
 {# Dashboard surface: /my-keys (the site's My Keys dashboard / profile surface).
    Skeleton loading state shows briefly while the page hydrates (VAL-DASHBOARD-009),
-   then swaps to the real data. Content stays server-rendered for no-JS users. #}
+   then swaps to the real data. Both the skeleton and the content wrapper carry
+   x-cloak, so pre-hydration (and no-JS) visitors see the server-rendered header
+   only; the deliberate trade-off (per dashboard scrutiny round 1) is that no-JS
+   visitors do not see the key cards. #}
 {% set kv_now = now %}
-<section class="page-section" x-data="{ loading: true }" x-init="setTimeout(() => { loading = false }, 800)">
+<section class="page-section" x-data="{ loading: true }" x-init="setTimeout(() => { loading = false }, 120)">
   <div class="container">
 
     <div class="page-header reveal">
@@ -58,7 +61,7 @@
     </div>
 
     <!-- Real dashboard content -->
-    <div :class="loading ? 'is-hidden' : ''">
+    <div :class="loading ? 'is-hidden' : ''" x-cloak>
 
       <!-- Account summary (user info) -->
       <div class="account-panel reveal">
@@ -164,7 +167,7 @@
                     </button>
                   </div>
                 </div>
-                <code class="license-card-key-value {{ 'license-card-key-value--masked' if not expired else '' }}" data-full="{{ kv }}">
+                <code class="license-card-key-value" :class="revealed ? '' : 'license-card-key-value--masked'" data-full="{{ kv }}">
                   <span class="license-card-key-masked" :class="revealed ? 'is-hidden' : ''">{{ masked_kv }}</span>
                   <span class="license-card-key-full" :class="revealed ? '' : 'is-hidden'" x-cloak>{{ kv }}</span>
                 </code>
@@ -202,10 +205,21 @@
                   <span class="license-card-meta-label">Expires</span>
                   <span class="license-card-meta-value">
                     {% if key.expires_at %}
-                      {% set remaining_days = (key.expires_at - kv_now).days %}
-                      {% if remaining_days > 0 %}
+                      {# Positive-total check: timedelta.days floors (a key expiring
+                         in 2h floors to 0 days and read as expired). Use
+                         total_seconds() so pill, Expires field and countdown agree. #}
+                      {% set remaining = (key.expires_at - kv_now).total_seconds() %}
+                      {% if remaining > 0 %}
                         {{ key.expires_at.strftime('%d %b %Y, %H:%M') }} UTC
-                        <span class="license-card-remaining {{ 'license-card-remaining--soon' if remaining_days <= 3 else '' }}">{{ remaining_days }} day{{ 's' if remaining_days != 1 }} remaining</span>
+                        {% set remaining_days = ((remaining / 86400) | round(0, 'floor')) | int %}
+                        {% set remaining_hours = (((remaining % 86400) / 3600) | round(0, 'floor')) | int %}
+                        {% if remaining_days >= 1 %}
+                          <span class="license-card-remaining {{ 'license-card-remaining--soon' if remaining_days <= 3 else '' }}">{{ remaining_days }} day{{ 's' if remaining_days != 1 }} remaining</span>
+                        {% elif remaining_hours >= 1 %}
+                          <span class="license-card-remaining license-card-remaining--soon">Expires today — {{ remaining_hours }} hour{{ 's' if remaining_hours != 1 }} remaining</span>
+                        {% else %}
+                          <span class="license-card-remaining license-card-remaining--soon">Expires today</span>
+                        {% endif %}
                       {% else %}
                         <span class="license-card-remaining--over">{{ key.expires_at.strftime('%d %b %Y, %H:%M') }} UTC (expired)</span>
                       {% endif %}
