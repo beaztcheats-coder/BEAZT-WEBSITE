@@ -242,15 +242,24 @@
       input.setAttribute("aria-invalid", "true");
       
       var existingError = group.querySelector(".form-error");
-      if (existingError) { existingError.remove(); }
-      
+      var slot = existingError && (existingError.hasAttribute("hidden") || existingError.hasAttribute("data-error-slot")) ? existingError : null;
+      if (existingError && !slot) { existingError.remove(); }
+
       if (message) {
-        var errorDiv = document.createElement("div");
+        var errorDiv = slot || document.createElement("div");
         errorDiv.className = "form-error";
         errorDiv.setAttribute("role", "alert");
         errorDiv.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
         errorDiv.appendChild(document.createTextNode(message));
-        group.appendChild(errorDiv);
+        errorDiv.hidden = false;
+        errorDiv.setAttribute("data-error-slot", "");
+        if (!slot) { group.appendChild(errorDiv); }
+        // VAL-ACCESS-004: associate the error with its input
+        if (errorDiv.id && input.id) {
+          var described = (input.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (v) { return v; });
+          if (described.indexOf(errorDiv.id) === -1) { described.push(errorDiv.id); }
+          input.setAttribute("aria-describedby", described.join(" "));
+        }
       }
     }
 
@@ -265,7 +274,14 @@
       input.setAttribute("aria-invalid", "false");
       
       var existingError = group.querySelector(".form-error");
-      if (existingError) { existingError.remove(); }
+      if (existingError) {
+        if (existingError.hasAttribute("data-error-slot")) {
+          existingError.hidden = true;
+          existingError.innerHTML = "";
+        } else {
+          existingError.remove();
+        }
+      }
     }
 
     function clearValidation(input) {
@@ -277,7 +293,14 @@
       input.removeAttribute("aria-invalid");
       
       var existingError = group.querySelector(".form-error");
-      if (existingError) { existingError.remove(); }
+      if (existingError) {
+        if (existingError.hasAttribute("data-error-slot")) {
+          existingError.hidden = true;
+          existingError.innerHTML = "";
+        } else {
+          existingError.remove();
+        }
+      }
     }
 
     function validateField(input) {

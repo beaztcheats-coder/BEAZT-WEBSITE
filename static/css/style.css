@@ -8221,3 +8221,31 @@ img {
 .hidden { display: none; }
 .block { display: block; }
 .inline-flex { display: inline-flex; }
+
+/* ── AUTH PAGE ADDITIONS (login-signup-pages) ───────────── */
+/* Client-side validation slots: hidden state must win over .form-error flex */
+.form-error[hidden] {
+  display: none;
+}
+
+/* Legal links row (signup): Terms of Service / Privacy Policy */
+.auth-legal {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.auth-legal a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--duration-fast);
+}
+
+.auth-legal a:hover,
+.auth-legal a:focus-visible {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
