@@ -343,7 +343,40 @@ def plan_detail(tier_id):
 
 @main_bp.route("/loader")
 def loader():
-    return render_template("loader.html")
+    products = Product.query.order_by(Product.created_at.asc()).all()
+    loader_cfg = get_loader_config()
+    return render_template(
+        "loader.html",
+        product=None,
+        products=products,
+        loader_url=loader_cfg["loader_url"],
+        loader_public_url=loader_cfg["loader_public_url"],
+        loader_private_url=loader_cfg["loader_private_url"],
+    )
+
+
+@main_bp.route("/loader/<slug>")
+def loader_product(slug):
+    """Product-specific loader guide (VAL-LOADER-002).
+
+    Additive presentation hook: renders the same loader.html template with
+    product context (name, status, loader_url, buyer_notes) so each product
+    gets correct download instructions and loader URL. The generic /loader
+    route above is unchanged.
+    """
+    product = Product.query.filter_by(slug=slug).first()
+    if not product:
+        abort(404)
+    products = Product.query.order_by(Product.created_at.asc()).all()
+    loader_cfg = get_loader_config()
+    return render_template(
+        "loader.html",
+        product=product,
+        products=products,
+        loader_url=loader_cfg["loader_url"],
+        loader_public_url=loader_cfg["loader_public_url"],
+        loader_private_url=loader_cfg["loader_private_url"],
+    )
 
 
 @main_bp.route("/feedback")
