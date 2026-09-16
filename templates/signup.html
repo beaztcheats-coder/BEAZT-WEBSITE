@@ -59,7 +59,7 @@
           <label for="password" class="form-label">
             <span class="icon" data-lucide="lock"></span> Password
           </label>
-          <div class="password-wrapper" x-data="{ showPassword: false }">
+          <div class="password-wrapper" x-data="{ showPassword: false }" :class="{ 'show-password': showPassword }">
             <input
               :type="showPassword ? 'text' : 'password'"
               id="password"
@@ -83,7 +83,7 @@
           <label for="confirm_password" class="form-label">
             <span class="icon" data-lucide="unlock"></span> Confirm Password
           </label>
-          <div class="password-wrapper" x-data="{ showConfirm: false }">
+          <div class="password-wrapper" x-data="{ showConfirm: false }" :class="{ 'show-password': showConfirm }">
             <input
               :type="showConfirm ? 'text' : 'password'"
               id="confirm_password"
