@@ -6605,18 +6605,101 @@ img {
   box-shadow: var(--glow-accent-subtle);
 }
 
+/* ── FAQ PAGE — category groups, search toolbar, CTA ──────
+   NOTE: vertical spacing still lives on content inside
+   .faq-answer-inner (see rule above) — never put top/bottom padding
+   on .faq-answer-inner itself or answers leak below collapsed items. */
+.faq-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-groups .faq-list {
+  margin: 0;
+  max-width: none;
+}
+
+.faq-group-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-primary);
+}
+
+.faq-group-title .icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.faq-toolbar {
+  max-width: 800px;
+  margin: 0 auto var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.faq-search-wrapper {
+  width: 100%;
+}
+
+.faq-search-wrapper .faq-search {
+  padding-right: var(--space-4);
+}
+
+.faq-search-count {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.faq-empty {
+  max-width: 800px;
+  margin: 0 auto var(--space-8);
+}
+
+.faq-cta {
+  max-width: 800px;
+  margin: var(--space-10) auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.faq-cta p {
+  margin: 0;
+}
+
 /* Responsive FAQ */
 @media (max-width: 640px) {
   .faq-question {
     padding: var(--space-4) var(--space-4);
   }
-  
+
   .faq-question-text {
     font-size: 0.9375rem;
   }
-  
+
   .faq-answer-inner {
-    padding: 0 var(--space-4) var(--space-4);
+    padding: 0 var(--space-4);
+  }
+
+  .faq-groups {
+    gap: var(--space-6);
+  }
+
+  .faq-cta {
+    flex-direction: column;
   }
 }
 

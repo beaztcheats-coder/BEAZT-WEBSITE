@@ -190,18 +190,30 @@
     });
     // Deep links from the homepage FAQ preview and features grid point at
     // #faq-answer-N anchors; open the targeted item so the answer is visible.
-    var hashId = window.location.hash ? window.location.hash.slice(1) : "";
-    if (hashId) {
+    // Runs on load AND on hashchange: .reveal parents may start hidden and
+    // the hash may be set after parse (e.g. in-page navigation), and the
+    // FAQ search filter may hide the target — unhide its item/group first.
+    function openHashTarget() {
+      var hashId = window.location.hash ? window.location.hash.slice(1) : "";
+      if (!hashId) { return; }
       var target = document.getElementById(hashId);
-      if (target && target.classList.contains("faq-answer")) {
-        var item = target.closest(".faq-item");
-        var btn = item ? item.querySelector(".faq-question") : null;
-        if (item && btn) {
-          item.classList.add("open");
-          btn.setAttribute("aria-expanded", "true");
-        }
+      if (!target || !target.classList.contains("faq-answer")) { return; }
+      var item = target.closest(".faq-item");
+      var btn = item ? item.querySelector(".faq-question") : null;
+      if (!item || !btn) { return; }
+      item.classList.remove("is-hidden");
+      var group = item.closest(".faq-group");
+      if (group) { group.classList.remove("is-hidden"); }
+      var searchInput = document.getElementById("faq-search");
+      if (searchInput && searchInput.value) {
+        searchInput.value = "";
+        searchInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
+      item.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
     }
+    openHashTarget();
+    window.addEventListener("hashchange", openHashTarget);
   }
 
   function setupFormValidation() {
