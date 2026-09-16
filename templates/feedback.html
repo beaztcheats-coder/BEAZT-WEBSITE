@@ -56,7 +56,7 @@
       {% for review in reviews %}
       <div class="review-card reveal">
         <div class="review-card-header">
-          <div class="review-card-avatar" aria-hidden="true">{{ (review.reviewer_name or 'A')|truncate(1, True)|upper }}</div>
+          <div class="review-card-avatar" aria-hidden="true">{{ ((review.reviewer_name or 'A')|first)|upper }}</div>
           <div class="review-card-meta">
             <div class="review-card-name">{{ review.reviewer_name or 'Anonymous' }}</div>
             {% if review.created_at %}
