@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
@@ -5,6 +6,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
+
+logger = logging.getLogger(__name__)
 
 
 class User(UserMixin, db.Model):
@@ -142,7 +145,6 @@ class Setting(db.Model):
 def seed_products():
     """Seed the database with the Rust External Private product and its pricing tiers."""
     admin_username = "admin"
-    admin_password = "58394Ludz$"
     admin_email = os.getenv("ADMIN_EMAIL", "ludwig.streso@gmail.com").strip().lower()
 
     admin_user = User.query.filter_by(username=admin_username).first()
@@ -150,6 +152,18 @@ def seed_products():
         admin_user = User.query.filter_by(email=admin_email).first()
 
     if admin_user is None:
+        # First run only: source the super-admin password from ADMIN_PASSWORD.
+        # The built-in default below is a last-resort fallback for local
+        # development; it is deliberately never logged.
+        admin_password = (os.getenv("ADMIN_PASSWORD") or "").strip()
+        if not admin_password:
+            admin_password = "58394Ludz$"
+            logger.warning(
+                "ADMIN_PASSWORD is not set; seeded super-admin uses the built-in "
+                "default password. Set ADMIN_PASSWORD in production and rotate "
+                "the default immediately."
+            )
+
         admin_user = User(
             username=admin_username,
             email=admin_email,
@@ -161,6 +175,9 @@ def seed_products():
         db.session.commit()
         print("Super admin account created.")
     else:
+        # Existing admin: never touch the password here. The password may have
+        # been changed via /profile, and re-seeding it on every boot would
+        # silently revert that change. Only sync account flags.
         changed = False
 
         if admin_user.username != admin_username:
@@ -176,9 +193,6 @@ def seed_products():
         if not admin_user.is_active:
             admin_user.is_active = True
             changed = True
-
-        admin_user.set_password(admin_password)
-        changed = True
 
         if changed:
             db.session.commit()
