@@ -43,6 +43,7 @@
       <td>
         {% if o.status == 'awaiting_keys' %}
         <form method="POST" action="{{ url_for('admin.fulfill_order', order_id=o.id) }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Fulfill</button>
         </form>
         {% endif %}

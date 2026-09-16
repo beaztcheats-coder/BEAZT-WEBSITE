@@ -22,6 +22,7 @@
 <div class="pricing-section pricing-shell">
   {% if tiers %}
     <form method="POST" action="{{ url_for('checkout.create_session') }}" x-data="{ selected: '{{ ns.default_selected_id }}', selectedLabel: '', selectedPrice: '' }" x-init="(() => { const el = $el.querySelector('input[name=tier_id]:checked'); if (el) { selected = el.value; selectedLabel = el.dataset.label; selectedPrice = el.dataset.price; } })()">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="plan-topline reveal">
         <span class="plan-tag">{{ product_features['label'] if product_features and product_features['label'] else product.name }}</span>
         {% if cheat_status %}

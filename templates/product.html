@@ -304,6 +304,7 @@
           formData.append('tier_id', this.selectedVariantId);
           formData.append('quantity', this.quantity);
           formData.append('gateway', this.selectedGateway);
+          formData.append('csrf_token', '{{ csrf_token() }}');
           var resp = await fetch('{{ url_for('checkout.create_session') }}', {
             method: 'POST',
             body: formData

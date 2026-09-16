@@ -11,6 +11,7 @@
 
     <div style="max-width:520px;margin-inline:auto;">
       <form method="POST" class="reveal" style="display:flex;flex-direction:column;gap:1.25rem;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div style="display:flex;flex-direction:column;gap:0.3rem;">
           <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Email</label>

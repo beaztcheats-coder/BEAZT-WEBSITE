@@ -16,6 +16,7 @@
         </div>
       </div>
       <form method="POST" id="signup-form" class="auth-form" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
           <label for="username" class="form-label">
             <span class="icon" data-lucide="user"></span> Username

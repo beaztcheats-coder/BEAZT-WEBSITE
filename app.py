@@ -1,5 +1,7 @@
+import hmac
 import os
-from flask import Flask, jsonify, render_template
+import secrets
+from flask import Flask, jsonify, render_template, request, session
 from config import Config
 from models import db, User, seed_products
 from flask_login import LoginManager
@@ -15,6 +17,58 @@ app = Flask(
     static_url_path="/static",
 )
 app.config.from_object(Config)
+
+# --- CSRF protection (VAL-SEC-004) -----------------------------------------
+# Lightweight, dependency-free implementation (chosen over Flask-WTF/CSRFProtect
+# to avoid adding a dependency for one feature): a per-session random token
+# validated with a constant-time comparison on every state-changing request.
+# Server-to-server payment webhooks are exempt (they carry no browser session):
+#   /checkout/ivno-webhook, /checkout/payfast-notify, /webhooks/sellix
+_CSRF_EXEMPT_PATHS = (
+    "/checkout/ivno-webhook",
+    "/checkout/payfast-notify",
+    "/webhooks/sellix",
+)
+
+
+def _get_csrf_token():
+    """Lazily create and return this session's CSRF token (Jinja global)."""
+    if "_csrf_token" not in session:
+        session["_csrf_token"] = secrets.token_hex(32)
+    return session["_csrf_token"]
+
+
+app.jinja_env.globals["csrf_token"] = _get_csrf_token
+
+
+@app.before_request
+def csrf_protect():
+    """Reject state-changing requests without a valid CSRF token (400).
+
+    Tokens are accepted from the form field (browser forms), the X-CSRF-Token
+    header (fetch/AJAX), or a JSON body field. Webhook paths are exempt.
+    """
+    if request.method not in ("POST", "PUT", "PATCH", "DELETE"):
+        return None
+
+    path = (request.path or "").rstrip("/")
+    if path in _CSRF_EXEMPT_PATHS:
+        return None
+
+    supplied = request.form.get("csrf_token") or request.headers.get("X-CSRF-Token")
+    if not supplied and request.is_json:
+        supplied = (request.get_json(silent=True) or {}).get("csrf_token")
+
+    stored = session.get("_csrf_token")
+    if not stored or not supplied or not hmac.compare_digest(
+        str(stored), str(supplied)
+    ):
+        return jsonify({"error": "CSRF token missing or invalid"}), 400
+    return None
+
+# ---------------------------------------------------------------------------
+
+
 
 
 @app.route("/ping")

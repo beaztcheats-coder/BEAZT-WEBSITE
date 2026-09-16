@@ -23,6 +23,7 @@
 <div class="admin-card" style="margin-bottom:1.75rem;">
   <h2 style="font-size:1rem;margin-bottom:0.8rem;">Import Keys</h2>
   <form method="POST" action="{{ url_for('admin.product_keys', product_id=product.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="add">
     <div class="form-row" style="gap:1rem;align-items:end;flex-wrap:wrap;">
       <div class="form-group" style="flex:1;min-width:200px;">
@@ -62,6 +63,7 @@
 
   {% if pool_keys %}
     <form method="POST" action="{{ url_for('admin.product_keys', product_id=product.id, tier_id=selected_tier_id or '') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="action" value="delete_pool">
       <div style="max-height:480px;overflow-y:auto;margin-bottom:0.75rem;">
         <table class="admin-table">

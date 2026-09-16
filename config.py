@@ -70,6 +70,16 @@ def _resolve_secret_key():
 
 class Config:
     SECRET_KEY = _resolve_secret_key()
+    # Session cookie hardening (VAL-SEC-004):
+    # SameSite=Lax mitigates cross-site request forgery on POSTs while keeping
+    # normal top-level navigation working. SESSION_COOKIE_SECURE is opt-in via
+    # env (set SESSION_COOKIE_SECURE=true in production behind HTTPS); it must
+    # stay off by default because the dev server runs on plain HTTP, where a
+    # Secure cookie would silently break logins.
+    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    SESSION_COOKIE_SECURE = os.getenv(
+        "SESSION_COOKIE_SECURE", ""
+    ).strip().lower() in ("1", "true", "yes", "on")
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
         "sqlite:///" + os.path.join(basedir, "instance", "beazt.db"),
