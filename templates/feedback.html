@@ -9,6 +9,9 @@
       <h1 class="t-h1">Verified buyer feedback</h1>
       <p class="text-muted">Fast delivery, reliable support, and stable day-to-day use.</p>
     </div>
+    <!-- OPERATIONAL PROOF CARDS: these describe service capabilities (delivery,
+         support, patching, onboarding), not customer reviews, so they are
+         retained under NO-FABRICATED-REVIEWS. -->
     <div class="proof-grid reveal" style="margin-bottom:1.4rem;">
       <article class="proof-card">
         <span class="icon" data-lucide="receipt-text"></span>
@@ -31,110 +34,66 @@
         <p>Onboarding is simple and guided for first-time buyers.</p>
       </article>
     </div>
-    <!-- STAT SOURCING (homepage-stat-bar ownership decision, per
-         NO-FABRICATED-STATS): the orders table in instance/beazt.db is empty,
-         so "2,400+ verified orders" and the 4.9 average are STATIC marketing
-         claims carried over from the pre-redesign site (git 00912f8,
-         2026-07-01), not live database figures. Marked static here so the
-         proof/reviews milestone can resolve this summary together with the
-         hardcoded review cards below. -->
-    <div class="rating-summary reveal">
-      <span class="rating-score">4.9</span>
-      <span class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-      <span class="rating-count">based on 2,400+ verified orders</span>
-    </div>
+    <!-- STAT SOURCING (resolves the homepage-stat-bar ownership decision for
+         this page, per NO-FABRICATED-REVIEWS): the former "4.9 / based on
+         2,400+ verified orders" rating summary was REMOVED. models.py has no
+         Review model, the feedback() route passes no review data, and the
+         database contains zero reviews, so the summary was a fabricated
+         statistic that directly contradicted the honest empty state below it
+         (the same reasoning used by the homepage testimonials handoff
+         fba71e37). The 4.9 and 2,400+ figures remain, explicitly marked
+         static, in the homepage stat bar (see index.html STAT BAR comment).
+         Do not reintroduce a rating summary here unless it is derived from a
+         real Review table passed by routes/main.py. -->
+    <!-- REVIEWS: data-driven section. No Review model exists yet and
+         feedback() passes no data, so the empty state renders today. When a
+         Review model is added, pass `reviews` from routes/main.py and the
+         cards below render automatically. Expected fields per card:
+         reviewer_name (falsy -> "Anonymous"), created_at, rating (1-5),
+         content, is_verified_purchase. -->
+    {% if reviews %}
     <div class="reviews-grid">
+      {% for review in reviews %}
       <div class="review-card reveal">
         <div class="review-card-header">
-          <div class="review-card-avatar">K</div>
+          <div class="review-card-avatar" aria-hidden="true">{{ (review.reviewer_name or 'A')|truncate(1, True)|upper }}</div>
           <div class="review-card-meta">
-            <div class="review-card-name">Kai</div>
-            <div class="review-card-date">2 days ago</div>
+            <div class="review-card-name">{{ review.reviewer_name or 'Anonymous' }}</div>
+            {% if review.created_at %}
+            <div class="review-card-date">{{ review.created_at.strftime('%b %d, %Y') }}</div>
+            {% endif %}
           </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <div class="review-card-rating" role="img" aria-label="Rated {{ review.rating }} out of 5 stars">{% for i in range(5) %}{% if i < review.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</div>
         </div>
-        <p class="review-card-content">4 months on BEAZT. Privacy cloak is flawless with OBS and Discord.</p>
+        <p class="review-card-content">{{ review.content }}</p>
+        {% if review.is_verified_purchase %}
         <span class="review-card-verified">
           <span class="icon icon-sm" data-lucide="check-circle-2"></span>
           Verified purchase
         </span>
+        {% endif %}
       </div>
-      <div class="review-card reveal">
-        <div class="review-card-header">
-          <div class="review-card-avatar">R</div>
-          <div class="review-card-meta">
-            <div class="review-card-name">VeteranRust</div>
-            <div class="review-card-date">5 days ago</div>
-          </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        </div>
-        <p class="review-card-content">Patches hit within hours. Discord actually replies, which is rare here.</p>
-        <span class="review-card-verified">
-          <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-          Verified purchase
-        </span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal" role="status" aria-label="No verified reviews yet">
+      <div class="empty-icon" aria-hidden="true">
+        <span class="icon" data-lucide="message-square-quote"></span>
       </div>
-      <div class="review-card reveal">
-        <div class="review-card-header">
-          <div class="review-card-avatar">M</div>
-          <div class="review-card-meta">
-            <div class="review-card-name">Mason</div>
-            <div class="review-card-date">1 week ago</div>
-          </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        </div>
-        <p class="review-card-content">Five months of zero drops. Visual toolkit stays sharp even on long raids.</p>
-        <span class="review-card-verified">
-          <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-          Verified purchase
-        </span>
-      </div>
-      <div class="review-card reveal">
-        <div class="review-card-header">
-          <div class="review-card-avatar">D</div>
-          <div class="review-card-meta">
-            <div class="review-card-name">DeltaX</div>
-            <div class="review-card-date">2 weeks ago</div>
-          </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        </div>
-        <p class="review-card-content">Onboarding took 10 minutes tops. Loader is clean and streamer cloak works.</p>
-        <span class="review-card-verified">
-          <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-          Verified purchase
-        </span>
-      </div>
-      <div class="review-card reveal">
-        <div class="review-card-header">
-          <div class="review-card-avatar">Z</div>
-          <div class="review-card-meta">
-            <div class="review-card-name">ZeroDay</div>
-            <div class="review-card-date">3 weeks ago</div>
-          </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-        </div>
-        <p class="review-card-content">Key delivered in under 30 seconds. Loader UI makes sense instantly.</p>
-        <span class="review-card-verified">
-          <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-          Verified purchase
-        </span>
-      </div>
-      <div class="review-card reveal">
-        <div class="review-card-header">
-          <div class="review-card-avatar">S</div>
-          <div class="review-card-meta">
-            <div class="review-card-name">ScopedIn</div>
-            <div class="review-card-date">1 month ago</div>
-          </div>
-          <div class="review-card-rating">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
-        </div>
-        <p class="review-card-content">Monthly rate is sane. Competitors charge double for less — lifetime would be wild.</p>
-        <span class="review-card-verified">
-          <span class="icon icon-sm" data-lucide="check-circle-2"></span>
-          Verified purchase
-        </span>
+      <h3 class="empty-title">No verified reviews yet</h3>
+      <p class="empty-text">Buyer reviews will appear here once verified purchases are submitted. In the meantime, ask current operators about their experience in Discord.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ discord_public_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          <span class="icon icon-sm" data-lucide="message-circle"></span>
+          Ask buyers in Discord
+        </a>
+        <a href="{{ url_for('main.cheats') }}" class="btn btn-ghost">
+          <span class="icon icon-sm" data-lucide="receipt-text"></span>
+          Browse products
+        </a>
       </div>
     </div>
+    {% endif %}
     <div class="pricing-cta reveal" style="margin-top:1.8rem;">
       <p style="color:var(--text-dim);font-size:0.85rem;max-width:780px;margin-inline:auto;">
         Reviews show real buyer experience but do not guarantee outcomes. Read the FAQ and terms before purchasing.
