@@ -155,6 +155,29 @@ def _create_payfast_payment(tier, quantity, order_total):
         return jsonify({"error": str(e)}), 500
 
 
+def _expected_payfast_amount(order):
+    """Recompute the ZAR amount PayFast should report for this order.
+
+    Mirrors ``_create_payfast_payment``: GBP order total (tier price x
+    quantity) converted at the current GBP->ZAR rate, rounded to 2dp.
+    Returns ``None`` when the order has no tier (cannot reconcile).
+    """
+    tier = order.tier
+    if not tier:
+        return None
+    quantity = getattr(order, "quantity", 1) or 1
+    order_total = tier.price_pounds * quantity
+    return round(order_total * _get_gbp_to_zar(), 2)
+
+
+def _amounts_reconcile(reported, expected):
+    """Compare ITN amount_gross to the expected amount at 2-decimal precision."""
+    try:
+        return round(float(reported), 2) == round(float(expected), 2)
+    except (TypeError, ValueError):
+        return False
+
+
 @checkout_bp.route("/payfast-notify", methods=["POST"])
 def payfast_notify():
     logger.info("PayFast ITN received: %s", dict(request.form))
@@ -172,10 +195,28 @@ def payfast_notify():
         return "INVALID", 400
 
     order_id = int(pf_data.get("m_payment_id", 0))
-    logger.info("PayFast ITN for order %s, payment_status=%s", order_id, pf_data.get("payment_status", "?"))
+    payment_status = str(pf_data.get("payment_status", "") or "")
+    logger.info("PayFast ITN for order %s, payment_status=%s", order_id, payment_status or "?")
     order = db.session.get(Order, order_id)
     if not order:
         logger.warning("PayFast ITN: order %s not found", order_id)
+        return "OK"
+
+    # BLK-2: fulfill ONLY on COMPLETE (case-insensitive) with reconciled amount.
+    # Non-COMPLETE or mismatched ITNs are acknowledged (200) without fulfillment
+    # so PayFast does not retry, but no keys are delivered.
+    if payment_status.upper() != "COMPLETE":
+        logger.warning("PayFast ITN: order %s not COMPLETE (payment_status=%r) — no fulfillment",
+                       order_id, payment_status)
+        return "OK"
+
+    expected = _expected_payfast_amount(order)
+    if expected is None:
+        logger.warning("PayFast ITN: order %s has no tier — cannot reconcile amount, no fulfillment", order_id)
+        return "OK"
+    if not _amounts_reconcile(pf_data.get("amount_gross"), expected):
+        logger.warning("PayFast ITN: order %s amount mismatch (reported=%r expected=%.2f) — no fulfillment",
+                       order_id, pf_data.get("amount_gross"), expected)
         return "OK"
 
     if order.status != "completed":
