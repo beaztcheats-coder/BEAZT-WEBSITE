@@ -398,7 +398,7 @@
            x-init="activeImage = $el.querySelector('.product-main-image img').src">
         {% if gallery_images and gallery_images|length > 0 %}
         <div class="product-main-image">
-          <img :src="activeImage" src="{{ gallery_images[0] }}" alt="{{ product.name }}" fetchpriority="high">
+          <img :src="activeImage" src="{{ gallery_images[0] }}" alt="{{ product.name }}" fetchpriority="high" decoding="async">
         </div>
         {% if gallery_images|length > 1 %}
         <div class="product-thumbnails" role="group" aria-label="Product image gallery">
@@ -414,7 +414,7 @@
         {% endif %}
         {% else %}
         <div class="product-main-image">
-          <img src="{{ url_for('main.cheat_image', slug=product.slug) }}" alt="{{ product.name }}">
+          <img src="{{ url_for('main.cheat_image', slug=product.slug) }}" alt="{{ product.name }}" width="600" height="340" fetchpriority="high" decoding="async">
         </div>
         {% endif %}
 

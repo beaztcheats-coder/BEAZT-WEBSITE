@@ -158,18 +158,54 @@
   }
 
   function setupReveal() {
-    if (typeof ScrollReveal === "undefined" || reducedMotion) {
+    var els = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+    if (!els.length) { return; }
+    // VAL-PERF-001: enables the html:not(.js) .reveal fallback in CSS before
+    // first paint, so content is never hidden when scripting is unavailable.
+    document.documentElement.classList.add("js");
+
+    // Scroll-driven reveal using the existing .reveal / .visible CSS system.
+    // Replaces the defer-loaded ScrollReveal CDN, which used to initialize
+    // only after this synchronous script had already run, leaving .reveal
+    // content stuck at opacity 0 (known load-order bug).
+    if (reducedMotion) {
+      els.forEach(function (el) { el.classList.add("visible"); });
       return;
     }
-    ScrollReveal().reveal(".reveal", {
-      distance: "28px",
-      origin: "bottom",
-      opacity: 0,
-      duration: 640,
-      easing: "cubic-bezier(0.22, 0.68, 0.27, 1)",
-      interval: 60,
-      cleanup: true,
-    });
+
+    var pending = els;
+    var timer = 0;
+
+    function check() {
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      for (var i = pending.length - 1; i >= 0; i -= 1) {
+        // Reveal anything in the viewport OR already scrolled past (fast
+        // flicks can skip elements through the viewport between checks).
+        if (pending[i].getBoundingClientRect().top < vh - 40) {
+          pending[i].classList.add("visible");
+          pending.splice(i, 1);
+        }
+      }
+      if (!pending.length) {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      }
+    }
+
+    // setTimeout throttle (not rAF): scroll-driven reveal must also run in
+    // environments where rAF frames are throttled or unavailable. Throttle
+    // (not debounce) so continuous scrolling still checks every 100ms.
+    function onScroll() {
+      if (timer) { return; }
+      timer = window.setTimeout(function () {
+        timer = 0;
+        check();
+      }, 100);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    check();
   }
 
   function setupFaqAccordion() {
@@ -487,20 +523,61 @@
   }
 
   function hydrateIcons() {
+    // Lucide is injected AFTER the page has loaded (see loadDeferred below):
+    // its 440KB bundle must not compete with the render-blocking CSS for
+    // bandwidth on slow connections. Icons are decorative; hydrate late.
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       try { window.lucide.createIcons(); } catch (error) { console.error("Lucide render failed", error); }
     }
   }
 
-  setupHeaderScroll();
-  setupMobileMenu();
-  setupCanvas();
-  setupReveal();
-  setupFaqAccordion();
-  setupFormValidation();
-  setupFlashDismiss();
-  setupCounters();
-  setupMobileBuyBar();
-  setupFooterReveal();
-  hydrateIcons();
+  function injectVendor(src) {
+    var script = document.createElement("script");
+    script.src = src;
+    document.head.appendChild(script);
+    return script;
+  }
+
+  function loadDeferred() {
+    if (!window.lucide) {
+      var icons = injectVendor("/static/js/vendor/lucide.min.js");
+      icons.onload = hydrateIcons;
+    }
+    if (!window.Alpine) {
+      // Alpine's CDN build auto-starts when injected after DOMContentLoaded
+      // (it checks document.readyState), so deferred interaction components
+      // initialize as soon as it arrives.
+      injectVendor("/static/js/vendor/alpine.min.js");
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      setupHeaderScroll();
+      setupMobileMenu();
+      setupCanvas();
+      setupReveal();
+      setupFaqAccordion();
+      setupFormValidation();
+      setupFlashDismiss();
+      setupCounters();
+      setupMobileBuyBar();
+      setupFooterReveal();
+      hydrateIcons();
+    });
+    window.addEventListener("load", loadDeferred);
+  } else {
+    setupHeaderScroll();
+    setupMobileMenu();
+    setupCanvas();
+    setupReveal();
+    setupFaqAccordion();
+    setupFormValidation();
+    setupFlashDismiss();
+    setupCounters();
+    setupMobileBuyBar();
+    setupFooterReveal();
+    hydrateIcons();
+    loadDeferred();
+  }
 })();

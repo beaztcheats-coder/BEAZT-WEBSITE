@@ -1,3 +1,4 @@
+import gzip
 import hmac
 import os
 import secrets
@@ -70,6 +71,51 @@ def csrf_protect():
 
 
 
+
+# --- Response compression (VAL-PERF-001) ------------------------------------
+# The render-blocking CSS bundle dominates the critical path on slow networks;
+# gzip cuts ~170KB of CSS to ~30KB. Flask servers do not compress by default,
+# so compress text responses when the client advertises support (dependency-
+# free: stdlib gzip + an after_request hook).
+_GZIP_CONTENT_TYPES = (
+    "text/html",
+    "text/css",
+    "application/javascript",
+    "text/javascript",
+    "application/json",
+    "image/svg+xml",
+    "text/plain",
+)
+_GZIP_MIN_SIZE = 860  # bytes; smaller responses gain nothing from gzip
+
+@app.after_request
+def compress_response(response):
+    if response.status_code != 200:
+        return response
+    content_type = (response.content_type or "").split(";")[0].strip()
+    if content_type not in _GZIP_CONTENT_TYPES:
+        return response
+    accept = request.headers.get("Accept-Encoding", "")
+    if "gzip" not in accept.lower():
+        return response
+    if response.headers.get("Content-Encoding"):
+        return response
+    if response.direct_passthrough:
+        # Static-file responses (send_file) stream from disk; buffer them so
+        # the body can be read and re-encoded.
+        response.direct_passthrough = False
+    data = response.get_data()
+    if len(data) < _GZIP_MIN_SIZE:
+        return response
+    compressed = gzip.compress(data, compresslevel=5)
+    if len(compressed) >= len(data):
+        return response
+    response.set_data(compressed)
+    response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Length"] = str(len(compressed))
+    response.headers["Vary"] = "Accept-Encoding"
+    response.headers.pop("ETag", None)  # representation changed
+    return response
 
 @app.route("/ping")
 def ping():

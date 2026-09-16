@@ -10,14 +10,13 @@
   <meta property="og:type" content="website">
   <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
   <title>{% block title %}BEAZT Private Access{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="dns-prefetch" href="https://unpkg.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
-  <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
-  <script defer src="https://unpkg.com/scrollreveal@4/dist/scrollreveal.min.js"></script>
-  <link rel="stylesheet" href="/static/css/style.css?v=6">
+  <!-- VAL-PERF-003: self-hosted variable fonts (latin subset) — no third-party font CDN, no FOUT-dependent CLS.
+       Fonts load on demand via font-display: swap; preloading Inter was measured to delay the
+       render-blocking CSS behind the 48KB font on slow links, hurting LCP more than the swap costs. -->
+  <!-- Alpine + lucide are injected post-load by script.js: neither is needed
+       for first paint, and their combined ~126KB must not compete with the
+       render-blocking CSS for bandwidth on slow connections. -->
+  <link rel="stylesheet" href="/static/css/style.css?v=7">
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -169,8 +168,9 @@
     </footer>
   </div>
 
-  <script defer src="https://unpkg.com/lucide@latest"></script>
-  <script src="/static/js/script.js"></script>
+  <!-- lucide (440KB) is injected post-load by script.js: must not compete with
+       the render-blocking CSS for bandwidth on slow connections. -->
+  <script defer src="/static/js/script.js?v=7"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
