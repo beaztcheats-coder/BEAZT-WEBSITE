@@ -1,6 +1,7 @@
 from pathlib import Path
 import io
 import json
+from datetime import datetime
 
 from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for, flash
 from flask_login import login_required, current_user
@@ -424,9 +425,13 @@ def my_keys():
     has_private = any(k.product and k.product.visibility == "private" and k.is_active for k in keys)
     return render_template("keys.html", keys=keys, pending_orders=pending_orders,
         loader_token=loader["loader_token"],
+        loader_url=loader["loader_url"],
+        loader_public_url=loader["loader_public_url"],
+        loader_private_url=loader["loader_private_url"],
         discord_public_url=discord_cfg["public_url"],
         discord_private_url=discord_cfg["private_url"],
-        has_private=has_private)
+        has_private=has_private,
+        now=datetime.utcnow())
 
 
 @main_bp.route("/profile", methods=["GET", "POST"])
