@@ -178,13 +178,16 @@ def dashboard():
             revenue_pence += o.tier.price_pence
 
     cf_balance = None
+    cf_balance_raw = None
     cf_balance_error = None
     cf_config = get_chairfbi_config()
     if cf_config.get("api_token"):
         try:
             from utils.chairfbi import ChairFBI
             cf = ChairFBI(api_token=cf_config["api_token"], base_url=cf_config.get("api_base"))
-            cf_balance = cf.get_balance()
+            report = cf.get_balance_report()
+            cf_balance = report["value"]
+            cf_balance_raw = report["raw"]
         except Exception as e:
             err_str = str(e)
             if "502" in err_str or "Bad Gateway" in err_str:
@@ -214,6 +217,7 @@ def dashboard():
         recent_users=recent_users,
         recent_keys=recent_keys,
         cf_balance=cf_balance,
+        cf_balance_raw=cf_balance_raw,
         cf_balance_error=cf_balance_error,
         license_token_is_default=license_token_is_default,
         license_api_url=license_cfg["api_url"],
@@ -1235,7 +1239,7 @@ def test_chairfbi():
     if success:
         balance = ChairFBI.parse_balance(result)
         if balance is not None:
-            flash(f"ChairFBI connection successful. Balance: €{balance:.2f}.", "success")
+            flash(f"ChairFBI connection successful. Balance: €{balance} (raw: {ChairFBI._find_raw(result)}).", "success")
         else:
             flash("ChairFBI connection successful.", "success")
     else:
@@ -1359,6 +1363,7 @@ def chairfbi_dashboard():
 
     balance = None
     cf_balance = None
+    cf_balance_raw = None
     cheats = []
     recent_cf_keys = []
     chairfbi_error = None
@@ -1372,7 +1377,9 @@ def chairfbi_dashboard():
             cf = ChairFBI(api_token=api_token, base_url=api_base)
 
             try:
-                cf_balance = cf.get_balance()
+                report = cf.get_balance_report()
+                cf_balance = report["value"]
+                cf_balance_raw = report["raw"]
             except Exception as e:
                 err_str = str(e)
                 if "502" in err_str or "Bad Gateway" in err_str:
@@ -1417,6 +1424,7 @@ def chairfbi_dashboard():
     return render_template(
         "admin/chairfbi.html",
         balance=cf_balance,
+        balance_raw=cf_balance_raw,
         balance_error=balance_error,
         cheats=cheats,
         recent_cf_keys=recent_cf_keys,

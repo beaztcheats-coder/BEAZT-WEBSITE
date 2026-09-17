@@ -31,14 +31,24 @@
 /* === Homepage private showcase + hero uptime label (2026-09-17) === */
 .hero-stat--label-top{display:flex;flex-direction:column;justify-content:center}
 .hero-stat--label-top .hero-stat-label{order:-1;margin-top:0;margin-bottom:var(--space-2)}
-.store-preview--private{position:relative}
-.store-preview--private::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(22,139,255,0.08),transparent 70%);pointer-events:none}
-.section-eyebrow--flagship{background:linear-gradient(135deg,rgba(22,139,255,0.22),rgba(88,101,242,0.18));border:1px solid var(--border-accent-subtle);box-shadow:0 0 16px var(--accent-glow-subtle),inset 0 1px 0 rgba(255,255,255,0.08)}
+/* === Flagship private section: heavy blue-glow treatment (2026-09-17) === */
+.store-preview--private{position:relative;overflow:hidden;border-top:1px solid rgba(22,139,255,0.14);border-bottom:1px solid rgba(22,139,255,0.14);background:linear-gradient(180deg,rgba(22,139,255,0.06) 0%,rgba(8,16,28,0.4) 30%,rgba(8,16,28,0.4) 70%,rgba(22,139,255,0.05) 100%)}
+.store-preview--private::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(22,139,255,0.22),transparent 65%),radial-gradient(ellipse 45% 35% at 50% 100%,rgba(88,101,242,0.14),transparent 65%);pointer-events:none}
+.store-preview--private::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:min(720px,80%);height:1px;background:linear-gradient(90deg,transparent,rgba(22,139,255,0.9),transparent);box-shadow:0 0 24px rgba(22,139,255,0.8),0 0 60px rgba(22,139,255,0.4);pointer-events:none}
+.store-preview--private .container{position:relative;z-index:1}
+.section-eyebrow--flagship{background:linear-gradient(135deg,rgba(22,139,255,0.3),rgba(88,101,242,0.24));border:1px solid rgba(22,139,255,0.55);color:#cfe7ff;box-shadow:0 0 22px rgba(22,139,255,0.45),0 0 60px rgba(22,139,255,0.18),inset 0 1px 0 rgba(255,255,255,0.14);text-shadow:0 0 12px rgba(22,139,255,0.6)}
+.store-preview--private .t-h2{text-shadow:0 0 32px rgba(22,139,255,0.4)}
 .private-meta{display:flex;align-items:center;justify-content:center;gap:0.6rem;flex-wrap:wrap;margin-top:1rem;font-size:0.72rem;color:var(--text-muted)}
-.private-meta>span{display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:9999px}
+.private-meta>span{display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.75rem;background:rgba(12,22,37,0.8);border:1px solid rgba(22,139,255,0.25);border-radius:9999px;box-shadow:0 0 14px rgba(22,139,255,0.12),inset 0 1px 0 rgba(255,255,255,0.05)}
 .private-live{color:var(--status-online);border-color:var(--status-online-border)!important;background:var(--status-online-bg)!important}
 .private-live .dot{width:7px;height:7px;border-radius:50%;background:var(--status-online);box-shadow:0 0 8px var(--status-online-glow);animation:pulse 2s ease-in-out infinite}
-.cheat-card--flagship{border-color:var(--border-accent);box-shadow:var(--shadow-xl),0 0 40px var(--accent-glow-subtle),inset 0 1px 0 rgba(255,255,255,0.05)}
+.cheats-grid--private .cheat-card--private{border-color:rgba(22,139,255,0.4);box-shadow:var(--shadow-lg),0 0 28px rgba(22,139,255,0.22),0 0 70px rgba(22,139,255,0.1),inset 0 1px 0 rgba(255,255,255,0.06)}
+.cheats-grid--private .cheat-card--private::before{opacity:1;background:linear-gradient(90deg,transparent 0%,rgba(22,139,255,0.9) 20%,#5eb2ff 50%,rgba(22,139,255,0.9) 80%,transparent 100%);box-shadow:0 0 16px rgba(22,139,255,0.6)}
+.cheats-grid--private .cheat-card--private:hover{border-color:rgba(94,178,255,0.8);box-shadow:var(--shadow-2xl),0 0 44px rgba(22,139,255,0.45),0 0 110px rgba(22,139,255,0.2),inset 0 1px 0 rgba(255,255,255,0.08);transform:translateY(-6px)}
+.cheats-grid--private .cheat-card-banner{box-shadow:inset 0 -30px 40px -20px rgba(22,139,255,0.35)}
+.cheats-grid--private .cheat-source-badge--private{background:linear-gradient(135deg,rgba(22,139,255,0.35),rgba(88,101,242,0.28));border-color:rgba(94,178,255,0.6);color:#d6ecff;box-shadow:0 0 16px rgba(22,139,255,0.4)}
+.cheat-card--flagship{border-color:rgba(94,178,255,0.7)!important;box-shadow:var(--shadow-xl),0 0 44px rgba(22,139,255,0.4),0 0 100px rgba(22,139,255,0.18),inset 0 1px 0 rgba(255,255,255,0.08)!important}
 .cheat-card--flagship::before{opacity:1}
 .cheat-card--flagship .cheat-card-banner{aspect-ratio:16/8}
 @media(max-width:640px){.cheat-card--flagship .cheat-card-banner{aspect-ratio:16/9}}
+@media(prefers-reduced-motion:reduce){.store-preview--private::after{box-shadow:none}}

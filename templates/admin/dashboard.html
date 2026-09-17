@@ -37,19 +37,22 @@
   <div class="stat-card">
     <div class="stat-num">
       {% if cf_balance is not none %}
-        &euro;{{ "%.2f"|format(cf_balance|float) }}
+        &euro;{{ cf_balance }}
       {% else %}
         --
       {% endif %}
     </div>
     <div class="stat-lbl">ChairFBI Balance</div>
+    {% if cf_balance_raw is defined and cf_balance_raw is not none %}
+    <div style="font-size:0.62rem;color:var(--text-muted);margin-top:0.25rem;font-family:var(--font-mono);" title="Exact value returned by the ChairFBI /api/store endpoint">API raw: {{ cf_balance_raw }}</div>
+    {% endif %}
   </div>
 </div>
 
 {% if cf_balance is not none and cf_balance|float < 20 %}
 <div class="cf-alert cf-alert-warn">
   <span class="icon icon-sm" data-lucide="alert-triangle"></span>
-  ChairFBI balance is low (&euro;{{ "%.2f"|format(cf_balance|float) }}). Top up soon to avoid checkout disruptions.
+  ChairFBI balance is low (&euro;{{ cf_balance }}). Top up soon to avoid checkout disruptions.
 </div>
 {% endif %}
 {% if cf_balance_error %}

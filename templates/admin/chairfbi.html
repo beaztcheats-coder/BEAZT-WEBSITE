@@ -24,12 +24,15 @@
   <div class="stat-card">
     <div class="stat-num">
       {% if balance is not none %}
-        &euro;{{ "%.2f"|format(balance|float) }}
+        &euro;{{ balance }}
       {% else %}
         --
       {% endif %}
     </div>
     <div class="stat-lbl">Current Balance</div>
+    {% if balance_raw is defined and balance_raw is not none %}
+    <div style="font-size:0.62rem;color:var(--text-muted);margin-top:0.25rem;font-family:var(--font-mono);" title="Exact value returned by the ChairFBI /api/store endpoint">API raw: {{ balance_raw }}</div>
+    {% endif %}
   </div>
   <div class="stat-card">
     <div class="stat-num">{{ cheats|length }}</div>
@@ -57,10 +60,16 @@
   </div>
 </div>
 
+{% if balance is not none and balance_raw is defined and balance_raw is not none and (balance|float != balance_raw|float) %}
+<div class="cf-alert cf-alert-warn">
+  <span class="icon icon-sm" data-lucide="alert-triangle"></span>
+  Displayed balance (&euro;{{ balance }}) differs in formatting from the raw API value ({{ balance_raw }}). Parsing may need attention.
+</div>
+{% endif %}
 {% if balance is not none and balance|float < 20 %}
 <div class="cf-alert cf-alert-warn">
   <span class="icon icon-sm" data-lucide="alert-triangle"></span>
-  Balance is low (&euro;{{ "%.2f"|format(balance|float) }}). Top up via ChairFBI panel to keep key creation working.
+  Balance is low (&euro;{{ balance }}). Top up via ChairFBI panel to keep key creation working.
 </div>
 {% endif %}
 {% if balance_error %}

@@ -67,11 +67,13 @@ class ChairFBI:
         return resp.json()
 
     def get_balance(self):
-        """Returns balance as float euros from /api/store.
+        """Returns the exact balance from /api/store as a float.
 
-        Handles: nested dicts ({data:{balance}}), string amounts
-        ("12.50", "€12.50"), and minor-unit integers (1250 -> 12.50).
-        Returns None when the payload carries no parseable amount.
+        No scaling or unit conversion is applied: the number shown in
+        admin is precisely the number the ChairFBI API returned.
+        Handles nested payloads ({data: {balance}}), numeric strings,
+        and European decimal commas ("12,50"). Returns None when the
+        payload carries no parseable amount.
         """
         store = self.get_store_info()
         return self.parse_balance(store)
@@ -83,8 +85,17 @@ class ChairFBI:
         if isinstance(value, (int, float)):
             return float(value)
         if isinstance(value, str):
-            cleaned = re.sub(r"[^0-9.\-]", "", value.strip())
-            if not cleaned:
+            text = value.strip()
+            if not text:
+                return None
+            # European decimal comma ("12,50" -> "12.50"). When both
+            # separators are present the commas are thousands separators.
+            if "," in text and "." not in text:
+                text = text.replace(",", ".")
+            else:
+                text = text.replace(",", "")
+            cleaned = re.sub(r"[^0-9.\-]", "", text)
+            if not cleaned or cleaned in ("-", ".", "-."):
                 return None
             try:
                 return float(cleaned)
@@ -117,18 +128,51 @@ class ChairFBI:
         return cls._coerce_amount(payload)
 
     @classmethod
+    def _find_raw(cls, payload, depth=0):
+        """Same search as _find_amount but returns the untouched raw value."""
+        if depth > 3 or payload is None:
+            return None
+        if isinstance(payload, list):
+            for item in payload:
+                found = cls._find_raw(item, depth + 1)
+                if found is not None:
+                    return found
+            return None
+        if isinstance(payload, dict):
+            for key in cls.BALANCE_KEYS:
+                if key in payload and payload.get(key) is not None and not isinstance(payload.get(key), bool):
+                    return payload.get(key)
+            for key in cls.BALANCE_CONTAINERS:
+                if key in payload:
+                    found = cls._find_raw(payload.get(key), depth + 1)
+                    if found is not None:
+                        return found
+            return None
+        return payload
+
+    @classmethod
     def parse_balance(cls, payload):
         amount = cls._find_amount(payload)
         if amount is None:
             logger.warning("ChairFBI /api/store returned no parseable balance: %r", payload)
             return None
-        # Minor-unit guard: whole-number balances >= 1000 are almost
-        # certainly cents/pence (e.g. 1250 -> €12.50). Real euro balances
-        # carry decimals or stay small, so only divide those.
-        if amount >= 1000 and amount == int(amount):
-            logger.info("ChairFBI balance %s looks like minor units, converting to euros", amount)
-            amount = amount / 100
-        return round(amount, 2)
+        # Exact passthrough: never scale, round, or otherwise transform the
+        # API value. What ChairFBI returns is what admin displays.
+        return float(amount)
+
+    def get_balance_report(self):
+        """Single /api/store call returning parsed value AND raw payload.
+
+        Returns {"value": float|None, "raw": <untouched API value>,
+        "payload": <full /api/store JSON>} so admin templates can display
+        the exact figure ChairFBI returned alongside the parsed number.
+        """
+        store = self.get_store_info()
+        return {
+            "value": self.parse_balance(store),
+            "raw": self._find_raw(store),
+            "payload": store,
+        }
 
     # -- Cheats (paginated) --
     def list_cheats(self, page=1, per_page=50, sort=None, filter_str=None):
