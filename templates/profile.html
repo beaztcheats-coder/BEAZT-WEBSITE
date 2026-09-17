@@ -14,26 +14,26 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div style="display:flex;flex-direction:column;gap:0.3rem;">
-          <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Email</label>
-          <input type="email" name="email" value="{{ current_user.email }}" required style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;outline:none;">
+          <label for="profile-email" style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Email</label>
+          <input type="email" id="profile-email" name="email" value="{{ current_user.email }}" required autocomplete="email" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;">
         </div>
 
         <div class="card" style="display:flex;flex-direction:column;gap:0.75rem;">
           <h3 style="font-size:0.85rem;font-weight:600;margin-bottom:0;">Change Password</h3>
 
           <div style="display:flex;flex-direction:column;gap:0.3rem;">
-            <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Current Password</label>
-            <input type="password" name="current_password" placeholder="Enter current password" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;outline:none;">
+            <label for="profile-current-password" style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Current Password</label>
+            <input type="password" id="profile-current-password" name="current_password" placeholder="Enter current password" autocomplete="current-password" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;">
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.3rem;">
-            <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">New Password</label>
-            <input type="password" name="new_password" placeholder="6+ characters" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;outline:none;">
+            <label for="profile-new-password" style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">New Password</label>
+            <input type="password" id="profile-new-password" name="new_password" placeholder="6+ characters" autocomplete="new-password" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;">
           </div>
 
           <div style="display:flex;flex-direction:column;gap:0.3rem;">
-            <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Confirm New Password</label>
-            <input type="password" name="confirm_password" placeholder="Re-enter new password" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;outline:none;">
+            <label for="profile-confirm-password" style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Confirm New Password</label>
+            <input type="password" id="profile-confirm-password" name="confirm_password" placeholder="Re-enter new password" autocomplete="new-password" style="padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:0.88rem;">
           </div>
         </div>
 
