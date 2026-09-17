@@ -104,14 +104,9 @@
           </div>
 
           <div>
-            <form method="POST" action="{{ url_for('admin.test_chairfbi') }}" style="display:inline;">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="chairfbi_api_token" :value="document.querySelector('input[name=chairfbi_api_token]').value">
-              <input type="hidden" name="chairfbi_api_base" :value="document.querySelector('input[name=chairfbi_api_base]').value">
-              <button type="submit" class="btn-xs" style="background:var(--surface);color:var(--accent-l);border:1px solid var(--accent);padding:0.35rem 0.85rem;font-size:0.75rem;font-weight:600;cursor:pointer;border-radius:3px;font-family:var(--font);">
-                Test Connection
-              </button>
-            </form>
+            <button type="submit" form="chairfbi-test-form" class="btn-xs" style="background:var(--surface);color:var(--accent-l);border:1px solid var(--accent);padding:0.35rem 0.85rem;font-size:0.75rem;font-weight:600;cursor:pointer;border-radius:3px;font-family:var(--font);">
+              Test Connection
+            </button>
           </div>
 
         </div>
@@ -282,6 +277,17 @@
         Save settings
       </button>
     </div>
+  </form>
+
+  <!-- Test Connection form: a SIBLING of the settings form above (a form
+       nested inside another form is silently discarded by browsers). The
+       Test Connection button targets this form via its `form` attribute.
+       Must stay AFTER the settings form so document.querySelector() in the
+       :value bindings below resolves to the settings form's inputs. -->
+  <form id="chairfbi-test-form" method="POST" action="{{ url_for('admin.test_chairfbi') }}" style="display:inline;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="chairfbi_api_token" :value="document.querySelector('input[name=chairfbi_api_token]').value">
+    <input type="hidden" name="chairfbi_api_base" :value="document.querySelector('input[name=chairfbi_api_base]').value">
   </form>
 </div>
 {% endblock %}
