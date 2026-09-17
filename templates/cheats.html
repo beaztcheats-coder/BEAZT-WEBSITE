@@ -15,23 +15,7 @@
       <span class="section-eyebrow" style="color:var(--accent-h)">BeaZt</span>
       <h2 class="t-h2">Private Software</h2>
     </div>
-    <div class="cheats-grid cheats-grid--private reveal" style="margin-bottom:2.5rem;" x-data="{ loading: false }">
-      <!-- Skeleton Loading -->
-      <template x-if="loading">
-        <div class="skeleton-card">
-          <div class="skeleton-card-banner skeleton"></div>
-          <div class="skeleton-card-body">
-            <div class="skeleton-card-badge skeleton"></div>
-            <div class="skeleton-card-title skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-footer">
-              <div class="skeleton-card-price skeleton"></div>
-              <div class="skeleton-card-btn skeleton"></div>
-            </div>
-          </div>
-        </div>
-      </template>
+    <div class="cheats-grid cheats-grid--private reveal" style="margin-bottom:2.5rem;">
       <!-- Actual Product Cards
            NOTE: rendered directly (not inside a single <template x-if>) because
            Alpine x-if requires a SINGLE root element — multiple sibling card
@@ -71,30 +55,7 @@
       <span class="section-eyebrow">Catalog</span>
       <h2 class="t-h2">All Cheats</h2>
     </div>
-    <div class="cheats-grid reveal" x-data="{ loading: false }">
-      <!-- Skeleton Loading
-           NOTE: the four skeleton cards are wrapped in a single display:contents
-           container because Alpine x-if requires a SINGLE root element — the
-           bare card loop emitted four siblings and only the first rendered. -->
-      <template x-if="loading">
-        <div style="display:contents;">
-          {% for i in range(4) %}
-          <div class="skeleton-card">
-            <div class="skeleton-card-banner skeleton"></div>
-            <div class="skeleton-card-body">
-              <div class="skeleton-card-badge skeleton"></div>
-              <div class="skeleton-card-title skeleton"></div>
-              <div class="skeleton-card-text skeleton"></div>
-              <div class="skeleton-card-text skeleton"></div>
-              <div class="skeleton-card-footer">
-                <div class="skeleton-card-price skeleton"></div>
-                <div class="skeleton-card-btn skeleton"></div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </template>
+    <div class="cheats-grid reveal">
       <!-- Actual Product Cards
            NOTE: rendered directly (not inside a single <template x-if>) because
            Alpine x-if requires a SINGLE root element — multiple sibling card

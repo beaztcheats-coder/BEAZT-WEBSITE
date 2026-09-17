@@ -78,7 +78,7 @@
     </p>
     <form method="POST" action="{{ url_for('admin.assign_custom_key', order_id=order.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <textarea name="key_value" rows="3" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" required></textarea>
+      <textarea name="key_value" rows="3" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" required></textarea>
       <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;margin-top:0.5rem;">Assign Custom Key</button>
     </form>
   </div>
@@ -111,7 +111,7 @@
     <p style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.6rem;">{{ fctx.pool_count }} unassigned pool key(s) available for this product/tier.</p>
     <form method="POST" action="{{ url_for('admin.assign_pool_key', order_id=order.id) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <select name="key_id" required style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;font-family:var(--mono);margin-bottom:0.5rem;">
+      <select name="key_id" required style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:0.82rem;font-family:var(--font-mono);margin-bottom:0.5rem;">
         <option value="" disabled selected>Select a pool key...</option>
         {% for pk in fctx.pool_keys %}
         <option value="{{ pk.id }}">{{ pk.key_value[:24] }}{% if pk.key_value|length > 24 %}...{% endif %} (added {{ pk.created_at.strftime('%d %b') }})</option>

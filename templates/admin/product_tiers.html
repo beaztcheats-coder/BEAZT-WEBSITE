@@ -42,7 +42,7 @@
         <button type="button" class="btn-xs" style="margin-top:0.4rem;background:var(--bg);border:1px solid var(--border);color:var(--accent-h);font-size:0.68rem;" onclick="testLicenseApi({{ product.id }})">
           <span class="icon icon-sm" data-lucide="activity"></span> Test Project Infinity API
         </button>
-        <pre id="license-test-result" style="display:none;margin-top:0.5rem;font-size:0.62rem;font-family:var(--mono);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:0.6rem;max-height:280px;overflow:auto;white-space:pre-wrap;color:var(--text-dim);"></pre>
+        <pre id="license-test-result" style="display:none;margin-top:0.5rem;font-size:0.62rem;font-family:var(--font-mono);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:0.6rem;max-height:280px;overflow:auto;white-space:pre-wrap;color:var(--text-dim);"></pre>
       </div>
       <div style="flex:1;min-width:180px;">
         <label style="display:block;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Visibility</label>
@@ -77,15 +77,15 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Description</label>
-        <textarea name="description" rows="2" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Short product description shown on detail page">{{ product.description or '' }}</textarea>
+        <textarea name="description" rows="2" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Short product description shown on detail page">{{ product.description or '' }}</textarea>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Features <span style="font-weight:400;">(one per line)</span></label>
-        <textarea name="features_text" rows="6" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Legit ESP suite&#10;Debug camera&#10;Player and resource overlays&#10;Distance and visibility tools">{{ product.features_text or '' }}</textarea>
+        <textarea name="features_text" rows="6" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Legit ESP suite&#10;Debug camera&#10;Player and resource overlays&#10;Distance and visibility tools">{{ product.features_text or '' }}</textarea>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Buyer Notes</label>
-        <textarea name="buyer_notes" rows="4" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Windows desktop with a stable Rust install&#10;Fast onboarding with Discord walkthroughs&#10;Ticketed help for setup, HWID, and maintenance">{{ product.buyer_notes or '' }}</textarea>
+        <textarea name="buyer_notes" rows="4" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Windows desktop with a stable Rust install&#10;Fast onboarding with Discord walkthroughs&#10;Ticketed help for setup, HWID, and maintenance">{{ product.buyer_notes or '' }}</textarea>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Banner Image</label>
@@ -100,7 +100,7 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Custom Image URL <span style="font-weight:400;">(or upload above)</span></label>
-        <input type="text" name="image_url" value="{{ product.image_url or '' }}" placeholder="https://example.com/cheat-banner.png" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+        <input type="text" name="image_url" value="{{ product.image_url or '' }}" placeholder="https://example.com/cheat-banner.png" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Loader File <span style="font-weight:400;">(exe/zip for buyers)</span></label>
@@ -115,7 +115,7 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Loader URL <span style="font-weight:400;">(or upload above)</span></label>
-        <input type="text" name="loader_url" value="{{ product.loader_url or '' }}" placeholder="/static/loaders/rust-beazt-external/loader.exe" style="width:100%;font-family:var(--mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+        <input type="text" name="loader_url" value="{{ product.loader_url or '' }}" placeholder="/static/loaders/rust-beazt-external/loader.exe" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
         {% if not product.loader_url %}
         <span style="font-size:0.68rem;color:var(--warn);"><span class="icon icon-sm" data-lucide="alert-triangle"></span> No loader attached &mdash; buyers of this product will have no loader to download. Paste a URL or upload a file.</span>
         {% else %}
@@ -138,7 +138,7 @@
         {% endif %}
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <div style="flex:1;min-width:200px;">
-            <input type="text" name="add_gallery_url" placeholder="https://example.com/image.webp" style="width:100%;font-family:var(--mono);font-size:0.78rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+            <input type="text" name="add_gallery_url" placeholder="https://example.com/image.webp" style="width:100%;font-family:var(--font-mono);font-size:0.78rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
           </div>
           <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add</button>
         </div>
@@ -210,8 +210,8 @@
     <option value="one_time" selected>One-time</option>
     <option value="subscription">Subscription</option>
   </select>
-  <input type="text" name="ivno_subscription_link" placeholder="Subscription link" style="width:180px;font-family:var(--mono);font-size:0.72rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
-  <input type="number" name="bundle_count" value="1" min="1" max="10" style="width:55px;font-family:var(--mono);font-size:0.72rem;padding:0.5rem 0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);" title="Keys per purchase">
+  <input type="text" name="ivno_subscription_link" placeholder="Subscription link" style="width:180px;font-family:var(--font-mono);font-size:0.72rem;padding:0.5rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);">
+  <input type="number" name="bundle_count" value="1" min="1" max="10" style="width:55px;font-family:var(--font-mono);font-size:0.72rem;padding:0.5rem 0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);" title="Keys per purchase">
   <button type="submit" class="btn-xs" style="background:var(--accent);color:#fff;border:none;">Add Tier</button>
 </form>
 

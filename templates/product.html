@@ -30,6 +30,8 @@
     display: inline-flex; align-items: center; gap: var(--space-2);
     font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);
     text-decoration: none; margin-bottom: var(--space-5);
+    /* 44px minimum hit area at mobile widths (VAL-PRODUCT-010) — visual size unchanged */
+    min-height: 44px; padding: 0 var(--space-2); margin-left: calc(-1 * var(--space-2));
     transition: color var(--duration-fast) var(--ease-smooth);
   }
   .pd-back:hover { color: var(--accent-primary); }
@@ -89,19 +91,19 @@
   }
   .pd-qty-controls { display: flex; align-items: center; gap: var(--space-2); }
   .pd-qty-btn {
-    min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 44px; min-height: var(--button-min-height, 44px); display: inline-flex; align-items: center; justify-content: center;
     background: var(--bg-elevated); border: 1px solid var(--border-default);
     color: var(--text-primary); border-radius: var(--radius-md);
-    font-size: 1rem; cursor: pointer; font-family: var(--mono, monospace);
+    font-size: 1rem; cursor: pointer; font-family: var(--font-mono, monospace);
     transition: all var(--duration-fast) var(--ease-smooth);
   }
   .pd-qty-btn:hover { border-color: var(--border-accent-subtle); color: var(--accent-primary); }
   .pd-qty-btn:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
   .pd-qty-input {
-    width: 54px; min-height: 36px; text-align: center;
+    width: 54px; min-height: var(--button-min-height, 44px); text-align: center;
     background: var(--bg-deep); border: 1px solid var(--border-default);
     border-radius: var(--radius-md); color: var(--text-primary);
-    font-family: var(--mono, monospace); font-size: 0.875rem;
+    font-family: var(--font-mono, monospace); font-size: 0.875rem;
   }
   .pd-qty-total { font-size: 0.8125rem; color: var(--text-muted); text-align: right; }
   .pd-qty-total strong { color: var(--text-primary); }
@@ -183,7 +185,7 @@
   }
   .demo-box span {
     position: absolute; left: 0; bottom: -20px; font-size: 0.625rem;
-    font-family: var(--mono, monospace); color: rgba(22, 139, 255, 0.9); white-space: nowrap;
+    font-family: var(--font-mono, monospace); color: rgba(22, 139, 255, 0.9); white-space: nowrap;
   }
   .demo-radar {
     position: absolute; top: var(--space-4); right: var(--space-4);
@@ -480,13 +482,13 @@
           <h2 class="purchase-title">{{ product.name }}</h2>
 
           <!-- Selected plan (VAL-PRODUCT-004) -->
-          <div class="pd-selected" x-show="currentVariant">
+          <div class="pd-selected" :class="currentVariant ? '' : 'is-hidden'">
             <div>
               <div class="pd-selected-name" x-text="currentVariant ? currentVariant.label : ''">{{ selected_tier.label if selected_tier else '—' }}</div>
               <div class="pd-selected-sub"
                    x-text="currentVariant ? ('Valid for ' + currentVariant.duration_days + ' days') : ''">{% if selected_tier %}Valid for {{ selected_tier.duration_days }} days{% endif %}</div>
             </div>
-            <span class="badge badge-info" x-show="isSubscription">Subscription</span>
+            <span class="badge badge-info" :class="isSubscription ? '' : 'is-hidden'">Subscription</span>
           </div>
 
           <div class="purchase-price">
@@ -505,25 +507,25 @@
           <!-- License selector: all tiers from pricing_tiers (VAL-PRODUCT-003) -->
           <div class="purchase-variants">
             <span class="purchase-variants-label" id="plan-picker-label">Select License</span>
-            <div class="variant-options" role="radiogroup" aria-labelledby="plan-picker-label" x-show="variants.length > 0">
+            <div class="variant-options" role="radiogroup" aria-labelledby="plan-picker-label" :class="variants.length > 0 ? '' : 'is-hidden'">
               <template x-for="t in variants" :key="t.id">
                 <label class="variant-option" :class="{ selected: selectedVariantId === t.id }">
                   <input type="radio" name="variant_picker" class="sr-only"
                          :value="t.id" x-model.number="selectedVariantId">
                   <span class="variant-option-name" x-text="t.label"></span>
                   <span class="variant-option-price">&pound;<span x-text="t.price_pounds.toFixed(2)"></span> / <span x-text="t.duration_days"></span>d</span>
-                  <span class="variant-flag" x-show="t.billing_type === 'subscription'">Sub</span>
+                  <span class="variant-flag" :class="t.billing_type === 'subscription' ? '' : 'is-hidden'">Sub</span>
                 </label>
               </template>
             </div>
-            <div class="pd-empty-plans" x-show="variants.length === 0" x-cloak>
+            <div class="pd-empty-plans" :class="variants.length === 0 ? '' : 'is-hidden'" x-cloak>
               No license plans are available for this product yet.
               Join our <a href="{{ discord_public_url }}" target="_blank" rel="noopener">Discord</a> for restock updates.
             </div>
           </div>
 
           <!-- Quantity (one-time purchases only) -->
-          <div class="pd-quantity" x-show="currentVariant && !isSubscription" x-cloak>
+          <div class="pd-quantity" :class="currentVariant && !isSubscription ? '' : 'is-hidden'" x-cloak>
             <span class="purchase-variants-label" style="margin-bottom:0;">Quantity</span>
             <div class="pd-qty-controls">
               <button type="button" class="pd-qty-btn" @click="if (quantity > 1) quantity--"
@@ -536,14 +538,14 @@
             <div class="pd-qty-total">
               <span x-text="quantity"></span> &times; &pound;<span x-text="currentPrice.toFixed(2)"></span>
               = <strong x-text="'£' + cartTotal.toFixed(2)"></strong>
-              <span class="pd-qty-min" x-show="!meetsMinimum">
+              <span class="pd-qty-min" :class="!meetsMinimum ? '' : 'is-hidden'">
                 +&pound;<span x-text="(IVNO_MIN_GBP - cartTotal).toFixed(2)"></span> more for card payment
               </span>
             </div>
           </div>
 
           <!-- Payment method -->
-          <div x-show="!hasExternalSub" x-cloak>
+          <div :class="!hasExternalSub ? '' : 'is-hidden'" x-cloak>
             <span class="purchase-variants-label">Payment Method</span>
             <div class="pd-gateways">
               <label class="pd-gateway" :class="{ selected: selectedGateway === 'payfast' }">
@@ -564,23 +566,23 @@
 
             <button type="submit" class="btn btn-primary btn-block btn-lg"
                     :disabled="!canBuy || checkingOut">
-              <span x-show="!checkingOut">
+              <span :class="!checkingOut ? '' : 'is-hidden'">
                 <span class="icon icon-sm" data-lucide="shopping-cart" aria-hidden="true"></span>
                 <span x-text="buyLabel">Buy Now</span>
               </span>
-              <span x-show="checkingOut" x-cloak>Processing&hellip;</span>
+              <span :class="checkingOut ? '' : 'is-hidden'" x-cloak>Processing&hellip;</span>
             </button>
           </div>
 
           <!-- External subscription checkout -->
-          <a x-show="hasExternalSub" x-cloak
+          <a :class="hasExternalSub ? '' : 'is-hidden'" x-cloak
              :href="subscriptionLink" target="_blank" rel="noopener"
              class="btn btn-primary btn-block btn-lg" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;text-decoration:none;">
             <span class="icon" data-lucide="credit-card" aria-hidden="true"></span>
             <span x-text="buyLabel">Subscribe</span>
           </a>
 
-          <p class="pd-error" x-show="checkoutError" x-text="checkoutError" x-cloak
+          <p class="pd-error" :class="checkoutError ? '' : 'is-hidden'" x-text="checkoutError" x-cloak
              role="alert" aria-live="assertive"></p>
 
           <p class="text-muted" style="font-size:0.75rem;margin-top:var(--space-3);text-align:center;">
@@ -611,7 +613,7 @@
 
     <!-- Overview tab: description, benefits, features (VAL-PRODUCT-002) -->
     <div id="panel-overview" role="tabpanel" aria-labelledby="tab-overview"
-         x-show="activeTab === 'overview'">
+         :class="activeTab === 'overview' ? '' : 'is-hidden'">
       {% if product.description %}
       <div class="card">
         <p>{{ product.description }}</p>
@@ -656,7 +658,7 @@
 
     <!-- Features & Demo tab: categories + illustrative demo UI (VAL-PRODUCT-006) -->
     <div id="panel-visualization" role="tabpanel" aria-labelledby="tab-visualization"
-         x-show="activeTab === 'visualization'" x-cloak>
+         :class="activeTab === 'visualization' ? '' : 'is-hidden'" x-cloak>
       {% if vc_features %}
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">Capabilities</h3>
@@ -713,7 +715,7 @@
 
     <!-- Buyer Info tab: setup instructions + notice (no fabricated reviews) -->
     <div id="panel-buyer" role="tabpanel" aria-labelledby="tab-buyer"
-         x-show="activeTab === 'buyer'" x-cloak>
+         :class="activeTab === 'buyer' ? '' : 'is-hidden'" x-cloak>
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.6rem;">Setup Instructions</h3>
         {% if product.buyer_notes %}

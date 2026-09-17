@@ -30,7 +30,6 @@
           <div class="skeleton-account-line skeleton-account-line--short skeleton"></div>
         </div>
       </div>
-      <div class="keys-grid">
         {% for i in range(2) %}
         <div class="skeleton-license-card">
           <div class="skeleton-license-header">
@@ -57,7 +56,6 @@
           </div>
         </div>
         {% endfor %}
-      </div>
     </div>
 
     <!-- Real dashboard content -->
@@ -190,7 +188,10 @@
                 </a>
                 {% endif %}
                 {% if prod_loader or global_loader %}
-                <a href="{{ url_for('main.loader') }}" class="btn btn-ghost btn-compact license-action-btn" style="text-decoration:none;">
+                {# Product-specific setup guide when a product slug exists;
+                   generic /loader remains the fallback (loader-page route). #}
+                {% set setup_href = url_for('main.loader_product', slug=key.product.slug) if key.product else url_for('main.loader') %}
+                <a href="{{ setup_href }}" class="btn btn-ghost btn-compact license-action-btn" style="text-decoration:none;">
                   <span class="icon icon-sm" data-lucide="book-open"></span> Setup Guide
                 </a>
                 {% endif %}

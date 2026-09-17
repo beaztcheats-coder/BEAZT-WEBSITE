@@ -90,7 +90,7 @@
 
       <div class="pricing-cta reveal">
         <div class="pricing-cta-inner">
-          <div class="plan-summary" x-show="selectedLabel">
+          <div class="plan-summary" :class="selectedLabel ? '' : 'is-hidden'">
             <span class="icon icon-sm" data-lucide="bookmark-check"></span>
             <span x-text="selectedLabel + ' · GBP ' + selectedPrice"></span>
           </div>
