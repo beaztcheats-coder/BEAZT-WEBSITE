@@ -91,7 +91,7 @@
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Banner Image</label>
         <div style="display:flex;gap:0.6rem;align-items:end;flex-wrap:wrap;">
           <div style="flex:1;min-width:220px;">
-            <input type="file" name="image_file" accept=".png,.jpg,.jpeg" style="font-size:0.72rem;color:var(--text-dim);">
+            <input type="file" name="image_file" accept=".png,.jpg,.jpeg,.webp" style="font-size:0.72rem;color:var(--text-dim);">
           </div>
           {% if product.image_url %}
           <a href="{{ product.image_url }}" target="_blank" style="font-size:0.68rem;color:var(--accent-h);white-space:nowrap;">View current</a>

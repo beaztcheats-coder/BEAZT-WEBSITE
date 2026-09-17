@@ -58,9 +58,9 @@
         <span class="hero-stat-val" data-count="2400" data-suffix="+">2,400+</span>
         <span class="hero-stat-label">Orders Fulfilled</span>
       </div>
-      <div class="hero-stat">
-        <span class="hero-stat-val" data-count="99.9" data-suffix="%">99.9%</span>
+      <div class="hero-stat hero-stat--label-top">
         <span class="hero-stat-label">Service Uptime</span>
+        <span class="hero-stat-val" data-count="99.9" data-suffix="%">99.9%</span>
       </div>
       <div class="hero-stat">
         <span class="hero-stat-val" data-count="15" data-suffix="s">&lt;15s</span>
@@ -162,12 +162,17 @@
 
 <!-- ═══ PRIVATE SOFTWARE ═══ -->
 {% if private_products %}
-<section class="section store-preview" aria-labelledby="store-preview-heading" style="padding-bottom:0.5rem;">
+<section class="section store-preview store-preview--private" aria-labelledby="store-preview-heading" style="padding-bottom:0.5rem;">
   <div class="container">
     <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
-      <span class="section-eyebrow">BeaZt Private</span>
+      <span class="section-eyebrow section-eyebrow--flagship">Flagship &middot; BeaZt Private</span>
       <h2 class="t-h2" id="store-preview-heading">Private Software</h2>
       <p style="color:var(--text-muted);font-size:0.82rem;max-width:560px;margin-inline:auto;">Externally hosted, private builds. Key pool operated by BeaZt.</p>
+      <div class="private-meta">
+        <span class="private-live"><span class="dot"></span>Undetected &amp; live</span>
+        <span>Instant key delivery</span>
+        <span>Stream-proof</span>
+      </div>
     </div>
     <div class="cheats-grid cheats-grid--private reveal" x-data="{ loading: false }">
       <!-- Skeleton Loading State -->
@@ -191,7 +196,7 @@
            Alpine x-if requires a SINGLE root element — multiple sibling card
            anchors in one template would render only the first card. -->
       {% for p in private_products[:3] %}
-      <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private" aria-label="View {{ p.name }} details">
+      <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private{% if loop.first %} cheat-card--flagship{% endif %}" aria-label="View {{ p.name }} details">
           <div class="cheat-card-banner">
             <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
           </div>

@@ -55,11 +55,15 @@ def _enrich_product_from_venomcheats(product, vc_products=None):
         product.last_synced_at = datetime.utcnow()
         product.features_text = build_features_text(vc_data)
         product.description = build_description(vc_data)
-        product.image_url = get_primary_image_url(vc_data)
+        # Backend-set artwork wins: only fill image/gallery from VenomCheats
+        # when the product has none, so a manual upload or URL in
+        # Admin -> Tiers -> Product Content is never clobbered by a sync.
+        if not product.image_url:
+            product.image_url = get_primary_image_url(vc_data)
 
         static_dir = os.path.join(current_app.root_path, "static")
         gallery_paths = download_product_media(vc_data, static_dir)
-        if gallery_paths:
+        if gallery_paths and not product.gallery_images:
             product.gallery_images = json.dumps(gallery_paths)
 
         db.session.commit()
@@ -604,7 +608,7 @@ def product_tiers(product_id):
         image_file = request.files.get("image_file")
         if image_file and image_file.filename:
             ext = os.path.splitext(image_file.filename)[1].lower()
-            if ext in (".png", ".jpg", ".jpeg"):
+            if ext in (".png", ".jpg", ".jpeg", ".webp"):
                 file_bytes = image_file.read()
                 saved = False
                 try:
@@ -1229,7 +1233,11 @@ def test_chairfbi():
     success, result = cf.test_connection()
 
     if success:
-        flash("ChairFBI connection successful.", "success")
+        balance = ChairFBI.parse_balance(result)
+        if balance is not None:
+            flash(f"ChairFBI connection successful. Balance: €{balance:.2f}.", "success")
+        else:
+            flash("ChairFBI connection successful.", "success")
     else:
         flash(f"ChairFBI connection failed: {result}", "error")
 
@@ -1365,10 +1373,6 @@ def chairfbi_dashboard():
 
             try:
                 cf_balance = cf.get_balance()
-                if cf_balance:
-                    bal = float(cf_balance)
-                    if bal > 500 and bal == int(bal):
-                        cf_balance = bal / 10
             except Exception as e:
                 err_str = str(e)
                 if "502" in err_str or "Bad Gateway" in err_str:

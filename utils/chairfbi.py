@@ -1,5 +1,6 @@
 import requests
 import logging
+import re
 import time
 
 logger = logging.getLogger(__name__)
@@ -9,6 +10,8 @@ class ChairFBI:
     BASE = "https://access.chairfbi.com"
     TIMEOUT = 15
     RETRIES = 2
+    BALANCE_KEYS = ("balance", "credits", "credit", "funds", "amount", "total", "money", "wallet")
+    BALANCE_CONTAINERS = ("data", "store", "result", "account", "wallet")
 
     def __init__(self, api_token=None, base_url=None):
         self.token = api_token
@@ -24,6 +27,7 @@ class ChairFBI:
         kwargs.setdefault("timeout", self.TIMEOUT)
         kwargs.setdefault("headers", self.headers)
 
+        resp = None
         for attempt in range(self.RETRIES + 1):
             try:
                 resp = requests.request(method, url, **kwargs)
@@ -38,6 +42,8 @@ class ChairFBI:
                     time.sleep(1)
                 else:
                     raise
+        if resp is None:
+            raise requests.RequestException("ChairFBI request failed after retries")
         return resp
 
     # -- Status --
@@ -61,11 +67,68 @@ class ChairFBI:
         return resp.json()
 
     def get_balance(self):
-        """Returns balance integer from /api/store"""
+        """Returns balance as float euros from /api/store.
+
+        Handles: nested dicts ({data:{balance}}), string amounts
+        ("12.50", "€12.50"), and minor-unit integers (1250 -> 12.50).
+        Returns None when the payload carries no parseable amount.
+        """
         store = self.get_store_info()
-        if isinstance(store, dict):
-            return store.get("balance")
-        return store
+        return self.parse_balance(store)
+
+    @classmethod
+    def _coerce_amount(cls, value):
+        if value is None or isinstance(value, bool):
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            cleaned = re.sub(r"[^0-9.\-]", "", value.strip())
+            if not cleaned:
+                return None
+            try:
+                return float(cleaned)
+            except ValueError:
+                return None
+        return None
+
+    @classmethod
+    def _find_amount(cls, payload, depth=0):
+        if depth > 3 or payload is None:
+            return None
+        if isinstance(payload, list):
+            for item in payload:
+                found = cls._find_amount(item, depth + 1)
+                if found is not None:
+                    return found
+            return None
+        if isinstance(payload, dict):
+            for key in cls.BALANCE_KEYS:
+                if key in payload:
+                    amount = cls._coerce_amount(payload.get(key))
+                    if amount is not None:
+                        return amount
+            for key in cls.BALANCE_CONTAINERS:
+                if key in payload:
+                    found = cls._find_amount(payload.get(key), depth + 1)
+                    if found is not None:
+                        return found
+            return None
+        return cls._coerce_amount(payload)
+
+    @classmethod
+    def parse_balance(cls, payload):
+        amount = cls._find_amount(payload)
+        if amount is None:
+            logger.warning("ChairFBI /api/store returned no parseable balance: %r", payload)
+            return None
+        # Minor-unit guard: whole-number balances >= 1000 are almost
+        # certainly cents/pence (e.g. 1250 -> €12.50). Real euro balances
+        # carry decimals or stay small, so only divide those.
+        if amount >= 1000 and amount == int(amount):
+            logger.info("ChairFBI balance %s looks like minor units, converting to euros", amount)
+            amount = amount / 100
+        return round(amount, 2)
 
     # -- Cheats (paginated) --
     def list_cheats(self, page=1, per_page=50, sort=None, filter_str=None):
