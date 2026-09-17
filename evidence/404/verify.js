@@ -7,7 +7,12 @@ const path = require('path');
   fs.mkdirSync(outDir, { recursive: true });
   const results = { checks: [], consoleErrors: [], failedRequests: [] };
   const browser = await chromium.launch();
-  const page = await browser.newPage({ reducedMotion: 'reduce' });
+  // NO reducedMotion override: this run must prove the page is visible in a
+  // normal default-motion browser (reveal load-order fix; .nf-card previously
+  // sat inside a single .reveal wrapper and rendered blank).
+  const page = await browser.newPage();
+  const allResponses = [];
+  page.on('response', r => allResponses.push(r.url()));
   page.on('console', m => { if (m.type() === 'error') results.consoleErrors.push(m.text()); });
   page.on('requestfailed', r => results.failedRequests.push(r.url() + ' :: ' + (r.failure() || {}).errorText));
   page.on('response', r => { if (r.status() >= 400 && !r.url().includes('fonts.g') && !r.url().includes('unpkg.com')) results.failedRequests.push(r.status + ' ' + r.url()); });
@@ -31,6 +36,15 @@ const path = require('path');
   check('decorative 404 code present', (await page.locator('.nf-code').count()) === 1, '');
   check('h1 Page not found', ((await page.textContent('h1')) || '').trim() === 'Page not found', (await page.textContent('h1') || '').trim());
   check('explanatory lead >= 40 chars', ((await page.textContent('.nf-lead')) || '').length >= 40, String(((await page.textContent('.nf-lead')) || '').length));
+  // reveal load-order fix: .nf-card sits in a .reveal wrapper and must actually
+  // reveal in a normal default-motion browser (previously stuck at opacity 0).
+  const nfCard = await page.evaluate(() => {
+    const el = document.querySelector('.nf-card');
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    return { hasVisible: el.classList.contains('visible'), opacity: cs.opacity, rectH: Math.round(el.getBoundingClientRect().height) };
+  });
+  check('.nf-card revealed in normal-motion browser', !!nfCard && nfCard.hasVisible && nfCard.opacity === '1' && nfCard.rectH > 0, JSON.stringify(nfCard));
   check('primary CTA Back to home -> /', (await page.getAttribute('a.btn-primary', 'href')) === '/', await page.getAttribute('a.btn-primary', 'href'));
   check('secondary CTA -> /cheats', (await page.getAttribute('a.btn-secondary', 'href')) === '/cheats', await page.getAttribute('a.btn-secondary', 'href'));
   const chips = await page.$$eval('.nf-chip', els => els.map(a => ({ text: a.textContent.trim(), href: a.getAttribute('href') })));
@@ -98,6 +112,7 @@ const path = require('path');
   }
   check('zero console errors (excluding document 404)', realConsoleErrors().length === 0, JSON.stringify(realConsoleErrors().slice(0, 5)));
   check('zero failed requests (excluding document 404)', realFailedRequests().length === 0, JSON.stringify(realFailedRequests().slice(0, 5)));
+  check('no unpkg/scrollreveal CDN dependency', !allResponses.some(u => /unpkg\.com|scrollreveal/i.test(u)), String(allResponses.filter(u => /unpkg\.com|scrollreveal/i.test(u)).length) + ' CDN hits');
 
   fs.writeFileSync(path.join(outDir, 'VAL-404-results.json'), JSON.stringify(results, null, 2));
   await browser.close();

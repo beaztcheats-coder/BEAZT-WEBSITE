@@ -113,7 +113,13 @@ def compress_response(response):
     response.set_data(compressed)
     response.headers["Content-Encoding"] = "gzip"
     response.headers["Content-Length"] = str(len(compressed))
-    response.headers["Vary"] = "Accept-Encoding"
+    # Append (do not overwrite) Accept-Encoding: authed responses already
+    # carry Vary: Cookie (session handling), and clobbering it would let
+    # shared caches serve one user's compressed page to another.
+    vary = [v.strip() for v in response.headers.get("Vary", "").split(",") if v.strip()]
+    if "Accept-Encoding" not in vary:
+        vary.append("Accept-Encoding")
+    response.headers["Vary"] = ", ".join(vary)
     response.headers.pop("ETag", None)  # representation changed
     return response
 

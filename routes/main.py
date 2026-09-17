@@ -62,8 +62,20 @@ def cheat_image(slug):
         abort(404)
 
     if product.image_url:
-        from flask import redirect as _redirect
-        return _redirect(product.image_url)
+        # Only redirect when the target actually exists: a set-but-broken
+        # image_url would otherwise 404 at the redirect target and defeat
+        # the card's onerror fallback to this placeholder. External URLs
+        # cannot be verified locally, so they keep the plain redirect.
+        from pathlib import Path as _Path
+        if product.image_url.startswith("/static/"):
+            static_file = _Path(current_app.root_path) / "static" / product.image_url[len("/static/"):]
+            if not static_file.is_file():
+                # Missing static file -> fall through to the placeholder.
+                pass
+            else:
+                return redirect(product.image_url)
+        else:
+            return redirect(product.image_url)
 
     from PIL import Image, ImageDraw, ImageFont
 

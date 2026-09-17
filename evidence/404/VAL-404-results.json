@@ -31,6 +31,11 @@
       "detail": "146"
     },
     {
+      "name": ".nf-card revealed in normal-motion browser",
+      "pass": true,
+      "detail": "{\"hasVisible\":true,\"opacity\":\"1\",\"rectH\":601}"
+    },
+    {
       "name": "primary CTA Back to home -> /",
       "pass": true,
       "detail": "/"
@@ -108,7 +113,7 @@
     {
       "name": "mobile stacked full-width CTAs",
       "pass": true,
-      "detail": "{\"cta\":52,\"chip\":44,\"dir\":\"column\"}"
+      "detail": "{\"cta\":58,\"chip\":44,\"dir\":\"column\"}"
     },
     {
       "name": "mobile chips >= 44px",
@@ -134,6 +139,11 @@
       "name": "zero failed requests (excluding document 404)",
       "pass": true,
       "detail": "[]"
+    },
+    {
+      "name": "no unpkg/scrollreveal CDN dependency",
+      "pass": true,
+      "detail": "0 CDN hits"
     }
   ],
   "consoleErrors": [
