@@ -109,58 +109,64 @@
   .pd-qty-total strong { color: var(--text-primary); }
   .pd-qty-min { display: block; color: var(--status-warning); margin-top: 2px; font-size: 0.75rem; }
 
-  .pd-gateways { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-4); }
-  .pd-gateway { flex: 1; cursor: pointer; min-width: 0; }
+  .pd-gateways { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
+  .pd-gateway { position: relative; display: block; cursor: pointer; min-width: 0; }
   .pd-gateway input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .pd-gateway-card {
     display: flex; align-items: center; gap: var(--space-3);
-    padding: var(--space-4); text-align: left; position: relative;
+    padding: var(--space-3) var(--space-4);
     background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-deep) 100%);
     border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.04);
+    border-radius: var(--radius-md);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     transition: all var(--duration-fast) var(--ease-smooth);
   }
-  .pd-gateway:hover .pd-gateway-card { border-color: var(--border-accent-subtle); transform: translateY(-1px); box-shadow: var(--shadow-md), var(--glow-accent-subtle); }
+  .pd-gateway:hover .pd-gateway-card { border-color: var(--border-accent-subtle); background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%); }
   .pd-gateway input:focus-visible + .pd-gateway-card {
     outline: none; border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
   .pd-gateway.selected .pd-gateway-card {
     border-color: var(--accent-primary);
-    background: linear-gradient(180deg, rgba(22,139,255,0.14) 0%, rgba(22,139,255,0.05) 100%);
-    box-shadow: 0 0 0 1px var(--accent-primary), 0 0 24px var(--accent-glow-subtle), inset 0 1px 0 rgba(255,255,255,0.07);
+    background: linear-gradient(180deg, rgba(22,139,255,0.12) 0%, rgba(22,139,255,0.04) 100%);
+    box-shadow: 0 0 0 1px var(--accent-primary), 0 0 20px var(--accent-glow-subtle);
   }
-  .pd-gateway-icon {
-    width: 42px; height: 42px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: var(--radius-md);
-    background: var(--accent-soft); color: var(--accent-primary);
-    border: 1px solid var(--border-accent-subtle);
+  .pd-radio {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--border-strong);
+    display: inline-flex; align-items: center; justify-content: center;
     transition: all var(--duration-fast) var(--ease-smooth);
   }
-  .pd-gateway-icon .icon { width: 20px; height: 20px; }
+  .pd-radio::after {
+    content: ""; width: 10px; height: 10px; border-radius: 50%;
+    background: #fff; transform: scale(0);
+    transition: transform var(--duration-fast) var(--ease-spring);
+  }
+  .pd-gateway.selected .pd-radio { border-color: var(--accent-primary); background: var(--accent-primary); box-shadow: 0 0 10px var(--accent-glow); }
+  .pd-gateway.selected .pd-radio::after { transform: scale(1); }
+  .pd-gateway-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface); color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+    transition: all var(--duration-fast) var(--ease-smooth);
+  }
+  .pd-gateway-icon .icon { width: 19px; height: 19px; }
   .pd-gateway.selected .pd-gateway-icon {
     background: var(--gradient-accent); color: #fff; border-color: transparent;
     box-shadow: var(--glow-button);
   }
-  .pd-gateway-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .pd-gateway-name { display: flex; align-items: center; gap: var(--space-2); font-weight: 700; font-size: 0.9375rem; color: var(--text-primary); letter-spacing: -0.01em; }
-  .pd-gateway-sub { display: block; font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pd-gateway-note { display: inline-flex; align-items: center; gap: 4px; font-size: 0.6875rem; font-weight: 700; margin-top: 4px; letter-spacing: 0.02em; }
-  .pd-gateway-note--ok { color: var(--status-online); }
-  .pd-gateway-note--warn { color: var(--status-warning); }
-  .pd-gateway-check {
-    position: absolute; top: 10px; right: 10px;
-    width: 20px; height: 20px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--gradient-accent); color: #fff;
-    box-shadow: var(--glow-button);
-    opacity: 0; transform: scale(0.6);
-    transition: all var(--duration-fast) var(--ease-spring);
+  .pd-gateway-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .pd-gateway-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+  .pd-gateway-name { font-weight: 700; font-size: 0.9375rem; color: var(--text-primary); letter-spacing: -0.01em; }
+  .pd-gateway-tag {
+    font-size: 0.6875rem; font-weight: 700; white-space: nowrap;
+    padding: 2px var(--space-2); border-radius: var(--radius-full); letter-spacing: 0.02em;
   }
-  .pd-gateway-check .icon { width: 12px; height: 12px; }
-  .pd-gateway.selected .pd-gateway-check { opacity: 1; transform: scale(1); }
+  .pd-gateway-tag--ok { color: var(--status-online); background: var(--status-online-bg); border: 1px solid var(--status-online-border); }
+  .pd-gateway-tag--warn { color: var(--status-warning); background: var(--status-warning-bg); border: 1px solid var(--status-warning-border); }
+  .pd-gateway-sub { font-size: 0.75rem; color: var(--text-muted); }
   .pd-gateway-hint {
     display: flex; align-items: center; justify-content: center; gap: var(--space-2);
     font-size: 0.75rem; color: var(--text-muted); text-align: center;
@@ -603,24 +609,28 @@
               <label class="pd-gateway" :class="{ selected: selectedGateway === 'payfast' }">
                 <input type="radio" name="gateway" value="payfast" x-model="selectedGateway" aria-label="Pay with PayFast">
                 <span class="pd-gateway-card">
-                  <span class="pd-gateway-check" aria-hidden="true"><span class="icon" data-lucide="check"></span></span>
+                  <span class="pd-radio" aria-hidden="true"></span>
                   <span class="pd-gateway-icon" aria-hidden="true"><span class="icon" data-lucide="wallet"></span></span>
                   <span class="pd-gateway-body">
-                    <span class="pd-gateway-name">PayFast</span>
+                    <span class="pd-gateway-top">
+                      <span class="pd-gateway-name">PayFast</span>
+                      <span class="pd-gateway-tag pd-gateway-tag--ok">No minimum</span>
+                    </span>
                     <span class="pd-gateway-sub">EFT &middot; cards &middot; instant EFT</span>
-                    <span class="pd-gateway-note pd-gateway-note--ok"><span class="icon icon-sm" data-lucide="badge-check" aria-hidden="true"></span>No minimum</span>
                   </span>
                 </span>
               </label>
               <label class="pd-gateway" :class="{ selected: selectedGateway === 'ivno' }">
                 <input type="radio" name="gateway" value="ivno" x-model="selectedGateway" aria-label="Pay with card">
                 <span class="pd-gateway-card">
-                  <span class="pd-gateway-check" aria-hidden="true"><span class="icon" data-lucide="check"></span></span>
+                  <span class="pd-radio" aria-hidden="true"></span>
                   <span class="pd-gateway-icon" aria-hidden="true"><span class="icon" data-lucide="credit-card"></span></span>
                   <span class="pd-gateway-body">
-                    <span class="pd-gateway-name">Card</span>
+                    <span class="pd-gateway-top">
+                      <span class="pd-gateway-name">Card</span>
+                      <span class="pd-gateway-tag pd-gateway-tag--warn">Min &pound;20</span>
+                    </span>
                     <span class="pd-gateway-sub">Visa &middot; Mastercard &middot; secure</span>
-                    <span class="pd-gateway-note pd-gateway-note--warn"><span class="icon icon-sm" data-lucide="info" aria-hidden="true"></span>Min &pound;20</span>
                   </span>
                 </span>
               </label>
