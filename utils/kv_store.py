@@ -63,6 +63,11 @@ PRODUCT_FIELDS = [
     "chairfbi_cheat_id", "key_source", "visibility", "features_text",
     "buyer_notes", "venomcheats_slug", "venomcheats_data",
     "gallery_images", "last_synced_at", "created_at",
+    # Persisted so restored products keep admin-set status, banner updates,
+    # loader links, License API wiring, and game grouping (previously lost).
+    "license_api_app_id", "updated_at", "status", "loader_url", "game",
+    # Game/category label — drives homepage grouping and /games/<slug> pages.
+    "game",
 ]
 
 
@@ -159,7 +164,7 @@ def restore_products_to_db():
 
             tiers_data = p_data.pop("_tiers", [])
             kwargs = {k: v for k, v in p_data.items() if k in PRODUCT_FIELDS}
-            for dt_field in ("created_at", "last_synced_at"):
+            for dt_field in ("created_at", "last_synced_at", "updated_at"):
                 if dt_field in kwargs and isinstance(kwargs[dt_field], str):
                     try:
                         kwargs[dt_field] = datetime.fromisoformat(kwargs[dt_field])

@@ -8,6 +8,36 @@
 <meta property="og:type" content="product">
 <meta property="og:image" content="{{ gallery_images[0] if gallery_images else url_for('main.cheat_image', slug=product.slug, _external=True) }}">
 <link rel="canonical" href="{{ url_for('main.product_detail', slug=product.slug, _external=True) }}">
+<meta property="og:url" content="{{ url_for('main.product_detail', slug=product.slug, _external=True) }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ product.name }} | BEAZT">
+<meta name="twitter:description" content="{{ (product.description or 'Private access. Instant delivery. Stream-proof builds.') | replace('\n', ' ') | truncate(155) }}">
+{% if gallery_images %}<meta name="twitter:image" content="{{ gallery_images[0] }}">{% endif %}
+{# Structured data: Product + Offers from live tiers. aggregateRating is only
+   emitted when approved reviews exist — never a fabricated score. #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.name | tojson }},
+  "description": {{ (product.description or product.name) | replace('\n', ' ') | truncate(300) | tojson }},
+  "image": {{ (gallery_images[0] if gallery_images else url_for('main.cheat_image', slug=product.slug, _external=True)) | tojson }},
+  "brand": {"@type": "Brand", "name": "BEAZT"},
+  "sku": {{ product.slug | tojson }},
+  {% if review_avg %}
+  "aggregateRating": {"@type": "AggregateRating", "ratingValue": {{ review_avg }}, "reviewCount": {{ reviews|length }}},
+  {% endif %}
+  "offers": [
+    {% for t in tiers %}
+    {"@type": "Offer",
+     "name": {{ t.label | tojson }},
+     "price": {{ "%.2f"|format(t.price_pounds) }},
+     "priceCurrency": "GBP",
+     "availability": "https://schema.org/InStock"}{{ "," if not loop.last }}
+    {% endfor %}
+  ]
+}
+</script>
 <style>
   /* ── Product detail page styles (page-scoped) ────────────── */
   /* Sticky purchase panel spans every grid row (gallery, specs, tabs,
@@ -816,6 +846,83 @@
       </div>
     </div>
     </div><!-- /.product-detail-grid -->
+
+    <!-- ── Verified reviews (DB-backed, moderated) ── -->
+    <section class="pd-reviews" id="reviews" aria-labelledby="pd-reviews-heading">
+      <div class="pd-reviews-header">
+        <h2 id="pd-reviews-heading">Verified reviews</h2>
+        {% if review_avg %}
+        <p class="pd-reviews-summary">
+          <span class="stars" aria-hidden="true">{{ '★' * (review_avg|round|int) }}{{ '☆' * (5 - (review_avg|round|int)) }}</span>
+          {{ review_avg }} / 5 &middot; {{ reviews|length }} verified review{{ '' if reviews|length == 1 else 's' }}
+        </p>
+        {% else %}
+        <p class="text-muted">No verified reviews yet. Only buyers with a completed order or active key can review.</p>
+        {% endif %}
+      </div>
+
+      {% if reviews %}
+      <div class="reviews-grid">
+        {% for r in reviews %}
+        <article class="review-card">
+          <div class="review-card-stars" aria-label="Rated {{ r.rating }} out of 5">
+            <span class="stars" aria-hidden="true">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span>
+          </div>
+          {% if r.title %}<h3 class="review-card-title">{{ r.title }}</h3>{% endif %}
+          <p class="review-card-body">{{ r.body }}</p>
+          <footer class="review-card-footer">
+            <span class="review-card-name">{{ r.display_name }}</span>
+            <span class="review-card-verified"><span class="icon icon-sm" data-lucide="badge-check"></span> Verified buyer</span>
+            <time class="review-card-date" datetime="{{ r.created_at.strftime('%Y-%m-%d') }}">{{ r.created_at.strftime('%b %d, %Y') }}</time>
+          </footer>
+        </article>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if can_review %}
+      <div class="review-form-card">
+        <h3>Write a review</h3>
+        <form method="POST" action="{{ url_for('main.submit_review', slug=product.slug) }}" class="review-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="review-form-row">
+            <label for="review-rating">Rating</label>
+            <select name="rating" id="review-rating" required>
+              <option value="5">5 — Excellent</option>
+              <option value="4">4 — Good</option>
+              <option value="3">3 — Average</option>
+              <option value="2">2 — Poor</option>
+              <option value="1">1 — Bad</option>
+            </select>
+          </div>
+          <div class="review-form-row">
+            <label for="review-title">Title <span class="text-muted">(optional)</span></label>
+            <input type="text" name="title" id="review-title" maxlength="128" placeholder="Sum it up in a few words">
+          </div>
+          <div class="review-form-row">
+            <label for="review-body">Your review</label>
+            <textarea name="body" id="review-body" rows="4" required minlength="10" placeholder="What worked, what didn't, how was setup?"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"><span class="icon icon-sm" data-lucide="send"></span> Submit review</button>
+          <p class="text-muted" style="font-size:0.78rem;margin:0.5rem 0 0;">Reviews are moderated and appear once approved.</p>
+        </form>
+      </div>
+      {% elif current_user.is_authenticated and not review_avg and not reviews %}
+      {# Logged in but not eligible: no form, no fake prompt. #}
+      {% endif %}
+    </section>
+
+    {% if related_cards %}
+    <!-- ── More in {{ product.game }} ── -->
+    <section class="pd-related" aria-labelledby="pd-related-heading">
+      <h2 id="pd-related-heading">More in {{ product.game }}</h2>
+      <div class="cheats-grid">
+        {% for c in related_cards %}
+        {% include 'partials/product_card.html' %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
   </div>
 
   <!-- Mobile sticky bottom purchase bar (VAL-PRODUCT-005) -->

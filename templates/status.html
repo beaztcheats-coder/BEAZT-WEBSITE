@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Live Status | BEAZT{% endblock %}
+{% block meta_description %}Live product status for every BEAZT listing: undetected, maintenance, or updating — straight from the operations panel.{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div class="page-header reveal">
+      <span class="section-eyebrow">Live Status</span>
+      <h1 class="t-h1">Status board</h1>
+      <p class="text-muted">Current operational status for every product. Statuses are set by the operations panel — we don't display derived or simulated uptime.</p>
+    </div>
+
+    <div class="status-summary reveal" role="status" aria-label="Status summary">
+      <div class="status-summary-item">
+        <span class="status-summary-num">{{ online_count }}/{{ cards|length }}</span>
+        <span class="status-summary-label">Undetected</span>
+      </div>
+      <div class="status-summary-item">
+        {% if last_updated %}
+        <span class="status-summary-num status-summary-num--date">{{ last_updated.strftime('%b %d, %Y') }}</span>
+        <span class="status-summary-label">Last product update</span>
+        {% else %}
+        <span class="status-summary-num status-summary-num--date">—</span>
+        <span class="status-summary-label">Last product update</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if cards %}
+    <div class="status-board status-board--full reveal">
+      <div class="status-board-header">
+        <span>Product</span>
+        <span>Game</span>
+        <span>Updated</span>
+        <span>Status</span>
+      </div>
+      {% for c in cards %}
+      <div class="status-row">
+        <span class="status-row-name"><a href="{{ url_for('main.product_detail', slug=c.slug) }}">{{ c.name }}</a></span>
+        <span class="status-row-game"><a href="{{ url_for('main.game_page', game_slug=c.game_slug) }}">{{ c.game }}</a></span>
+        <span class="status-row-uptime">{{ c.updated_at.strftime('%b %d, %Y') if c.updated_at else '—' }}</span>
+        {% if c.status == 'online' %}
+          <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
+        {% elif c.status == 'maintenance' %}
+          <span class="status-pill status-pill-warn"><span class="status-pill-dot"></span>Maintenance</span>
+        {% else %}
+          <span class="status-pill status-pill-down"><span class="status-pill-dot"></span>Updating</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal" role="status">
+      <div class="empty-icon" aria-hidden="true"><span class="icon" data-lucide="activity"></span></div>
+      <h3 class="empty-title">No products to report on</h3>
+      <p class="empty-text">The catalogue is being restocked. Check back soon, or join the Discord for updates.</p>
+    </div>
+    {% endif %}
+
+    <div class="status-note reveal">
+      <p><span class="icon icon-sm" data-lucide="timer" aria-hidden="true"></span> Maintenance windows never burn license time — your key's timer is paused while a product is down for updates.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

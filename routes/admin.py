@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, current_app, Response
 from flask_login import login_required, current_user, login_user, logout_user
-from models import db, User, Product, PricingTier, Order, Key, Setting
+from models import db, User, Product, PricingTier, Order, Key, Setting, Review
 from config import Config, get_chairfbi_config, get_loader_config, get_discord_config, get_ivno_config, get_license_api_config, get_mailer_config
 
 admin_bp = Blueprint("admin", __name__)
@@ -225,6 +225,56 @@ def dashboard():
     )
 
 
+@admin_bp.route("/reviews")
+@admin_required
+def reviews():
+    """Review moderation queue: newest first, pending ones highlighted."""
+    all_reviews = (
+        Review.query.order_by(Review.created_at.desc()).all()
+    )
+    counts = {
+        "pending": sum(1 for r in all_reviews if r.status == "pending"),
+        "approved": sum(1 for r in all_reviews if r.status == "approved"),
+        "rejected": sum(1 for r in all_reviews if r.status == "rejected"),
+    }
+    return render_template("admin/reviews.html", reviews=all_reviews, counts=counts)
+
+@admin_bp.route("/reviews/<int:review_id>/moderate", methods=["POST"])
+@admin_required
+def moderate_review(review_id):
+    """Approve or reject a review. Approved reviews appear on the storefront."""
+    review = db.session.get(Review, review_id)
+    if not review:
+        abort(404)
+    action = request.form.get("action", "").strip()
+    if action == "approve":
+        review.status = "approved"
+        review.approved_at = datetime.utcnow()
+        flash("Review approved.", "success")
+    elif action == "reject":
+        review.status = "rejected"
+        review.approved_at = None
+        flash("Review rejected.", "success")
+    elif action == "delete":
+        db.session.delete(review)
+        flash("Review deleted.", "success")
+    else:
+        flash("Unknown moderation action.", "error")
+        return redirect(url_for("admin.reviews"))
+    db.session.commit()
+    return redirect(url_for("admin.reviews"))
+
+@admin_bp.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@admin_required
+def delete_review(review_id):
+    review = db.session.get(Review, review_id)
+    if not review:
+        abort(404)
+    db.session.delete(review)
+    db.session.commit()
+    flash("Review deleted.", "success")
+    return redirect(url_for("admin.reviews"))
+
 @admin_bp.route("/users")
 @admin_required
 def users():
@@ -397,6 +447,7 @@ def create_product():
     visibility_val = request.form.get("visibility", "public").strip()
     if visibility_val not in ("private", "public"):
         visibility_val = "public"
+    game = (request.form.get("game", "").strip() or None)
 
     product = Product(
         name=name,
@@ -408,6 +459,7 @@ def create_product():
         chairfbi_cheat_id=chairfbi_cheat_id or None,
         license_api_app_id=license_api_app_id,
         visibility=visibility_val,
+        game=game,
     )
     db.session.add(product)
     db.session.commit()
@@ -608,6 +660,8 @@ def product_tiers(product_id):
             product.features_text = request.form.get("features_text", "").strip() or None
         if "buyer_notes" in request.form:
             product.buyer_notes = request.form.get("buyer_notes", "").strip() or None
+        if "game" in request.form:
+            product.game = request.form.get("game", "").strip() or None
 
         image_file = request.files.get("image_file")
         if image_file and image_file.filename:

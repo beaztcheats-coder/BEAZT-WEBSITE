@@ -4,7 +4,7 @@ BEAZT is a premium private-software storefront built with Python/Flask. It provi
 
 ## Features
 
-- **Store** — catalog homepage, `/cheats` listing, and product detail pages with image galleries, feature lists, pricing tiers (one-time and subscription billing), and buyer notes.
+- **Store** — catalog homepage and `/cheats` listing render the **full live catalogue** (every product, grouped by game, with search/status/sort filters), product detail pages with image galleries, feature lists, pricing tiers (one-time and subscription billing), and buyer notes; per-game landing pages under `/games/<game>`, a `/status` board, and DB-backed verified reviews.
 - **Auth** — login, signup, and logout with per-session CSRF protection and hashed passwords.
 - **Checkout** — gateway sessions for PayFast and IVNO; server-to-server webhooks verify payments and fulfill orders automatically.
 - **Dashboard (My Keys)** — customers view and manage their license keys; loader downloads are available per key.
@@ -78,10 +78,16 @@ The database is auto-created and auto-migrated at startup: `db.create_all()` run
 
 | Endpoint | Purpose |
 |---|---|
-| `/` | Homepage / catalog |
-| `/cheats` | Product listing |
-| `/product/<slug>` | Product detail page |
-| `/plan/<tier_id>` | Pricing-tier detail / purchase page |
+| `/` | Homepage — full live catalogue (every product, grouped by game, with search/status/sort filters via GET params) |
+| `/cheats` | Store listing — same shared catalogue partial as the homepage |
+| `/games` | Index of all games that have products |
+| `/games/<game_slug>` | Per-game landing page (all products for one game) |
+| `/status` | Full live status board (real per-product statuses, no fabricated uptime) |
+| `/sitemap.xml` | XML sitemap: static pages, product pages, game pages |
+| `/robots.txt` | Crawler rules + sitemap reference |
+| `/product/<slug>` | Product detail page (structured data, verified reviews, related products) |
+| `/product/<slug>/review` (POST) | Verified-buyer review submission (moderated, CSRF-protected) |
+| `/plan/<tier_id>` | Pricing-tier detail / purchase page (redirects to product page) |
 | `/loader`, `/loader/<slug>` | Loader guide pages |
 | `/feedback` | Reviews and proof page |
 | `/faq` | FAQ page |
@@ -95,7 +101,7 @@ The database is auto-created and auto-migrated at startup: `db.create_all()` run
 | `/checkout/payfast-notify` (POST) | PayFast ITN webhook — verifies payment, fulfills order |
 | `/checkout/ivno-webhook` (POST) | IVNO subscription webhook |
 | `/webhooks/sellix` (POST) | Legacy — returns 410 (Sellix deprecated) |
-| `/admin`, `/admin/users`, `/admin/keys`, `/admin/products`, `/admin/orders`, `/admin/settings`, `/admin/chairfbi` | Admin panel (plus sub-routes for CRUD, fulfillment, impersonation, and key operations) |
+| `/admin`, `/admin/users`, `/admin/keys`, `/admin/products`, `/admin/orders`, `/admin/settings`, `/admin/chairfbi`, `/admin/reviews` | Admin panel (plus sub-routes for CRUD, fulfillment, impersonation, key operations, review moderation) |
 | `/ping` | Liveness check |
 
 ## Payments and Webhooks
@@ -131,7 +137,7 @@ See `DESIGN_TOKENS.md` and `docs/design-system.md` for the design system documen
 ```
 app.py               # Flask app factory-ish entrypoint: CSRF, gzip, blueprints, migrations, seeding
 config.py            # Env-based configuration + Settings-backed integration helpers
-models.py            # SQLAlchemy models: User, Product, PricingTier, Order, Key, Setting; seed_products()
+models.py            # SQLAlchemy models: User, Product, PricingTier, Order, Key, Setting, Review; seed_products()
 routes/
   main.py            # Storefront, dashboard, content, health routes
   auth.py            # Login / signup / logout

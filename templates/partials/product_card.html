@@ -1,0 +1,40 @@
+{# Single ProductCard. Expects: c (catalogue card view-model from
+   routes/main.py _catalog_cards). Server-rendered; one source of truth for
+   price/status/stock. #}
+<a href="{{ url_for('main.product_detail', slug=c.slug) }}" class="cheat-card{% if c.is_private %} cheat-card--private{% endif %}{% if c.out_of_stock %} cheat-card--oos{% endif %}" aria-label="View {{ c.name }} details">
+  <div class="cheat-card-banner">
+    <img src="{{ c.product.image_url if c.product.image_url else url_for('main.cheat_image', slug=c.slug) }}" alt="{{ c.name }} artwork" loading="lazy" decoding="async" width="600" height="340" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=c.slug) }}'">
+  </div>
+  <div class="cheat-card-top">
+    <span class="status-badge status-badge--{{ c.status }}" role="img" aria-label="Status: {{ c.status_label }}">
+      <span class="status-badge-dot" aria-hidden="true"></span>{{ c.status_label }}
+    </span>
+    {% if c.out_of_stock %}
+    <span class="status-badge status-badge--oos">Out of stock</span>
+    {% endif %}
+    {% if c.is_private %}
+    <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
+    {% endif %}
+  </div>
+  <h3 class="cheat-card-name">{{ c.name }}</h3>
+  <div class="cheat-card-meta">
+    <span class="cheat-card-game">{{ c.game }}</span>
+    {% if c.review_count %}
+    <span class="cheat-card-rating" aria-label="Rated {{ c.review_avg }} out of 5 from {{ c.review_count }} verified reviews">
+      <span class="stars" aria-hidden="true">&#9733;</span> {{ c.review_avg }} <span class="cheat-card-rating-count">({{ c.review_count }})</span>
+    </span>
+    {% endif %}
+  </div>
+  {% if c.updated_at %}
+  <p class="cheat-card-updated">Updated {{ c.updated_at.strftime('%b %d, %Y') }}</p>
+  {% endif %}
+  {% if c.price_pounds is not none %}
+  <div class="cheat-card-pricing">
+    <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(c.price_pounds) }}{% if c.duration_days %} <span class="cheat-card-days">/ {{ c.duration_days }}d</span>{% endif %}</span>
+    {% if c.tier_count > 1 %}<span class="cheat-card-tiers-count">{{ c.tier_count }} plans</span>{% endif %}
+  </div>
+  {% else %}
+  <p class="cheat-card-noprice">Coming soon</p>
+  {% endif %}
+  <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
+</a>

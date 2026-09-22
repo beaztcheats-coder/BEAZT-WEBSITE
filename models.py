@@ -53,8 +53,31 @@ class Product(db.Model):
     updated_at = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(16), default="undetected")
     loader_url = db.Column(db.String(256), nullable=True)
+    # Game/category this product belongs to (e.g. "Rust"). Free-text set by the
+    # admin; storefront groups products and builds /games/<slug> pages from it.
+    game = db.Column(db.String(64), nullable=True, index=True)
 
     tiers = db.relationship("PricingTier", backref="product", lazy="dynamic")
+
+    @property
+    def game_slug(self):
+        """URL-safe slug for the game ("Counter-Strike 2" -> "counter-strike-2").
+
+        Falls back to the display game (derived from the product slug) so
+        products without an admin-set game still group and link consistently.
+        """
+        import re as _re
+        name = self.game or self.display_game
+        if not name:
+            return ""
+        return _re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+    @property
+    def display_game(self):
+        """Game name for display; falls back to the first slug token."""
+        if self.game:
+            return self.game
+        return self.slug.split("-")[0].capitalize() if self.slug else "Other"
 
 
 class PricingTier(db.Model):
@@ -140,6 +163,32 @@ class Setting(db.Model):
         else:
             db.session.add(Setting(key=key, value=value))
         db.session.commit()
+
+
+class Review(db.Model):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False, index=True)
+    # Optional link to the fulfilled order that qualified the buyer.
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True, index=True)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    title = db.Column(db.String(128), nullable=True)
+    body = db.Column(db.Text, nullable=False)
+    # pending -> approved (shown publicly) | rejected. Admin-moderated.
+    status = db.Column(db.String(16), default="pending", index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    approved_at = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship("User", backref="reviews")
+    product = db.relationship("Product", backref="reviews")
+    order = db.relationship("Order", backref="review", uselist=False)
+
+    @property
+    def display_name(self):
+        """Buyer name shown publicly (username, never email)."""
+        return self.user.username if self.user else "Verified buyer"
 
 
 def seed_products():

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ game_name ~ ' Cheats' if game_name else 'Games' }} | BEAZT{% endblock %}
+{% block meta_description %}{{ 'Browse all BEAZT products for ' ~ game_name ~ ': live status, real pricing, verified reviews, instant key delivery.' if game_name else 'Browse BEAZT products by game: live status, real pricing, verified reviews, instant key delivery.' }}{% endblock %}
+
+{% block content %}
+{% if game_name %}
+{# ── Single game landing page (/games/<slug>) ── #}
+<section class="page-section">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ url_for('main.index') }}">Home</a> <span aria-hidden="true">/</span>
+      <a href="{{ url_for('main.games_index') }}">Games</a> <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ game_name }}</span>
+    </nav>
+    <div class="page-header reveal">
+      <span class="section-eyebrow">Game</span>
+      <h1 class="t-h1">{{ game_name }}</h1>
+      <p class="text-muted">Every BEAZT product for {{ game_name }} — live status, real pricing, instant key delivery.</p>
+    </div>
+    <div class="cheats-grid">
+      {% for c in cards %}
+      {% include 'partials/product_card.html' %}
+      {% endfor %}
+    </div>
+    <div style="margin-top:2rem;" class="reveal">
+      <a href="{{ url_for('main.games_index') }}" class="btn btn-ghost"><span class="icon icon-sm" data-lucide="arrow-left"></span> All games</a>
+    </div>
+  </div>
+</section>
+{% else %}
+{# ── Games index (/games) ── #}
+<section class="page-section">
+  <div class="container">
+    <div class="page-header reveal">
+      <span class="section-eyebrow">Catalogue</span>
+      <h1 class="t-h1">Games</h1>
+      <p class="text-muted">Browse by game. Each game page lists every product we stock for it.</p>
+    </div>
+    {% if games %}
+    <div class="games-grid">
+      {% for g in games %}
+      <a href="{{ url_for('main.game_page', game_slug=g.slug) }}" class="game-card" aria-label="View all {{ g.name }} products">
+        {% if g.card and g.card.product and g.card.product.image_url %}
+        <div class="game-card-banner">
+          <img src="{{ g.card.product.image_url }}" alt="{{ g.name }} artwork" loading="lazy" decoding="async" width="600" height="340">
+        </div>
+        {% endif %}
+        <div class="game-card-body">
+          <h2 class="game-card-name">{{ g.name }}</h2>
+          <div class="game-card-meta">
+            <span>{{ g.count }} product{{ '' if g.count == 1 else 's' }}</span>
+            <span class="game-card-status game-card-status--{{ 'ok' if g.online == g.count else ('warn' if g.online else 'down') }}">
+              <span class="dot" aria-hidden="true"></span>{{ g.online }} online
+            </span>
+            {% if g.price_min is not none %}
+            <span class="game-card-price">From &pound;{{ "%.2f"|format(g.price_min) }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state reveal" role="status">
+      <div class="empty-icon" aria-hidden="true"><span class="icon" data-lucide="gamepad-2"></span></div>
+      <h3 class="empty-title">No games yet</h3>
+      <p class="empty-text">The catalogue is being restocked. Check back soon, or join the Discord for updates.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

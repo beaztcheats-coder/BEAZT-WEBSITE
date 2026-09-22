@@ -362,6 +362,7 @@ with app.app_context():
             ("updated_at", "DATETIME"),
             ("status", "VARCHAR(16) DEFAULT 'undetected'"),
             ("loader_url", "VARCHAR(256)"),
+            ("game", "VARCHAR(64)"),
         ]:
             try:
                 mc.execute("ALTER TABLE products ADD COLUMN {} {}".format(col, ddl))

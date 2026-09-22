@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <script defer src="/static/js/vendor/alpine.min.js"></script>
   <script defer src="/static/js/vendor/lucide.min.js"></script>
-  <link rel="stylesheet" href="/static/css/style.css?v=12">
+  <link rel="stylesheet" href="/static/css/style.css?v=13">
   <link rel="stylesheet" href="/static/css/admin.css?v=2">
 </head>
 <body>
@@ -55,6 +55,9 @@
         </a>
         <a href="{{ url_for('admin.orders') }}" class="{{ 'active' if request.endpoint in ('admin.orders','admin.order_detail','admin.fulfill_order','admin.assign_custom_key','admin.assign_pool_key','admin.retry_license') }}">
           <span class="icon icon-sm" data-lucide="receipt"></span> Orders
+        </a>
+        <a href="{{ url_for('admin.reviews') }}" class="{{ 'active' if request.endpoint in ('admin.reviews','admin.moderate_review','admin.delete_review') }}">
+          <span class="icon icon-sm" data-lucide="star"></span> Reviews
         </a>
         <a href="{{ url_for('admin.chairfbi_dashboard') }}" class="{{ 'active' if request.endpoint in ('admin.chairfbi_dashboard','admin.chairfbi_revoke','admin.chairfbi_hwid_reset','admin.chairfbi_vouche') }}">
           <span class="icon icon-sm" data-lucide="cloud"></span> ChairFBI

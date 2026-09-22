@@ -1,0 +1,64 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<div class="page-header-admin">
+  <h1>Reviews</h1>
+  <p>Moderate buyer reviews. Only approved reviews appear on the storefront.</p>
+</div>
+
+<div style="display:flex;gap:0.6rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+  <span class="badge-sm badge-blue">{{ counts.pending }} pending</span>
+  <span class="badge-sm badge-green">{{ counts.approved }} approved</span>
+  <span class="badge-sm" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);">{{ counts.rejected }} rejected</span>
+</div>
+
+{% if reviews %}
+<table class="admin-table">
+  <thead><tr><th>ID</th><th>Buyer</th><th>Product</th><th>Rating</th><th>Review</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for r in reviews %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.display_name }}</td>
+      <td><a href="{{ url_for('main.product_detail', slug=r.product.slug) }}" target="_blank" style="color:var(--accent-l);">{{ r.product.name }}</a></td>
+      <td><span style="color:#facc15;white-space:nowrap;">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span> {{ r.rating }}/5</td>
+      <td style="max-width:320px;">
+        {% if r.title %}<strong style="display:block;font-size:0.8rem;">{{ r.title }}</strong>{% endif %}
+        <span style="color:var(--text-muted);font-size:0.78rem;">{{ r.body[:160] }}{% if r.body|length > 160 %}…{% endif %}</span>
+      </td>
+      <td style="white-space:nowrap;">{{ r.created_at.strftime('%b %d, %Y') }}</td>
+      <td>
+        {% if r.status == 'approved' %}<span class="badge-sm badge-green">approved</span>
+        {% elif r.status == 'rejected' %}<span class="badge-sm" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);">rejected</span>
+        {% else %}<span class="badge-sm badge-blue">pending</span>{% endif %}
+      </td>
+      <td style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+        {% if r.status != 'approved' %}
+        <form method="POST" action="{{ url_for('admin.moderate_review', review_id=r.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="approve">
+          <button type="submit" class="btn-xs" style="background:rgba(34,197,94,0.15);color:var(--success);border:1px solid rgba(34,197,94,0.3);">Approve</button>
+        </form>
+        {% endif %}
+        {% if r.status != 'rejected' %}
+        <form method="POST" action="{{ url_for('admin.moderate_review', review_id=r.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="reject">
+          <button type="submit" class="btn-xs" style="background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3);">Reject</button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin.moderate_review', review_id=r.id) }}" onsubmit="return confirm('Permanently delete this review?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="delete">
+          <button type="submit" class="btn-xs btn-danger">Del</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="admin-card" style="text-align:center;padding:2.5rem;">
+  <p style="color:var(--text-muted);margin:0;">No reviews submitted yet. Verified buyers can review products from product pages.</p>
+</div>
+{% endif %}
+{% endblock %}

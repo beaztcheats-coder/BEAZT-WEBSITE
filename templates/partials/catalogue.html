@@ -1,0 +1,75 @@
+{# Shared full-catalogue renderer: toolbar (search/filter/sort) + per-game
+   sections of ProductCards. Expects: cards, game_groups, all_games, sort,
+   filters. Fully server-rendered — every product, price, and status comes
+   from the same DB rows the checkout uses. Filtering uses GET params so the
+   catalogue stays crawlable and works without JavaScript. #}
+<section class="section catalogue-section" id="catalogue" aria-labelledby="catalogue-heading">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-eyebrow">Full Catalogue</span>
+      <h2 class="t-h2" id="catalogue-heading">Everything in the store, live</h2>
+      <p class="section-sub">Every active product with real-time status and pricing. {{ cards|length }} product{{ '' if cards|length == 1 else 's' }} shown.</p>
+    </div>
+
+    {# ── Toolbar: search / game filter / status filter / sort ── #}
+    <form method="get" action="{{ request.path }}" class="catalogue-toolbar reveal" role="search" aria-label="Filter catalogue">
+      <div class="catalogue-search">
+        <span class="icon icon-sm" data-lucide="search" aria-hidden="true"></span>
+        <input type="search" name="q" value="{{ filters.q }}" placeholder="Search products or games&hellip;" aria-label="Search products">
+      </div>
+      <div class="catalogue-filters">
+        <label class="sr-only" for="filter-game">Filter by game</label>
+        <select name="game" id="filter-game" aria-label="Filter by game">
+          <option value="">All games</option>
+          {% for g in all_games %}
+          <option value="{{ g.slug }}" {{ 'selected' if filters.game == g.slug }}>{{ g.name }} ({{ g.cards|length }})</option>
+          {% endfor %}
+        </select>
+        <label class="sr-only" for="filter-status">Filter by status</label>
+        <select name="status" id="filter-status" aria-label="Filter by status">
+          <option value="">Any status</option>
+          <option value="online" {{ 'selected' if filters.status == 'online' }}>Undetected</option>
+          <option value="maintenance" {{ 'selected' if filters.status == 'maintenance' }}>Maintenance</option>
+          <option value="updating" {{ 'selected' if filters.status == 'updating' }}>Updating</option>
+        </select>
+        <label class="sr-only" for="sort-select">Sort products</label>
+        <select name="sort" id="sort-select" aria-label="Sort products">
+          <option value="featured" {{ 'selected' if sort == 'featured' }}>Featured</option>
+          <option value="price-asc" {{ 'selected' if sort == 'price-asc' }}>Price: low to high</option>
+          <option value="price-desc" {{ 'selected' if sort == 'price-desc' }}>Price: high to low</option>
+          <option value="newest" {{ 'selected' if sort == 'newest' }}>Recently updated</option>
+          <option value="name" {{ 'selected' if sort == 'name' }}>Name A&ndash;Z</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary catalogue-apply">Apply</button>
+      {% if filters.q or filters.game or filters.status or (sort and sort != 'featured') %}
+      <a href="{{ request.path }}" class="catalogue-clear">Clear filters &times;</a>
+      {% endif %}
+    </form>
+
+    {% if not cards %}
+    <div class="empty-state reveal" role="status">
+      <div class="empty-icon" aria-hidden="true"><span class="icon" data-lucide="search-x"></span></div>
+      <h3 class="empty-title">No products match</h3>
+      <p class="empty-text">Try a different search, or <a href="{{ request.path }}">clear the filters</a> to see the full catalogue.</p>
+    </div>
+    {% endif %}
+
+    {% for group in game_groups %}
+    <div class="catalogue-game-section" id="game-{{ group.slug }}">
+      <div class="catalogue-game-header">
+        <h3 class="catalogue-game-name">
+          <a href="{{ url_for('main.game_page', game_slug=group.slug) }}">{{ group.name }}</a>
+        </h3>
+        <span class="catalogue-game-count">{{ group.cards|length }} product{{ '' if group.cards|length == 1 else 's' }}</span>
+        <a class="catalogue-game-link" href="{{ url_for('main.game_page', game_slug=group.slug) }}">View game page &rarr;</a>
+      </div>
+      <div class="cheats-grid">
+        {% for c in group.cards %}
+        {% include 'partials/product_card.html' %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>

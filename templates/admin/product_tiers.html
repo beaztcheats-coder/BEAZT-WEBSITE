@@ -80,6 +80,10 @@
         <textarea name="description" rows="2" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Short product description shown on detail page">{{ product.description or '' }}</textarea>
       </div>
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Game / Category</label>
+        <input type="text" name="game" value="{{ product.game or '' }}" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);" placeholder="e.g. Rust — groups the product on the homepage and /games pages">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Features <span style="font-weight:400;">(one per line)</span></label>
         <textarea name="features_text" rows="6" style="width:100%;font-family:var(--font-mono);font-size:0.82rem;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text);resize:vertical;" placeholder="Legit ESP suite&#10;Debug camera&#10;Player and resource overlays&#10;Distance and visibility tools">{{ product.features_text or '' }}</textarea>
       </div>

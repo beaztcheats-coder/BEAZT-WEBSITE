@@ -75,17 +75,8 @@
 </section>
 
 <!-- ═══ STATUS STRIP ═══ -->
-{% set status_ns = namespace(online=0, total=0, last_updated=None) %}
-{% if all_products is defined and all_products %}
-  {% for p in all_products %}
-    {% set status_ns.total = status_ns.total + 1 %}
-    {% set eff_status = cheat_statuses_home.get(p.id, p.status) if cheat_statuses_home is defined else p.status %}
-    {% if not eff_status %}{% set eff_status = 'undetected' %}{% endif %}
-    {% if eff_status in ('online', 'undetected') %}{% set status_ns.online = status_ns.online + 1 %}{% endif %}
-    {% set ts = p.updated_at or p.created_at %}
-    {% if ts and (status_ns.last_updated is none or ts > status_ns.last_updated) %}{% set status_ns.last_updated = ts %}{% endif %}
-  {% endfor %}
-{% endif %}
+{# Aggregates computed server-side in routes/main.py from live product
+   statuses — no client-side counting, no fabricated indicators. #}
 <section class="status-strip" aria-label="Live system status">
   <div class="container status-strip-inner">
     <div class="status-strip-main" role="status" aria-label="Systems operational">
@@ -93,19 +84,19 @@
       <span class="status-strip-label">SYSTEMS OPERATIONAL</span>
     </div>
     <div class="status-strip-indicators" role="list" aria-label="Service indicators">
-      <div class="status-strip-item" role="listitem" aria-label="{{ status_ns.online }} of {{ status_ns.total }} products online">
-        {% if status_ns.total > 0 and status_ns.online == 0 %}
+      <div class="status-strip-item" role="listitem" aria-label="{{ catalog_summary.online }} of {{ catalog_summary.total }} products online">
+        {% if catalog_summary.total > 0 and catalog_summary.online == 0 %}
         <span class="status-strip-indicator status-strip-indicator--warning" aria-hidden="true"></span>
         {% else %}
         <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
         {% endif %}
-        <span class="status-strip-text">{{ status_ns.online }} PRODUCT{{ '' if status_ns.online == 1 else 'S' }} ONLINE</span>
+        <span class="status-strip-text">{{ catalog_summary.online }} PRODUCT{{ '' if catalog_summary.online == 1 else 'S' }} ONLINE</span>
       </div>
       <div class="status-strip-divider" aria-hidden="true"></div>
       <div class="status-strip-item" role="listitem">
         <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
-        {% if status_ns.last_updated %}
-        <span class="status-strip-text" title="{{ status_ns.last_updated.strftime('%b %d, %Y %H:%M UTC') }}">LAST UPDATED {{ status_ns.last_updated.strftime('%b %d, %Y') }}</span>
+        {% if catalog_summary.last_updated %}
+        <span class="status-strip-text" title="{{ catalog_summary.last_updated.strftime('%b %d, %Y %H:%M UTC') }}">LAST UPDATED {{ catalog_summary.last_updated.strftime('%b %d, %Y') }}</span>
         {% else %}
         <span class="status-strip-text">LAST UPDATED —</span>
         {% endif %}
@@ -116,9 +107,8 @@
         <span class="status-strip-text">DELIVERY SYSTEM ONLINE</span>
       </div>
       <div class="status-strip-divider" aria-hidden="true"></div>
-      <div class="status-strip-item" role="listitem" aria-label="Support online">
-        <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
-        <span class="status-strip-text">SUPPORT ONLINE</span>
+      <div class="status-strip-item" role="listitem">
+        <a href="{{ url_for('main.status_page') }}" class="status-strip-text" style="color:var(--accent);">FULL STATUS BOARD &rarr;</a>
       </div>
     </div>
   </div>
@@ -160,107 +150,11 @@
   </div>
 </section>
 
-<!-- ═══ PRIVATE SOFTWARE ═══ -->
-{% if private_products %}
-<section class="section store-preview store-preview--private" aria-labelledby="store-preview-heading" style="padding-bottom:0.5rem;">
-  <div class="container">
-    <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
-      <span class="section-eyebrow section-eyebrow--flagship">Flagship &middot; BeaZt Private</span>
-      <h2 class="t-h2" id="store-preview-heading">Private Software</h2>
-      <p style="color:var(--text-muted);font-size:0.82rem;max-width:560px;margin-inline:auto;">Externally hosted, private builds. Key pool operated by BeaZt.</p>
-      <div class="private-meta">
-        <span class="private-live"><span class="dot"></span>Undetected &amp; live</span>
-        <span>Instant key delivery</span>
-        <span>Stream-proof</span>
-      </div>
-    </div>
-    <div class="cheats-grid cheats-grid--private reveal" x-data="{ loading: false }">
-      <!-- Skeleton Loading State -->
-      <template x-if="loading">
-        <div class="skeleton-card">
-          <div class="skeleton-card-banner skeleton"></div>
-          <div class="skeleton-card-body">
-            <div class="skeleton-card-badge skeleton"></div>
-            <div class="skeleton-card-title skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-text skeleton"></div>
-            <div class="skeleton-card-footer">
-              <div class="skeleton-card-price skeleton"></div>
-              <div class="skeleton-card-btn skeleton"></div>
-            </div>
-          </div>
-        </div>
-      </template>
-      <!-- Actual Product Cards
-           NOTE: rendered directly (not inside a single <template x-if>) because
-           Alpine x-if requires a SINGLE root element — multiple sibling card
-           anchors in one template would render only the first card. -->
-      {% for p in private_products[:3] %}
-      <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card cheat-card--private{% if loop.first %} cheat-card--flagship{% endif %}" aria-label="View {{ p.name }} details">
-          <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
-          </div>
-          <div class="cheat-card-top">
-            {% set eff_status = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
-            <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
-            <span class="cheat-source-badge cheat-source-badge--private">BeaZt Private</span>
-          </div>
-          <h3 class="cheat-card-name">{{ p.name }}</h3>
-          {% if p.updated_at %}
-          <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
-          {% endif %}
-          {% if p.tiers.count() > 0 %}
-          <div class="cheat-card-pricing">
-            <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(p.tiers[0].price_pounds) }}</span>
-          </div>
-          {% else %}
-          <p class="cheat-card-noprice">Coming soon</p>
-          {% endif %}
-          <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- ═══ STORE ═══ -->
-{% if resold_products %}
-<section class="section store-preview" aria-labelledby="store-preview-catalog-heading" style="padding-bottom:0.5rem;">
-  <div class="container">
-    <div class="section-header reveal" style="text-align:center;margin-bottom:1.5rem;">
-      <span class="section-eyebrow">Catalog</span>
-      <h2 class="t-h2" id="store-preview-catalog-heading">Store</h2>
-      <a href="{{ url_for('main.cheats') }}" style="font-size:0.78rem;color:var(--accent);">View all &rarr;</a>
-    </div>
-    <div class="cheats-grid reveal">
-      {% for p in resold_products[:3] %}
-        <a href="{{ url_for('main.product_detail', slug=p.slug) }}" class="cheat-card" aria-label="View {{ p.name }} details">
-          <div class="cheat-card-banner">
-            <img src="{{ p.image_url if p.image_url else url_for('main.cheat_image', slug=p.slug) }}" alt="{{ p.name }} artwork" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ url_for('main.cheat_image', slug=p.slug) }}'">
-          </div>
-          <div class="cheat-card-top">
-            {% set eff_status = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
-            <span class="cheat-card-status {{ 'status-' ~ eff_status }}" role="img" aria-label="Status: {{ eff_status }}"><span class="sr-only">{{ eff_status }}</span></span>
-          </div>
-          <h3 class="cheat-card-name">{{ p.name }}</h3>
-          {% if p.updated_at %}
-          <p class="cheat-card-updated" style="font-size:0.62rem;color:var(--text-dim);margin-bottom:0.4rem;">Updated {{ p.updated_at.strftime('%b %d, %Y') }}</p>
-          {% endif %}
-          {% if p.tiers.count() > 0 %}
-          <div class="cheat-card-pricing">
-            <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(p.tiers[0].price_pounds) }}</span>
-          </div>
-          {% else %}
-          <p class="cheat-card-noprice">Coming soon</p>
-          {% endif %}
-          <span class="cheat-card-arrow" aria-hidden="true">&rarr;</span>
-        </a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
+<!-- ═══ FULL CATALOGUE ═══ -->
+{# Every active product, server-rendered from the same DB rows checkout uses.
+   Grouped by game, with search / status / sort filters (GET params, crawlable).
+   Private builds are pinned first by the route's 'featured' sort. #}
+{% include 'partials/catalogue.html' %}
 
 <!-- ═══ FEATURES BENTO ═══ -->
 <!-- Capability copy is sourced from existing site surfaces: FAQ (read-only
@@ -351,63 +245,83 @@
   </div>
 </section>
 
-<!-- ═══ STATUS BOARD ═══ -->
-{% if all_products %}
+<!-- ═══ STATUS BOARD (homepage preview) ═══ -->
+<!-- The former "Uptime 99.9%" column was a fabricated per-product metric
+     (no uptime tracking exists in the app); it is replaced with the real
+     last-updated date. Full board with live statuses: /status -->
+{% if cards %}
 <section class="section section-alt">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-eyebrow">Live Status</span>
-      <h2 class="t-h2">Detection &amp; uptime board</h2>
-      <p class="section-sub" style="max-width:560px;color:var(--text-muted);font-size:0.92rem;">Real-time per-product status, updated continuously.</p>
+      <h2 class="t-h2">Detection &amp; status board</h2>
+      <p class="section-sub" style="max-width:560px;color:var(--text-muted);font-size:0.92rem;">Real per-product status, straight from the operations panel.</p>
     </div>
     <div class="status-board reveal">
       <div class="status-board-header">
         <span>Product</span>
-        <span>Uptime</span>
+        <span>Updated</span>
         <span>Status</span>
       </div>
-      {% for p in all_products[:6] %}
-        {% set st = cheat_statuses_home.get(p.id, p.status) or 'undetected' %}
+      {% for c in cards[:6] %}
         <div class="status-row">
-          <span class="status-row-name">{{ p.name }}</span>
-          <span class="status-row-uptime">99.9%</span>
-          {% if st in ('online', 'undetected') %}
+          <span class="status-row-name">{{ c.name }}</span>
+          <span class="status-row-uptime">{{ c.updated_at.strftime('%b %d, %Y') if c.updated_at else '—' }}</span>
+          {% if c.status == 'online' %}
             <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
-          {% elif st == 'maintenance' %}
+          {% elif c.status == 'maintenance' %}
             <span class="status-pill status-pill-warn"><span class="status-pill-dot"></span>Maintenance</span>
-          {% elif st == 'offline' %}
-            <span class="status-pill status-pill-down"><span class="status-pill-dot"></span>Updating</span>
           {% else %}
-            <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
+            <span class="status-pill status-pill-down"><span class="status-pill-dot"></span>Updating</span>
           {% endif %}
         </div>
       {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:1.4rem;" class="reveal">
+      <a href="{{ url_for('main.status_page') }}" class="btn btn-ghost">
+        <span class="icon icon-sm" data-lucide="activity"></span>
+        Full status board
+      </a>
     </div>
   </div>
 </section>
 {% endif %}
 
-<!-- ═══ TESTIMONIALS ═══ -->
-<!-- No Review model/table exists in models.py and index() passes no review
-     data, so this section shows an honest empty state instead of fabricated
-     testimonials. STAT-SOURCING NOTE (homepage-stat-bar ownership decision):
-     the former "4.9 / based on 2,400+ verified orders" rating summary was
-     removed from this section — with zero reviews in the database it was a
-     fabricated statistic that contradicted the empty state directly below it
-     (VAL-HOME-005 requires star ratings to match review data). The 4.9 and
-     2,400+ figures remain, explicitly marked static, in the stat bar above. -->
+<!-- ═══ VERIFIED REVIEWS ═══ -->
+<!-- Reviews are DB-backed (Review model): only approved reviews from verified
+     buyers are shown, with the aggregate derived from the same rows. When no
+     approved reviews exist, an honest empty state is shown — never fabricated
+     quotes or scores. -->
 <section class="section" aria-labelledby="testimonials-heading">
   <div class="container">
     <div class="section-header reveal">
       <span class="section-eyebrow">Proof</span>
       <h2 class="t-h2" id="testimonials-heading">Verified buyer feedback</h2>
     </div>
+    {% if latest_reviews %}
+    <div class="reviews-grid reveal">
+      {% for r in latest_reviews %}
+      <article class="review-card">
+        <div class="review-card-stars" aria-label="Rated {{ r.rating }} out of 5">
+          <span class="stars" aria-hidden="true">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span>
+        </div>
+        {% if r.title %}<h3 class="review-card-title">{{ r.title }}</h3>{% endif %}
+        <p class="review-card-body">{{ r.body }}</p>
+        <footer class="review-card-footer">
+          <span class="review-card-name">{{ r.display_name }}</span>
+          <span class="review-card-verified"><span class="icon icon-sm" data-lucide="badge-check"></span> Verified buyer &middot; {{ r.product.name }}</span>
+          <time class="review-card-date" datetime="{{ r.created_at.strftime('%Y-%m-%d') }}">{{ r.created_at.strftime('%b %d, %Y') }}</time>
+        </footer>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
     <div class="empty-state reveal" role="status" aria-label="No verified reviews yet">
       <div class="empty-icon" aria-hidden="true">
         <span class="icon" data-lucide="message-square-quote"></span>
       </div>
       <h3 class="empty-title">No verified reviews yet</h3>
-      <p class="empty-text">Buyer reviews will appear here once verified purchases are submitted. Read operator proof and support quality on the proof page.</p>
+      <p class="empty-text">Buyer reviews will appear here once verified purchases are submitted and approved. Read operator proof and support quality on the proof page.</p>
       <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
         <a href="{{ url_for('main.feedback') }}" class="btn btn-primary">
           <span class="icon icon-sm" data-lucide="receipt-text"></span>
@@ -419,6 +333,7 @@
         </a>
       </div>
     </div>
+    {% endif %}
   </div>
 </section>
 

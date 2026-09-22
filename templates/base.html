@@ -8,6 +8,12 @@
   <meta property="og:title" content="{% block og_title %}BEAZT — Premium Private External{% endblock %}">
   <meta property="og:description" content="{% block og_description %}Acid-grade private Rust access. Instant key delivery, 24/7 operator desk, stream-proof builds.{% endblock %}">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.base_url }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}BEAZT — Premium Private External{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Acid-grade private Rust access. Instant key delivery, 24/7 operator desk, stream-proof builds.{% endblock %}">
+  <link rel="canonical" href="{{ request.base_url }}">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <link rel="icon" href="/static/icons/logo.svg" type="image/svg+xml">
   <title>{% block title %}BEAZT Private Access{% endblock %}</title>
   <!-- VAL-PERF-003: self-hosted variable fonts (latin subset) — no third-party font CDN, no FOUT-dependent CLS.
@@ -16,7 +22,7 @@
   <!-- Alpine + lucide are injected post-load by script.js: neither is needed
        for first paint, and their combined ~126KB must not compete with the
        render-blocking CSS for bandwidth on slow connections. -->
-  <link rel="stylesheet" href="/static/css/style.css?v=12">
+  <link rel="stylesheet" href="/static/css/style.css?v=13">
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -51,6 +57,8 @@
         <nav class="nav-links" aria-label="Main navigation">
           <a href="/" class="nav-link {{ 'active' if request.endpoint == 'main.index' else '' }}">Home</a>
           <a href="{{ url_for('main.cheats') }}" class="nav-link {{ 'active' if request.endpoint == 'main.cheats' else '' }}">Store</a>
+          <a href="{{ url_for('main.games_index') }}" class="nav-link {{ 'active' if request.endpoint in ('main.games_index', 'main.game_page') else '' }}">Games</a>
+          <a href="{{ url_for('main.status_page') }}" class="nav-link {{ 'active' if request.endpoint == 'main.status_page' else '' }}">Status</a>
           <a href="{{ url_for('main.feedback') }}" class="nav-link {{ 'active' if request.endpoint == 'main.feedback' else '' }}">Proof</a>
           <a href="{{ url_for('main.faq') }}" class="nav-link {{ 'active' if request.endpoint == 'main.faq' else '' }}">FAQ</a>
           <a href="{{ url_for('main.loader') }}" class="nav-link {{ 'active' if request.endpoint == 'main.loader' else '' }}">Loader</a>
@@ -83,6 +91,8 @@
       <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
         <a href="/" class="nav-link {{ 'active' if request.endpoint == 'main.index' else '' }}">Home</a>
         <a href="{{ url_for('main.cheats') }}" class="nav-link {{ 'active' if request.endpoint == 'main.cheats' else '' }}">Store</a>
+        <a href="{{ url_for('main.games_index') }}" class="nav-link {{ 'active' if request.endpoint in ('main.games_index', 'main.game_page') else '' }}">Games</a>
+        <a href="{{ url_for('main.status_page') }}" class="nav-link {{ 'active' if request.endpoint == 'main.status_page' else '' }}">Status</a>
         <a href="{{ url_for('main.feedback') }}" class="nav-link {{ 'active' if request.endpoint == 'main.feedback' else '' }}">Proof</a>
         <a href="{{ url_for('main.faq') }}" class="nav-link {{ 'active' if request.endpoint == 'main.faq' else '' }}">FAQ</a>
         <a href="{{ url_for('main.loader') }}" class="nav-link {{ 'active' if request.endpoint == 'main.loader' else '' }}">Loader</a>
@@ -142,6 +152,8 @@
           <div class="footer-nav-group">
             <span class="footer-nav-label">Support</span>
             <a href="{{ url_for('main.faq') }}" class="footer-link">FAQ</a>
+            <a href="{{ url_for('main.status_page') }}" class="footer-link">Live Status</a>
+            <a href="{{ url_for('main.games_index') }}" class="footer-link">All Games</a>
             <a href="{{ url_for('main.feedback') }}" class="footer-link">Reviews</a>
             <a href="{{ url_for('main.loader') }}" class="footer-link">Setup Guide</a>
           </div>
