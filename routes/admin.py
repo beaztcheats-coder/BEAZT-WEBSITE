@@ -1655,6 +1655,50 @@ def chairfbi_revoke(key_id):
     return redirect(url_for("admin.chairfbi_dashboard"))
 
 
+@admin_bp.route("/chairfbi/delete/<int:key_id>", methods=["POST"])
+@admin_required
+def chairfbi_delete(key_id):
+    """Delete an UNUSED key on ChairFBI (refunds balance).
+
+    Started keys cannot be deleted directly — ChairFBI requires an approval
+    request via POST /api/keys-delete-request, reviewed on their panel.
+    """
+    from utils.chairfbi import ChairFBIRateLimitError
+
+    key = db.session.get(Key, key_id)
+    if not key or not key.chairfbi_key_id:
+        flash("No ChairFBI key ID found for this key.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    cfg = get_chairfbi_config()
+    api_token = cfg.get("api_token", "")
+    api_base = cfg.get("api_base", "https://access.chairfbi.com")
+
+    if not api_token:
+        flash("ChairFBI API token not configured.", "error")
+        return redirect(url_for("admin.chairfbi_dashboard"))
+
+    try:
+        from utils.chairfbi import ChairFBI
+        cf = ChairFBI(api_token=api_token, base_url=api_base)
+        result = cf.delete_keys([key.chairfbi_key_id])
+        key.is_active = False
+        db.session.commit()
+        refunded = result.get("totalRefunded")
+        msg = "ChairFBI key deleted successfully."
+        if refunded:
+            msg += f" Balance refunded: {refunded}"
+        flash(msg, "success")
+    except ChairFBIRateLimitError as e:
+        flash(f"ChairFBI rate limit hit — try again in ~{e.available_in or 45}s: {e}", "error")
+    except Exception as e:
+        # 400 typically means the key was started: ChairFBI only allows
+        # started keys to go through the admin-approval deletion flow.
+        flash(f"ChairFBI key delete failed: {e}. If the key has been started, it must be deleted via the ChairFBI panel approval flow.", "error")
+
+    return redirect(url_for("admin.chairfbi_dashboard"))
+
+
 @admin_bp.route("/chairfbi/hwid-reset/<int:key_id>", methods=["POST"])
 @admin_required
 def chairfbi_hwid_reset(key_id):

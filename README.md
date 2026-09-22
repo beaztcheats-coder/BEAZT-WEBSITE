@@ -10,7 +10,7 @@ BEAZT is a premium private-software storefront built with Python/Flask. It provi
 - **Dashboard (My Keys)** — customers view and manage their license keys; loader downloads are available per key.
 - **Reviews / feedback** — `/feedback` page with community proof.
 - **Content pages** — FAQ, loader guide (`/loader`, `/loader/<slug>`), terms of service, and privacy policy; custom 404 page.
-- **Admin panel** (`/admin`) — product and tier management (create, import/export CSV, bulk delete), order fulfillment (pool keys, custom keys, license-API retry), key management, user management (impersonation, enable/disable, delete), ChairFBI/License API key operations (import, HWID reset, revoke, vouch), VenomCheat sync, and a database-backed Settings page with a License API "Test Connection" form.
+- **Admin panel** (`/admin`) — product and tier management (create, import/export CSV, bulk delete), order fulfillment (pool keys, custom keys, license-API retry), key management, user management (impersonation, enable/disable, delete), ChairFBI/License API key operations (import, HWID reset, revoke, delete-unused-key, vouch), VenomCheat sync, and a database-backed Settings page with a License API "Test Connection" form.
 - **Health endpoints** — `/health/products` and `/health/kv` for operational checks.
 
 ## Tech Stack
@@ -145,7 +145,7 @@ routes/
   admin.py           # Admin panel (products, tiers, orders, keys, users, settings, ChairFBI)
 templates/           # Jinja2 templates (site + admin/)
 static/
-  css/style.css      # Minified stylesheet (cache-buster v9)
+  css/style.css      # Minified stylesheet (cache-buster v16)
   js/vendor/         # Vendored Alpine.js, Lucide
   fonts/             # Self-hosted Inter, Sora, JetBrains Mono (woff2)
 utils/               # KV store, backup thread, sync services

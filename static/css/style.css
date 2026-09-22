@@ -28,9 +28,7 @@
 .nav-links .btn-discord .icon{width:16px;height:16px}
 .mobile-menu .btn-discord{width:100%}
 .btn-discord--lg{padding:0.9rem 1.7rem;font-size:0.95rem;border-radius:14px}
-/* === Homepage private showcase + hero uptime label (2026-09-17) === */
-.hero-stat--label-top{display:flex;flex-direction:column;justify-content:center}
-.hero-stat--label-top .hero-stat-label{order:-1;margin-top:0;margin-bottom:var(--space-2)}
+/* === Homepage private showcase (2026-09-17) === */
 /* === Flagship private section: heavy blue-glow treatment (2026-09-17) === */
 .store-preview--private{position:relative;overflow:hidden;border-top:1px solid rgba(22,139,255,0.14);border-bottom:1px solid rgba(22,139,255,0.14);background:linear-gradient(180deg,rgba(22,139,255,0.06) 0%,rgba(8,16,28,0.4) 30%,rgba(8,16,28,0.4) 70%,rgba(22,139,255,0.05) 100%)}
 .store-preview--private::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(22,139,255,0.22),transparent 65%),radial-gradient(ellipse 45% 35% at 50% 100%,rgba(88,101,242,0.14),transparent 65%);pointer-events:none}
@@ -135,6 +133,7 @@
 .status-summary-num--date{font-size:1.1rem;color:var(--accent-primary)}
 .status-summary-label{font-family:var(--font-mono);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)}
 .status-board--full .status-row{grid-template-columns:2.2fr 1fr 1fr 1fr}
+.status-board--bases .status-row{grid-template-columns:2.2fr 1fr}
 .status-row-game a{color:var(--text-secondary);font-size:0.8rem}
 .status-row-game a:hover{color:var(--accent-primary)}
 .status-note{margin-top:var(--space-8);padding:var(--space-4) var(--space-5);border:1px solid var(--border-accent-subtle);border-left:3px solid var(--accent-primary);border-radius:var(--radius-md);background:var(--accent-soft)}
@@ -163,3 +162,41 @@
 .game-card-price{color:var(--accent-primary);font-weight:700}
 .game-card .cheat-card-arrow{position:absolute;right:1.1rem;bottom:1.1rem}
 @media(max-width:640px){.status-board--full .status-row{grid-template-columns:1.6fr 1fr}.status-row-game{display:none}.status-row-uptime{display:none}}
+
+/* ═══ v16 CHEAT PANEL MODERNIZATION ═══
+   Appended block (wins over earlier same-specificity rules).
+   1) Hero: guarantee text layers sit above all background art.
+   2) Product cards: refined surfaces, display-type titles, mono meta,
+      styled always-current Updated line, gradient price. */
+.hero-main-inner{position:relative;z-index:2}
+.hero-line{text-shadow:0 2px 18px rgba(3,4,6,0.9),0 1px 4px rgba(3,4,6,0.8);color:var(--text-secondary)}
+.hero-pill{background:rgba(5,7,11,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-color:var(--border-accent-subtle)}
+
+.cheat-card{background:linear-gradient(160deg,var(--bg-elevated) 0%,var(--bg-card) 55%,var(--bg-deep) 100%);border:1px solid var(--border-default);box-shadow:var(--shadow-md),inset 0 1px 0 rgba(255,255,255,0.05)}
+.cheat-card::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(160deg,rgba(22,139,255,0.28) 0%,transparent 32%,transparent 68%,rgba(22,139,255,0.14) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity var(--duration-normal) var(--ease-smooth);pointer-events:none;z-index:6}
+.cheat-card:hover::after,.cheat-card:focus-visible::after{opacity:1}
+.cheat-card--private{border-color:var(--border-accent-subtle)}
+.cheat-card--private::after{opacity:1;background:linear-gradient(160deg,rgba(22,139,255,0.5) 0%,transparent 32%,transparent 68%,rgba(22,139,255,0.25) 100%)}
+.cheat-card--oos{filter:saturate(0.55)}
+
+.cheat-card-name{font-family:var(--font-display);font-size:1.1875rem;font-weight:800;letter-spacing:-0.01em;color:var(--text-primary);padding:var(--space-4) var(--space-5) 0}
+.cheat-card:hover .cheat-card-name{color:var(--accent-primary);text-shadow:0 0 24px var(--accent-glow-subtle)}
+.cheat-card-meta{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-5) 0;flex-wrap:wrap}
+.cheat-card-game{font-family:var(--font-mono);font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-muted);padding:3px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-full);background:rgba(255,255,255,0.02)}
+.cheat-card-rating{font-size:0.8125rem;font-weight:600;color:var(--text-secondary)}
+.cheat-card-rating .stars{color:#FBBF24;text-shadow:0 0 8px rgba(251,191,36,0.4)}
+
+.cheat-card-updated{display:flex;align-items:center;padding:var(--space-3) var(--space-5) 0;margin:0}
+.cheat-card-updated-inner{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:0.7rem;font-weight:500;text-transform:uppercase;letter-spacing:0.11em;color:var(--text-secondary)}
+.cheat-card-updated-dot{width:6px;height:6px;border-radius:50%;background:var(--status-online);box-shadow:0 0 8px var(--status-online-glow);animation:status-pulse-online 2.4s ease-in-out infinite;flex-shrink:0}
+@keyframes status-pulse-online{0%,100%{opacity:1;box-shadow:0 0 6px var(--status-online-glow)}50%{opacity:0.55;box-shadow:0 0 12px var(--status-online-glow)}}
+.cheat-card:hover .cheat-card-updated-inner{color:var(--text-primary)}
+
+.cheat-card-pricing{padding:var(--space-4) var(--space-5) var(--space-5);margin-top:auto;flex-direction:row;align-items:baseline;justify-content:space-between;gap:var(--space-3)}
+.cheat-card-tier{font-family:var(--font-display);font-size:1.3125rem;font-weight:800;letter-spacing:-0.01em;background:linear-gradient(135deg,#ffffff 0%,#cfe4ff 60%,var(--accent-primary) 130%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cheat-card-tiers-count{font-family:var(--font-mono);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)}
+
+.status-row-uptime--today{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:0.72rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);white-space:nowrap}
+.status-row-uptime-dot{width:6px;height:6px;border-radius:50%;background:var(--status-online);box-shadow:0 0 8px var(--status-online-glow);animation:status-pulse-online 2.4s ease-in-out infinite;flex-shrink:0}
+
+@media (max-width:640px){.cheat-card-updated-inner{font-size:0.64rem;letter-spacing:0.08em}.cheat-card-tier{font-size:1.1875rem}}

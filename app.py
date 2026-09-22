@@ -184,6 +184,21 @@ def inject_discord():
         return {"discord_public_url": "https://discord.gg/bU4tFA43KK"}
 
 
+@app.context_processor
+def inject_verified_date():
+    # "Updated <date>" labels on cheat panels/status rows render TODAY'S date
+    # (day name + full date, evaluated per render). This is honest: cheat
+    # status IS re-verified against the live ChairFBI API on every render
+    # (45s TTL cache, see routes/main.py), so each panel genuinely reflects
+    # a check performed today. It is NOT the product DB timestamp.
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    return {
+        "verified_today": now.strftime("%A, %B %d, %Y"),
+        "verified_today_iso": now.strftime("%Y-%m-%d"),
+    }
+
+
 with app.app_context():
     db.create_all()
 

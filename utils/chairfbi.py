@@ -6,6 +6,19 @@ import time
 logger = logging.getLogger(__name__)
 
 
+class ChairFBIRateLimitError(RuntimeError):
+    """Raised when the ChairFBI API responds 429 rate_limit_exceeded.
+
+    Carries ``available_in`` (seconds until the per-token limit resets, per
+    the API's ``availableIn`` field). Callers should degrade gracefully
+    rather than sleep-and-retry inside a request thread.
+    """
+
+    def __init__(self, message, available_in=None):
+        super().__init__(message)
+        self.available_in = available_in
+
+
 class ChairFBI:
     BASE = "https://access.chairfbi.com"
     TIMEOUT = 15
@@ -31,11 +44,31 @@ class ChairFBI:
         for attempt in range(self.RETRIES + 1):
             try:
                 resp = requests.request(method, url, **kwargs)
+                if resp.status_code == 429:
+                    # Rate limit: 100 req/min per token. The API tells us how
+                    # long until the window resets ("availableIn"); retrying
+                    # sooner would just burn more of the budget. Never
+                    # sleep-and-retry inside a request thread — surface it.
+                    available_in = None
+                    try:
+                        available_in = resp.json().get("availableIn")
+                    except Exception:
+                        pass
+                    logger.warning(
+                        "ChairFBI rate limit hit on %s %s (availableIn=%s)",
+                        method, path, available_in,
+                    )
+                    raise ChairFBIRateLimitError(
+                        f"ChairFBI rate limit exceeded — retry in {available_in or 'a few'} seconds",
+                        available_in=available_in,
+                    )
                 if resp.status_code < 500:
                     return resp
                 if attempt < self.RETRIES:
                     logger.warning("ChairFBI 5xx error (attempt %d/%d), retrying...", attempt + 1, self.RETRIES + 1)
                     time.sleep(1)
+            except ChairFBIRateLimitError:
+                raise
             except requests.RequestException as e:
                 if attempt < self.RETRIES:
                     logger.warning("ChairFBI request failed (attempt %d/%d): %s", attempt + 1, self.RETRIES + 1, e)
@@ -54,7 +87,7 @@ class ChairFBI:
         return resp.json()
 
     def get_cheat_bases(self):
-        """GET /api/status-bases - returns cheat base status list"""
+        """GET /api/status-bases - returns cheat base status list [{id, name, enabled, status}]"""
         resp = self._request("GET", "/api/status-bases")
         resp.raise_for_status()
         return resp.json()
@@ -186,6 +219,28 @@ class ChairFBI:
         resp.raise_for_status()
         return resp.json()
 
+    def update_cheats(self, cheats, name=None, active=None, custom_menu=None,
+                      override_spoofer=None, disable_for_update=None):
+        """PUT /api/cheats - update store cheat settings.
+
+        ``cheats`` is an array of cheat IDs. ``disable_for_update`` requires
+        ``active=False`` (per API docs it sets disabled_at on editable cheats).
+        """
+        payload = {"cheats": [int(c) for c in cheats]}
+        if name is not None:
+            payload["name"] = name
+        if active is not None:
+            payload["active"] = active
+        if custom_menu is not None:
+            payload["custom_menu"] = custom_menu
+        if override_spoofer is not None:
+            payload["override_spoofer"] = override_spoofer
+        if disable_for_update is not None:
+            payload["disable_for_update"] = disable_for_update
+        resp = self._request("PUT", "/api/cheats", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
     # -- Keys --
     def create_key(self, cheat_id, days, notes=None, prefix=None, amount=1):
         """POST /api/keys - creates keys, returns {balance, keys: [string]}"""
@@ -210,7 +265,10 @@ class ChairFBI:
         return resp.json()
 
     def update_keys(self, keys, hwid=None, freezed=None, locked=None, vouche=None, notes=None):
-        """PUT /api/keys - update keys (hwid reset, freeze, lock, vouche)"""
+        """PUT /api/keys - update keys (hwid reset, freeze, lock, vouche).
+
+        ``keys`` accepts key IDs (int) or loader_keys (str), per the API schema.
+        """
         payload = {"keys": keys}
         if hwid is not None:
             payload["hwid"] = hwid
@@ -229,6 +287,134 @@ class ChairFBI:
     def revoke_key(self, key_id):
         """Lock a key via PUT /api/keys"""
         return self.update_keys(keys=[key_id], locked=True)
+
+    def delete_keys(self, keys):
+        """POST /api/keys-delete - delete UNUSED keys (refunds the balance).
+
+        ``keys`` accepts key IDs (int) or loader_keys (str). For STARTED keys
+        use request_key_deletion() instead — the API requires admin approval.
+        Returns {deletedKeys, totalRefunded, refundDetails}.
+        """
+        resp = self._request("POST", "/api/keys-delete", json={"keys": keys})
+        resp.raise_for_status()
+        return resp.json()
+
+    def request_key_deletion(self, keys, reason):
+        """POST /api/keys-delete-request - request deletion of STARTED keys.
+
+        Requires admin approval on the ChairFBI side. The reason must be
+        specific and include proof (screenshots, transaction IDs) — vague
+        reasons like "refund" are rejected automatically.
+        Returns {success, message, requests: [{id, key_id, status}]}.
+        """
+        resp = self._request("POST", "/api/keys-delete-request",
+                             json={"keys": keys, "reason": reason})
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_key_deletion_request(self, loader_key):
+        """GET /api/key-deletion-request/{loader_key} - deletion request status.
+
+        Works with the loader_key of an active key/pass key, or the preserved
+        loader_key stored on the request after deletion.
+        """
+        resp = self._request("GET", f"/api/key-deletion-request/{loader_key}")
+        resp.raise_for_status()
+        return resp.json()
+
+    # -- Passes --
+    def list_passes(self, page=1, per_page=50, sort=None, filter_str=None):
+        """GET /api/passes - paginated pass template list with meta"""
+        params = {"page": page, "per_page": per_page}
+        if sort:
+            params["sort"] = sort
+        if filter_str:
+            params["filter"] = filter_str
+        resp = self._request("GET", "/api/passes", params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def create_pass(self, name):
+        """POST /api/passes - create a pass template (name: 4-30 chars)."""
+        resp = self._request("POST", "/api/passes", json={"name": name})
+        resp.raise_for_status()
+        return resp.json()
+
+    def update_pass(self, pass_id, name=None, active=None):
+        """PUT /api/passes - update a pass template (name and/or active)."""
+        payload = {"pass": int(pass_id)}
+        if name is not None:
+            payload["name"] = name
+        if active is not None:
+            payload["active"] = active
+        resp = self._request("PUT", "/api/passes", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def delete_pass(self, pass_id):
+        """DELETE /api/passes - delete a pass template (only if no keys exist)."""
+        resp = self._request("DELETE", "/api/passes", json={"pass": int(pass_id)})
+        resp.raise_for_status()
+        return resp.json()
+
+    def update_pass_cheats(self, pass_id, cheats):
+        """PUT /api/passes-cheats - set the cheats associated with a pass."""
+        payload = {"pass": int(pass_id), "cheats": [int(c) for c in cheats]}
+        resp = self._request("PUT", "/api/passes-cheats", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    # -- Pass Keys --
+    def list_pass_keys(self, page=1, per_page=50, sort=None, filter_str=None):
+        """GET /api/pass-keys - paginated pass key list with meta"""
+        params = {"page": page, "per_page": per_page}
+        if sort:
+            params["sort"] = sort
+        if filter_str:
+            params["filter"] = filter_str
+        resp = self._request("GET", "/api/pass-keys", params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def create_pass_key(self, pass_id, amount=1, days=7, prefix=None, notes=None):
+        """POST /api/pass-keys - creates pass keys, returns {balance, keys: [string]}.
+
+        ``days`` must be 7, 15, or 30 (API-enforced enum).
+        """
+        if days not in (7, 15, 30):
+            raise ValueError("ChairFBI pass key days must be 7, 15, or 30")
+        payload = {"pass": int(pass_id), "amount": amount, "days": days}
+        if prefix:
+            payload["prefix"] = prefix
+        if notes:
+            payload["notes"] = notes
+        resp = self._request("POST", "/api/pass-keys", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def update_pass_keys(self, keys, hwid=None, freezed=None, locked=None, notes=None):
+        """PUT /api/pass-keys - update pass keys (hwid reset, freeze, lock).
+
+        ``keys`` accepts pass key IDs (int) or loader_keys (str).
+        """
+        payload = {"keys": keys}
+        if hwid is not None:
+            payload["hwid"] = hwid
+        if freezed is not None:
+            payload["freezed"] = freezed
+        if locked is not None:
+            payload["locked"] = locked
+        if notes is not None:
+            payload["notes"] = notes
+        resp = self._request("PUT", "/api/pass-keys", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
+    def delete_pass_keys(self, keys):
+        """POST /api/pass-keys-delete - delete UNUSED pass keys."""
+        resp = self._request("POST", "/api/pass-keys-delete", json={"keys": keys})
+        resp.raise_for_status()
+        return resp.json()
 
     def test_connection(self):
         try:

@@ -1,6 +1,9 @@
 from pathlib import Path
 import io
 import json
+import time
+import threading
+import logging
 from datetime import datetime
 
 from flask import Blueprint, render_template, abort, current_app, Response, redirect, request, url_for, flash
@@ -9,6 +12,7 @@ from models import db, Product, Key, PricingTier, User, Order, Review
 from config import get_loader_config, get_discord_config
 
 main_bp = Blueprint("main", __name__)
+logger = logging.getLogger(__name__)
 
 
 def get_product_features(slug):
@@ -166,30 +170,110 @@ def cheat_image(slug):
     return Response(buf.getvalue(), mimetype="image/png")
 
 
+# --- ChairFBI live status ----------------------------------------------------
+# The ChairFBI API is rate limited to 100 requests/minute per token. Catalogue,
+# status, and product pages each render N products, so status must be fetched
+# once per TTL window and shared — never once per product per render. A short
+# negative cache also stops hammering the API (and stalling renders) when it's
+# down or rate limited.
+_CHAIRFBI_STATUS_TTL = 45      # seconds: fresh data window
+_CHAIRFBI_ERROR_TTL = 20       # seconds: cool-down after a failed fetch
+_chairfbi_status_cache = {"cheats": None, "fetched_at": 0.0, "error_until": 0.0}
+_chairfbi_status_lock = threading.Lock()
+
+
+def _fetch_chairfbi_status():
+    """Return the live /api/status cheat list, shared via a TTL cache.
+
+    One API call per window serves every product on the site. Returns None
+    when the token is unconfigured or when the last fetch failed within the
+    cool-down window (callers fall back to admin-set product status).
+    """
+    from config import get_chairfbi_config
+    cfg = get_chairfbi_config()
+    if not cfg.get("api_token"):
+        return None
+
+    now = time.time()
+    with _chairfbi_status_lock:
+        if (
+            _chairfbi_status_cache["cheats"] is not None
+            and now - _chairfbi_status_cache["fetched_at"] < _CHAIRFBI_STATUS_TTL
+        ):
+            return _chairfbi_status_cache["cheats"]
+        if now < _chairfbi_status_cache["error_until"]:
+            return None
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=cfg["api_token"], base_url=cfg.get("api_base"))
+            cheats = cf.get_cheats()
+            if not isinstance(cheats, list):
+                cheats = []
+            _chairfbi_status_cache["cheats"] = cheats
+            _chairfbi_status_cache["fetched_at"] = time.time()
+            _chairfbi_status_cache["error_until"] = 0.0
+            return cheats
+        except Exception as exc:  # noqa: BLE001 - storefront must not break on API errors
+            logger.warning("ChairFBI status fetch failed: %s", exc)
+            _chairfbi_status_cache["error_until"] = time.time() + _CHAIRFBI_ERROR_TTL
+            return None
+
+
+_chairfbi_bases_cache = {"data": None, "fetched_at": 0.0, "error_until": 0.0}
+
+
+def _fetch_chairfbi_bases():
+    """Live /api/status-bases (cheat-base/loader status), TTL-cached.
+
+    Returns a list of {id, name, enabled, status} dicts, or None when the
+    integration is unconfigured or unavailable.
+    """
+    from config import get_chairfbi_config
+    cfg = get_chairfbi_config()
+    if not cfg.get("api_token"):
+        return None
+
+    now = time.time()
+    with _chairfbi_status_lock:
+        if (
+            _chairfbi_bases_cache["data"] is not None
+            and now - _chairfbi_bases_cache["fetched_at"] < _CHAIRFBI_STATUS_TTL
+        ):
+            return _chairfbi_bases_cache["data"]
+        if now < _chairfbi_bases_cache["error_until"]:
+            return None
+        try:
+            from utils.chairfbi import ChairFBI
+            cf = ChairFBI(api_token=cfg["api_token"], base_url=cfg.get("api_base"))
+            bases = cf.get_cheat_bases()
+            if not isinstance(bases, list):
+                bases = []
+            _chairfbi_bases_cache["data"] = bases
+            _chairfbi_bases_cache["fetched_at"] = time.time()
+            _chairfbi_bases_cache["error_until"] = 0.0
+            return bases
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("ChairFBI base status fetch failed: %s", exc)
+            _chairfbi_bases_cache["error_until"] = time.time() + _CHAIRFBI_ERROR_TTL
+            return None
+
+
 def _get_chairfbi_cheat_status(product):
     if not product:
         return None
     # Admin-set status takes priority
     if product.status and product.status not in ("undetected",):
         return product.status
-    # Otherwise check ChairFBI API
+    # Otherwise check the (cached) ChairFBI API status list
     if not product.chairfbi_cheat_id:
         return product.status or "undetected"
-    try:
-        from config import get_chairfbi_config
-        cfg = get_chairfbi_config()
-        if not cfg.get("api_token"):
-            return None
-        from utils.chairfbi import ChairFBI
-        cf = ChairFBI(api_token=cfg["api_token"], base_url=cfg.get("api_base"))
-        cheats = cf.get_cheats()
+    cheats = _fetch_chairfbi_status()
+    if cheats:
         for c in cheats:
             cid = str(c.get("id", ""))
             cname = c.get("name", "")
             if cid == product.chairfbi_cheat_id or cname == product.chairfbi_cheat_id:
                 return "online" if c.get("active") else "offline"
-    except Exception:
-        pass
     return None
 
 
@@ -658,11 +742,13 @@ def status_page():
     last_updated = max(
         (c["updated_at"] for c in cards if c["updated_at"]), default=None
     )
+    base_statuses = _fetch_chairfbi_bases()
     return render_template(
         "status.html",
         cards=cards,
         online_count=online_count,
         last_updated=last_updated,
+        base_statuses=base_statuses,
     )
 
 

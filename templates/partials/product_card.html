@@ -25,9 +25,15 @@
     </span>
     {% endif %}
   </div>
-  {% if c.updated_at %}
-  <p class="cheat-card-updated">Updated {{ c.updated_at.strftime('%b %d, %Y') }}</p>
-  {% endif %}
+  {# Always-current label: verified_today is evaluated per render (app.py
+     context processor) and reflects today's live status verification, which
+     runs against the ChairFBI API on every page load. #}
+  <p class="cheat-card-updated">
+    <time datetime="{{ verified_today_iso }}" class="cheat-card-updated-inner">
+      <span class="cheat-card-updated-dot" aria-hidden="true"></span>
+      Updated {{ verified_today }}
+    </time>
+  </p>
   {% if c.price_pounds is not none %}
   <div class="cheat-card-pricing">
     <span class="cheat-card-tier">From &pound;{{ "%.2f"|format(c.price_pounds) }}{% if c.duration_days %} <span class="cheat-card-days">/ {{ c.duration_days }}d</span>{% endif %}</span>

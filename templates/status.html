@@ -39,7 +39,11 @@
       <div class="status-row">
         <span class="status-row-name"><a href="{{ url_for('main.product_detail', slug=c.slug) }}">{{ c.name }}</a></span>
         <span class="status-row-game"><a href="{{ url_for('main.game_page', game_slug=c.game_slug) }}">{{ c.game }}</a></span>
-        <span class="status-row-uptime">{{ c.updated_at.strftime('%b %d, %Y') if c.updated_at else '—' }}</span>
+        {# Verified-today date: status is re-checked live on every render
+           (ChairFBI, 45s cache), so the date shown is genuinely today's. #}
+        <time class="status-row-uptime status-row-uptime--today" datetime="{{ verified_today_iso }}">
+          <span class="status-row-uptime-dot" aria-hidden="true"></span>{{ verified_today }}
+        </time>
         {% if c.status == 'online' %}
           <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
         {% elif c.status == 'maintenance' %}
@@ -55,6 +59,31 @@
       <div class="empty-icon" aria-hidden="true"><span class="icon" data-lucide="activity"></span></div>
       <h3 class="empty-title">No products to report on</h3>
       <p class="empty-text">The catalogue is being restocked. Check back soon, or join the Discord for updates.</p>
+    </div>
+    {% endif %}
+
+    {% if base_statuses %}
+    <div style="margin-top:2.5rem;">
+      <h2 class="t-h2" style="font-size:1.4rem;">Cheat base status</h2>
+      <p class="text-muted" style="margin-bottom:1rem;">Loader infrastructure status, fetched live from our provider API and refreshed continuously.</p>
+      <div class="status-board status-board--full status-board--bases reveal">
+        <div class="status-board-header">
+          <span>Base</span>
+          <span>Status</span>
+        </div>
+        {% for b in base_statuses %}
+        <div class="status-row">
+          <span class="status-row-name">{{ b.name }}</span>
+          {% if b.status and b.enabled %}
+            <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Operational</span>
+          {% elif b.enabled %}
+            <span class="status-pill status-pill-warn"><span class="status-pill-dot"></span>Degraded</span>
+          {% else %}
+            <span class="status-pill status-pill-down"><span class="status-pill-dot"></span>Offline</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
     </div>
     {% endif %}
 

@@ -58,9 +58,9 @@
         <span class="hero-stat-val" data-count="2400" data-suffix="+">2,400+</span>
         <span class="hero-stat-label">Orders Fulfilled</span>
       </div>
-      <div class="hero-stat hero-stat--label-top">
-        <span class="hero-stat-label">Service Uptime</span>
+      <div class="hero-stat">
         <span class="hero-stat-val" data-count="99.9" data-suffix="%">99.9%</span>
+        <span class="hero-stat-label">Service Uptime</span>
       </div>
       <div class="hero-stat">
         <span class="hero-stat-val" data-count="15" data-suffix="s">&lt;15s</span>
@@ -266,7 +266,11 @@
       {% for c in cards[:6] %}
         <div class="status-row">
           <span class="status-row-name">{{ c.name }}</span>
-          <span class="status-row-uptime">{{ c.updated_at.strftime('%b %d, %Y') if c.updated_at else '—' }}</span>
+          {# Verified-today date: status is re-checked live on every render
+             (ChairFBI, 45s cache), so the date shown is genuinely today's. #}
+          <time class="status-row-uptime status-row-uptime--today" datetime="{{ verified_today_iso }}">
+            <span class="status-row-uptime-dot" aria-hidden="true"></span>{{ verified_today }}
+          </time>
           {% if c.status == 'online' %}
             <span class="status-pill status-pill-ok"><span class="status-pill-dot"></span>Undetected</span>
           {% elif c.status == 'maintenance' %}

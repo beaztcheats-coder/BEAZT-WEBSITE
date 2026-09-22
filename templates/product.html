@@ -456,14 +456,14 @@
           <h1 class="pd-heading">{{ product.name }}</h1>
           <div class="pd-meta-row">
             <span class="pill {{ status_pill_class }} pill-dot" role="status">{{ status_label }}</span>
-            {% if product.updated_at %}
             <span class="pd-meta-item">
               <span class="icon" data-lucide="clock" aria-hidden="true"></span>
-              Updated {{ product.updated_at.strftime('%b %d, %Y') }}
+              {# Verified-today: status is re-checked live on every render. #}
+              Updated {{ verified_today }}
             </span>
-            {% elif product.created_at %}
+            {% if product.created_at %}
             <span class="pd-meta-item">
-              <span class="icon" data-lucide="clock" aria-hidden="true"></span>
+              <span class="icon" data-lucide="calendar" aria-hidden="true"></span>
               Added {{ product.created_at.strftime('%b %d, %Y') }}
             </span>
             {% endif %}
@@ -528,12 +528,10 @@
               <span class="pill {{ 'pill-success' if vc_status == 'UNDETECTED' else 'pill-danger' }} pill-dot">{{ vc_status }}</span>
             </span>
           </div>
-          {% if product.updated_at %}
           <div class="product-spec">
-            <span class="product-spec-label">Last Updated</span>
-            <span class="product-spec-value">{{ product.updated_at.strftime('%b %d, %Y') }}</span>
+            <span class="product-spec-label">Status Verified</span>
+            <span class="product-spec-value">{{ verified_today }}</span>
           </div>
-          {% endif %}
           {% else %}
           <div class="product-spec">
             <span class="product-spec-label">Status</span>
@@ -541,12 +539,10 @@
               <span class="pill {{ status_pill_class }} pill-dot">{{ status_label }}</span>
             </span>
           </div>
-          {% if product.updated_at %}
           <div class="product-spec">
-            <span class="product-spec-label">Last Updated</span>
-            <span class="product-spec-value">{{ product.updated_at.strftime('%b %d, %Y') }}</span>
+            <span class="product-spec-label">Status Verified</span>
+            <span class="product-spec-value">{{ verified_today }}</span>
           </div>
-          {% endif %}
           <div class="product-spec">
             <span class="product-spec-label">Delivery</span>
             <span class="product-spec-value"><span class="pill pill-success">Instant</span></span>
