@@ -200,3 +200,40 @@
 .status-row-uptime-dot{width:6px;height:6px;border-radius:50%;background:var(--status-online);box-shadow:0 0 8px var(--status-online-glow);animation:status-pulse-online 2.4s ease-in-out infinite;flex-shrink:0}
 
 @media (max-width:640px){.cheat-card-updated-inner{font-size:0.64rem;letter-spacing:0.08em}.cheat-card-tier{font-size:1.1875rem}}
+/* === Pinned private showcase (2026-09-17): flagship section pinned above the
+   catalogue on homepage/store/game pages. Animated blue-glow treatment —
+   orbiting ambient blobs, sweeping beam, glass cards, shimmer badges. === */
+.private-showcase{position:relative;overflow:hidden;border-top:1px solid rgba(22,139,255,0.2);border-bottom:1px solid rgba(22,139,255,0.2);background:linear-gradient(180deg,rgba(22,139,255,0.08) 0%,rgba(6,12,24,0.6) 28%,rgba(6,12,24,0.6) 72%,rgba(88,101,242,0.07) 100%)}
+.private-showcase::before{content:"";position:absolute;inset:-20%;background:radial-gradient(ellipse 55% 40% at 18% 18%,rgba(22,139,255,0.28),transparent 65%),radial-gradient(ellipse 50% 38% at 82% 24%,rgba(88,101,242,0.22),transparent 65%),radial-gradient(ellipse 60% 42% at 50% 105%,rgba(22,139,255,0.18),transparent 65%);pointer-events:none;animation:private-ambient-drift 14s ease-in-out infinite alternate}
+@keyframes private-ambient-drift{0%{transform:translate3d(-2%,-1%,0) scale(1)}50%{transform:translate3d(2%,1.5%,0) scale(1.06)}100%{transform:translate3d(-1%,1%,0) scale(1.03)}}
+.private-showcase::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:min(720px,80%);height:1px;background:linear-gradient(90deg,transparent,rgba(22,139,255,0.9),transparent);box-shadow:0 0 24px rgba(22,139,255,0.8),0 0 60px rgba(22,139,255,0.4);pointer-events:none}
+.private-showcase .container{position:relative;z-index:1}
+.private-showcase-grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(22,139,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(22,139,255,0.055) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 75% 70% at 50% 45%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 45%,#000 30%,transparent 75%)}
+.private-showcase-header{margin-bottom:var(--space-8)}
+.flagship-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#9fd0ff;box-shadow:0 0 10px rgba(159,208,255,0.9);animation:flagship-eyebrow-pulse 3.2s ease-in-out infinite}
+.private-showcase-cta{display:flex;justify-content:center;margin-top:var(--space-8)}
+.private-showcase-cta .btn-discord{position:relative;isolation:isolate}
+.private-showcase-cta .btn-discord::after{content:"";position:absolute;inset:-3px;border-radius:14px;border:1px solid rgba(94,178,255,0.55);opacity:0;z-index:-1;animation:flagship-cta-ring 2.6s ease-out infinite}
+@keyframes flagship-cta-ring{0%{opacity:0.9;transform:scale(0.98)}70%{opacity:0;transform:scale(1.08)}100%{opacity:0;transform:scale(1.08)}}
+.private-showcase-title{background:linear-gradient(180deg,#fff 30%,#9fd0ff 75%,#5eb2ff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 26px rgba(22,139,255,0.55))}
+.private-showcase-sub{max-width:620px;margin-inline:auto}
+.private-showcase .section-eyebrow--flagship{animation:flagship-eyebrow-pulse 3.2s ease-in-out infinite}
+@keyframes flagship-eyebrow-pulse{0%,100%{box-shadow:0 0 22px rgba(22,139,255,0.45),0 0 60px rgba(22,139,255,0.18),inset 0 1px 0 rgba(255,255,255,0.14)}50%{box-shadow:0 0 32px rgba(22,139,255,0.7),0 0 90px rgba(22,139,255,0.3),inset 0 1px 0 rgba(255,255,255,0.2)}}
+.private-showcase .cheats-grid--private{position:relative}
+.private-showcase .cheats-grid--private .cheat-card--private{background:linear-gradient(160deg,rgba(20,36,60,0.92) 0%,rgba(10,18,32,0.95) 60%,rgba(14,26,48,0.92) 100%);border-color:rgba(94,178,255,0.5);box-shadow:var(--shadow-lg),0 0 28px rgba(22,139,255,0.28),0 0 80px rgba(22,139,255,0.12),inset 0 1px 0 rgba(255,255,255,0.08);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.private-showcase .cheats-grid--private .cheat-card--private::before{opacity:1;height:3px;background:linear-gradient(90deg,transparent 0%,rgba(22,139,255,0.9) 20%,#9fd0ff 50%,rgba(22,139,255,0.9) 80%,transparent 100%);box-shadow:0 0 18px rgba(22,139,255,0.8);background-size:200% 100%;animation:flagship-beam-slide 4s linear infinite}
+@keyframes flagship-beam-slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.private-showcase .cheats-grid--private .cheat-card--private::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,transparent 30%,rgba(159,208,255,0.09) 45%,rgba(255,255,255,0.14) 50%,rgba(159,208,255,0.09) 55%,transparent 70%);background-size:250% 250%;background-position:120% 0;pointer-events:none;z-index:4;transition:background-position 1.1s ease}
+.private-showcase .cheats-grid--private .cheat-card--private:hover{border-color:rgba(159,208,255,0.9);box-shadow:var(--shadow-2xl),0 0 50px rgba(22,139,255,0.55),0 0 130px rgba(22,139,255,0.25),inset 0 1px 0 rgba(255,255,255,0.1);transform:translateY(-6px)}
+.private-showcase .cheats-grid--private .cheat-card--private:hover::after{background-position:-20% 0}
+.private-showcase .cheats-grid--private .cheat-card-banner{position:relative}
+.private-showcase .cheats-grid--private .cheat-card-banner::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(22,139,255,0.16) 0%,transparent 32%,transparent 62%,rgba(4,10,20,0.55) 100%),radial-gradient(ellipse 80% 45% at 50% 112%,rgba(22,139,255,0.4),transparent 70%)}
+.private-showcase .cheats-grid--private .cheat-card--private:hover .cheat-card-banner img{transform:scale(1.1);filter:saturate(1.12) brightness(1.06)}
+.private-showcase .cheat-card-name{text-shadow:0 0 18px rgba(22,139,255,0.35)}
+.private-showcase .cheat-source-badge--private{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(22,139,255,0.4),rgba(88,101,242,0.32));border-color:rgba(159,208,255,0.65);color:#e2f1ff;box-shadow:0 0 18px rgba(22,139,255,0.5)}
+.private-showcase .cheat-source-badge--private::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,0.35) 50%,transparent 65%);transform:translateX(-120%);animation:flagship-badge-shimmer 3.4s ease-in-out infinite}
+@keyframes flagship-badge-shimmer{0%,55%{transform:translateX(-120%)}90%,100%{transform:translateX(120%)}}
+.private-showcase .cheat-card-tier{color:#cfe7ff;text-shadow:0 0 14px rgba(22,139,255,0.45)}
+.private-showcase .cheat-card-arrow{background:rgba(22,139,255,0.16);border-color:rgba(94,178,255,0.5);color:#9fd0ff;box-shadow:0 0 14px rgba(22,139,255,0.35)}
+.private-showcase .cheat-card--private:hover .cheat-card-arrow{background:var(--gradient-accent);border-color:transparent;color:#fff;box-shadow:0 0 22px rgba(22,139,255,0.7)}
+@media(prefers-reduced-motion:reduce){.private-showcase::before,.private-showcase .section-eyebrow--flagship,.private-showcase .cheats-grid--private .cheat-card--private::before,.private-showcase .cheat-source-badge--private::after,.private-showcase-cta .btn-discord::after,.flagship-eyebrow-dot{animation:none}.private-showcase::after{box-shadow:none}.private-showcase .cheats-grid--private .cheat-card--private:hover{transform:none}.private-showcase .cheats-grid--private .cheat-card--private::after{display:none}}

@@ -3,7 +3,7 @@
 {% block meta_description %}Browse the full BEAZT catalogue: every product with live status, real pricing from {{ cards|length if cards else 'our' }} listings, verified reviews, and instant key delivery.{% endblock %}
 
 {% block content %}
-<section class="page-section">
+<section class="page-section" style="padding-bottom:0;">
   <div class="container">
     <div class="page-header reveal">
       <span class="section-eyebrow">Inventory</span>
@@ -11,6 +11,10 @@
       <p class="text-muted">The complete catalogue — every product, live status, real pricing. Filter by game or status, sort by price, and click through for details.</p>
     </div>
   </div>
+  {# Private builds pinned above the catalogue — flagship line first. #}
+  {% include 'partials/private_showcase.html' %}
+</section>
+<section class="page-section" style="padding-top:0;">
   {# Shared catalogue: same partial as the homepage — one source of truth. #}
   {% include 'partials/catalogue.html' %}
 </section>

@@ -17,6 +17,10 @@
       <h1 class="t-h1">{{ game_name }}</h1>
       <p class="text-muted">Every BEAZT product for {{ game_name }} — live status, real pricing, instant key delivery.</p>
     </div>
+  </div>
+  {# Private builds for this game pinned above the grid. #}
+  {% include 'partials/private_showcase.html' %}
+  <div class="container">
     <div class="cheats-grid">
       {% for c in cards %}
       {% include 'partials/product_card.html' %}

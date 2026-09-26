@@ -17,13 +17,8 @@
         <span class="status-summary-label">Undetected</span>
       </div>
       <div class="status-summary-item">
-        {% if last_updated %}
-        <span class="status-summary-num status-summary-num--date">{{ last_updated.strftime('%b %d, %Y') }}</span>
-        <span class="status-summary-label">Last product update</span>
-        {% else %}
-        <span class="status-summary-num status-summary-num--date">—</span>
-        <span class="status-summary-label">Last product update</span>
-        {% endif %}
+        <span class="status-summary-num status-summary-num--date">{{ verified_today }}</span>
+        <span class="status-summary-label">Last verified</span>
       </div>
     </div>
 

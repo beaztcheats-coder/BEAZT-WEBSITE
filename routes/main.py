@@ -417,7 +417,11 @@ def _sort_cards(cards, sort):
 
 
 def _group_cards_by_game(cards):
-    """Group cards into ordered game sections (first-seen order)."""
+    """Group cards into ordered game sections (first-seen order).
+
+    Private builds sort first within each game section so they stay on
+    top of the grid even when 'newest' or price sorts are active.
+    """
     groups = {}
     order = []
     for c in cards:
@@ -426,6 +430,8 @@ def _group_cards_by_game(cards):
             groups[key] = {"slug": key, "name": c["game"], "cards": []}
             order.append(key)
         groups[key]["cards"].append(c)
+    for key in order:
+        groups[key]["cards"].sort(key=lambda c: not c["is_private"])
     return [groups[k] for k in order]
 
 
@@ -535,11 +541,13 @@ def cheats():
     all_games = _group_cards_by_game(cards)
     cards = _apply_catalogue_filters(cards, **filters)
     game_groups = _group_cards_by_game(cards)
+    private_cards = [c for c in cards if c["is_private"]]
     return render_template(
         "cheats.html",
         cards=cards,
         game_groups=game_groups,
         all_games=all_games,
+        private_cards=private_cards,
         sort=sort,
         filters=filters,
     )
@@ -730,7 +738,10 @@ def game_page(game_slug):
     if not cards:
         abort(404)
     game_name = cards[0]["game"]
-    return render_template("games.html", games=None, game_name=game_name, cards=cards)
+    # Private builds first on game pages too.
+    cards.sort(key=lambda c: not c["is_private"])
+    private_cards = [c for c in cards if c["is_private"]]
+    return render_template("games.html", games=None, game_name=game_name, cards=cards, private_cards=private_cards)
 
 
 @main_bp.route("/status")

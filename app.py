@@ -181,7 +181,7 @@ def inject_discord():
         cfg = get_discord_config()
         return {"discord_public_url": cfg["public_url"]}
     except Exception:
-        return {"discord_public_url": "https://discord.gg/bU4tFA43KK"}
+        return {"discord_public_url": "https://discord.gg/X8yQuMYsxp"}
 
 
 @app.context_processor
@@ -458,6 +458,24 @@ with app.app_context():
     except Exception as _e:
         db.session.rollback()
         print("Tier sync migration skipped:", _e)
+
+    # One-time (idempotent) rewrite: the Discord invite moved to
+    # https://discord.gg/X8yQuMYsxp. Any stored discord_public_url still
+    # pointing at the old invite is rewritten so the storefront picks up
+    # the new link without manual Settings edits. A deliberately custom
+    # URL (anything other than the known old invite) is left untouched.
+    try:
+        from models import Setting
+        _old_invites = {
+            "https://discord.gg/bU4tFA43KK",
+            "http://discord.gg/bU4tFA43KK",
+        }
+        _stored = Setting.get("discord_public_url")
+        if _stored and _stored.strip().rstrip("/") in _old_invites:
+            Setting.set("discord_public_url", "https://discord.gg/X8yQuMYsxp")
+            print("Discord invite updated to the new server link.")
+    except Exception as _e:
+        print("Discord invite rewrite skipped:", _e)
 
     seed_products()
 

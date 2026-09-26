@@ -95,11 +95,7 @@
       <div class="status-strip-divider" aria-hidden="true"></div>
       <div class="status-strip-item" role="listitem">
         <span class="status-strip-indicator status-strip-indicator--online" aria-hidden="true"></span>
-        {% if catalog_summary.last_updated %}
-        <span class="status-strip-text" title="{{ catalog_summary.last_updated.strftime('%b %d, %Y %H:%M UTC') }}">LAST UPDATED {{ catalog_summary.last_updated.strftime('%b %d, %Y') }}</span>
-        {% else %}
-        <span class="status-strip-text">LAST UPDATED —</span>
-        {% endif %}
+        <span class="status-strip-text" title="{{ verified_today }}">LAST UPDATED {{ verified_today }}</span>
       </div>
       <div class="status-strip-divider" aria-hidden="true"></div>
       <div class="status-strip-item" role="listitem" aria-label="Delivery system online">
@@ -149,6 +145,12 @@
     </div>
   </div>
 </section>
+
+<!-- ═══ PRIVATE SHOWCASE (pinned above catalogue) ═══ -->
+{# Flagship private builds always sit on top of the homepage, ahead of the
+   full catalogue below. Private builds are pinned first by the route's
+   'featured' sort. #}
+{% include 'partials/private_showcase.html' %}
 
 <!-- ═══ FULL CATALOGUE ═══ -->
 {# Every active product, server-rendered from the same DB rows checkout uses.
